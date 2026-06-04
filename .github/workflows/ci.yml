@@ -21,7 +21,7 @@ jobs:
         run: npm install --save-dev @commitlint/cli @commitlint/config-conventional
       - name: Run commitlint
         if: github.event_name == 'pull_request'
-        run: npx commitlint --config ./commitlint.config.js --from ${{ github.event.pull_request.base.sha }} --to HEAD
+        run: npx commitlint --config ./commitlint.config.cjs --from ${{ github.event.pull_request.base.sha }} --to HEAD
 
   build:
     name: Build & Push
@@ -43,12 +43,15 @@ jobs:
       - name: Compute tags
         id: meta
         run: |
-          TEST_IMAGE="ghcr.io/${{ github.repository }}/test:${{ github.sha }}"
+          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          TEST_IMAGE="ghcr.io/${REPO}/test:${SHORT_SHA}"
           echo "test_image=$TEST_IMAGE" >> $GITHUB_OUTPUT
 
-          PROD_TAGS="ghcr.io/${{ github.repository }}:${{ github.sha }}"
+          PROD_TAGS="ghcr.io/${REPO}:${SHORT_SHA}"
           if [ "${{ github.event_name }}" = "push" ]; then
-            PROD_TAGS="$PROD_TAGS,ghcr.io/${{ github.repository }}:latest"
+            PROD_TAGS="$PROD_TAGS,ghcr.io/${REPO}:latest"
           fi
           echo "prod_tags=$PROD_TAGS" >> $GITHUB_OUTPUT
       - name: Build builder stage
@@ -126,6 +129,8 @@ jobs:
       - uses: docker/setup-buildx-action@v3
       - name: Add version tag
         run: |
+          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           docker buildx imagetools create \
-            --tag ghcr.io/${{ github.repository }}:${{ needs.release.outputs.new_release_version }} \
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            --tag ghcr.io/${REPO}:${{ needs.release.outputs.new_release_version }} \
+            ghcr.io/${REPO}:${SHORT_SHA}
