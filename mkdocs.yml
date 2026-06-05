@@ -1,0 +1,27 @@
+site_name: EasyUI
+repo_url: https://github.com/Spartixx/EasyUI
+repo_name: Spartixx/EasyUI
+site_url: https://easyui.macrez.cloud
+theme:
+  name: material
+  custom_dir: overrides
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: "Switch to dark mode"
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: "Switch to light mode"
+nav:
+  - Home: index.md
+  - About: about.md
+hide:
+  - footer
