@@ -9,10 +9,9 @@ services:
       - .:/app
       - /app/node_modules
 
-  prod:
-    build:
-      context: .
-      target: app
+  docs:
+    image: squidfunk/mkdocs-material:latest
+    volumes:
+      - .:/docs
     ports:
-      - "8030:8030"
-
+      - "8000:8000"

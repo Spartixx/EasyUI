@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   commitlint:
     name: Commitlint
@@ -23,66 +26,22 @@ jobs:
         if: github.event_name == 'pull_request'
         run: npx commitlint --config ./commitlint.config.cjs --from ${{ github.event.pull_request.base.sha }} --to HEAD
 
-  build:
-    name: Build & Push
-    runs-on: ubuntu-latest
-    needs: commitlint
-    permissions:
-      contents: read
-      packages: write
-    outputs:
-      test_image: ${{ steps.meta.outputs.test_image }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/setup-buildx-action@v3
-      - name: Compute tags
-        id: meta
-        run: |
-          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-
-          TEST_IMAGE="ghcr.io/${REPO}/test:${SHORT_SHA}"
-          echo "test_image=$TEST_IMAGE" >> $GITHUB_OUTPUT
-
-          PROD_TAGS="ghcr.io/${REPO}:${SHORT_SHA}"
-          if [ "${{ github.event_name }}" = "push" ]; then
-            PROD_TAGS="$PROD_TAGS,ghcr.io/${REPO}:latest"
-          fi
-          echo "prod_tags=$PROD_TAGS" >> $GITHUB_OUTPUT
-      - name: Build builder stage
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: builder
-          push: true
-          tags: ${{ steps.meta.outputs.test_image }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Build production image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.prod_tags }}
-          cache-from: type=gha
-
   test:
     name: Test
     runs-on: ubuntu-latest
-    needs: build
+    needs: commitlint
     steps:
-      - uses: docker/login-action@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          node-version: 26
+          cache: 'npm'
+      - name: Install dependencies
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
       - name: Run tests
-        run: docker run --rm ${{ needs.build.outputs.test_image }} npm test
+        run: npm run test
 
   release:
     name: Semantic Release
@@ -118,24 +77,70 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-  tag-release:
-    name: Tag Release Image
+  build-storybook:
+    name: Build Storybook
     runs-on: ubuntu-latest
-    needs: release
-    if: needs.release.outputs.new_release_published == 'true'
-    permissions:
-      packages: write
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - uses: docker/login-action@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/setup-buildx-action@v3
-      - name: Add version tag
-        run: |
-          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          docker buildx imagetools create \
-            --tag ghcr.io/${REPO}:${{ needs.release.outputs.new_release_version }} \
-            ghcr.io/${REPO}:${SHORT_SHA}
+          node-version: 26
+          cache: 'npm'
+      - name: Install dependencies
+        run: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm ci
+      - name: Build Storybook
+        run: npm run build-storybook
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storybook-dist
+          path: storybook-static/
+
+  build-docs:
+    name: Build Docs
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install MkDocs Material
+        run: pip install mkdocs-material
+      - name: Build docs
+        run: mkdocs build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs-dist
+          path: site/
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [build-storybook, build-docs]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download Storybook artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: storybook-dist
+          path: gh-pages/storybook
+      - name: Download docs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-dist
+          path: gh-pages
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: gh-pages/
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
