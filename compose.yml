@@ -7,14 +7,13 @@ services:
       - "6006:6006"
     volumes:
       - .:/app
-      - /app/node_modules
 
   docs:
     image: node:26-alpine
-    working_dir: /app
+    working_dir: /app/website
     command: sh -c "npm install && npm start -- --host 0.0.0.0"
     volumes:
-      - ./website:/app
+      - .:/app
       - /app/node_modules
     ports:
       - "3000:3000"

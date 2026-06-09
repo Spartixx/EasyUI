@@ -73,6 +73,7 @@ jobs:
             @semantic-release/npm
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   build-storybook:
     name: Build Storybook
