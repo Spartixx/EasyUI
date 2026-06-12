@@ -10,8 +10,11 @@ services:
       - /app/node_modules
 
   docs:
-    image: squidfunk/mkdocs-material:latest
+    image: node:26-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm start -- --host 0.0.0.0"
     volumes:
-      - .:/docs
+      - ./website:/app
+      - /app/node_modules
     ports:
-      - "8000:8000"
+      - "3000:3000"
