@@ -1,0 +1,45 @@
+# Spinner
+
+A small animated indicator used to signal a loading state.
+
+## Usage
+
+```tsx
+import { Spinner } from '@easy-ui-react/easy-ui-react'
+
+export function Example() {
+  return <Spinner />
+}
+```
+
+## Sizes
+
+- `sm`
+- `md`
+- `lg`
+
+```tsx
+<Spinner size="lg" />
+```
+
+## Color
+
+`Spinner` draws with `currentColor`, so it inherits the text color of its parent. Set a text color class via `className` to change it:
+
+```tsx
+<Spinner className="text-(--easyui-color-primary)" />
+```
+
+## Props
+
+| Prop        | Type                   | Default  | Description                       |
+|-------------|------------------------|----------|-----------------------------------|
+| `size`      | `'sm' \| 'md' \| 'lg'` | `'md'`   | Spinner size                      |
+| `className` | `string`               | -        | Class applied to the root `<svg>` |
+
+`Spinner` is decorative (`aria-hidden="true"`), renders a single `<svg>` element and does not forward a `ref`.
+
+
+## Storybook
+
+[Open in Storybook →](pathname:///storybook/?path=/story/primitives-spinner--default)

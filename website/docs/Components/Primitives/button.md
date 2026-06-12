@@ -168,4 +168,4 @@ These slots can also be styled globally for every `Button` in your app, see the 
 
 ## Storybook
 
-[Open in Storybook →](../../storybook/?path=/story/primitives-button--default)
+[Open in Storybook →](pathname:///storybook/?path=/story/primitives-button--default)
