@@ -1,0 +1,171 @@
+# Button
+
+A clickable element used to trigger an action.
+
+## Usage
+
+```tsx
+import { Button } from '@easy-ui-react/easy-ui-react'
+
+export function Example() {
+  return <Button color="primary">Click me</Button>
+}
+```
+
+## Variants
+
+| Variant    | Description                                  |
+|------------|----------------------------------------------|
+| `solid`    | Filled background, default variant           |
+| `outlined` | Border only, transparent background          |
+| `flat`     | Tinted background, darker text               |
+| `light`    | No background, colored text, tinted on hover |
+
+```tsx
+<Button variant="solid">Solid</Button>
+```
+
+## Colors
+
+- `default`
+- `primary`
+- `secondary`
+- `success`
+- `warning`
+- `error`
+
+```tsx
+<Button color="primary">Primary</Button>
+```
+
+Each color maps to a set of `--easyui-color-*` CSS variables that can be overridden globally, see the [theming guide](../../Customize/theming.md).
+
+## Sizes
+
+- `sm`
+- `md`
+- `lg`
+
+```tsx
+<Button size="sm">Small</Button>
+```
+
+## Radius
+
+- `none`
+- `sm`
+- `md`
+- `lg`
+- `full`
+
+```tsx
+<Button radius="sm">Rounded</Button>
+```
+
+`sm`, `md` and `lg` map to `--easyui-radius-*` CSS variables, see the [theming guide](../../Customize/theming.md).
+
+## Content
+
+Add an icon (or any node) before/after the label with `startContent` / `endContent`. 
+By default, they sit inside the button.
+set the `startContentPlacement` / `endContentPlacement` to `outside` to render them outside the clickable area.
+
+```tsx
+<Button 
+  startContent={<ArrowLeft/>} 
+  startContentPlacement={"outside"}
+  endContent={<ArrowRight/>} 
+  endContentPlacement={"outside"}
+>
+  Click me
+</Button>
+```
+
+## States
+
+### Loading
+Set `loading` to replace the content with a spinner and mark the button as `aria-busy`. The button is automatically disabled while loading.
+
+```tsx
+<Button loading>Saving…</Button>
+```
+
+### Disabled
+Set `disabled` to mark the button as disabled.
+
+```tsx
+<Button disabled>Disabled</Button>
+```
+
+## Full width
+
+```tsx
+<Button fullWidth>Submit</Button>
+```
+
+## Label & description
+
+Add a field label above the button and a helper text. Both are optional.
+
+```tsx
+<Button label="Account" description="This action cannot be undone.">
+  Delete account
+</Button>
+```
+
+Use `descriptionPlacement` to render the description below the `label` instead of below the button itself:
+
+```tsx
+<Button label="Account" description="This action cannot be undone." descriptionPlacement="label">
+  Delete account
+</Button>
+```
+
+## Slots
+
+Customize individual parts via `classNames`:
+
+| Slot           | Description                         |
+|----------------|-------------------------------------|
+| `base`         | The root `<button>` element         |
+| `startContent` | Wrapper around `startContent`       |
+| `endContent`   | Wrapper around `endContent`         |
+| `text`         | Wrapper around the children/text    |
+| `spinner`      | The loading spinner                 |
+| `label`        | The field label element             |
+| `description`  | The description/helper text element |
+
+```tsx
+<Button classNames={{ base: 'shadow-md', text: 'tracking-wide' }}>
+  Click me
+</Button>
+```
+
+These slots can also be styled globally for every `Button` in your app, see the [global configuration guide](../../Customize/global-config.md).
+
+## Props
+
+| Prop                    | Type                                                                                                                   | Default     | Description                                                |
+|-------------------------|------------------------------------------------------------------------------------------------------------------------|-------------|------------------------------------------------------------|
+| `variant`               | `'solid' \| 'outlined' \| 'flat' \| 'light'`                                                                           | `'solid'`   | Visual style                                               |
+| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'`                                           | `'default'` | Color theme                                                |
+| `size`                  | `'sm' \| 'md' \| 'lg'`                                                                                                 | `'md'`      | Button size                                                |
+| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                                                             | `'md'`      | Corner radius                                              |
+| `disabled`              | `boolean`                                                                                                              | `false`     | Disables the button                                        |
+| `loading`               | `boolean`                                                                                                              | `false`     | Shows a spinner and disables the button                    |
+| `fullWidth`             | `boolean`                                                                                                              | `false`     | Makes the button take the full available width             |
+| `startContent`          | `ReactNode`                                                                                                            | -           | Content rendered before the label                          |
+| `endContent`            | `ReactNode`                                                                                                            | -           | Content rendered after the label                           |
+| `startContentPlacement` | `'inside' \| 'outside'`                                                                                                | `'inside'`  | Where `startContent` is rendered                           |
+| `endContentPlacement`   | `'inside' \| 'outside'`                                                                                                | `'inside'`  | Where `endContent` is rendered                             |
+| `label`                 | `string`                                                                                                               | -           | Field label rendered above the button                      |
+| `description`           | `string`                                                                                                               | -           | Helper text shown alongside the button                     |
+| `descriptionPlacement`  | `'label' \| 'element'`                                                                                                 | `'element'` | Render `description` below the `label` or below the button |
+| `className`             | `string`                                                                                                               | -           | Class applied to the root element                          |
+| `classNames`            | `Partial<Record<'base' \| 'startContent' \| 'endContent' \| 'text' \| 'spinner' \| 'label' \| 'description', string>>` | -           | Per-slot class overrides                                   |
+
+`Button` also accepts every native `<button>` attribute (`onClick`, `type`, `name`, etc.) and forwards `ref` to the underlying `<button>` element.
+
+## Storybook
+
+[Open in Storybook →](../../storybook/?path=/story/primitives-button--default)

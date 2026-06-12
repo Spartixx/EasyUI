@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --easyui-color-default: #d7d7dd;
+  --easyui-color-default-foreground: #18181b;
+  --easyui-color-primary: #1c5eca;
+  --easyui-color-primary-foreground: #ffffff;
+  --easyui-color-secondary: #5e2bd4;
+  --easyui-color-secondary-foreground: #ffffff;
+  --easyui-color-success: #11ab3c;
+  --easyui-color-success-foreground: #ffffff;
+  --easyui-color-warning: #da820d;
+  --easyui-color-warning-foreground: #ffffff;
+  --easyui-color-error: #d61515;
+  --easyui-color-error-foreground: #ffffff;
+  --easyui-color-primary-dark: color-mix(in srgb, var(--easyui-color-primary) 70%, black);
+  --easyui-color-secondary-dark: color-mix(in srgb, var(--easyui-color-secondary) 70%, black);
+  --easyui-color-success-dark: color-mix(in srgb, var(--easyui-color-success) 70%, black);
+  --easyui-color-warning-dark: color-mix(in srgb, var(--easyui-color-warning) 70%, black);
+  --easyui-color-error-dark: color-mix(in srgb, var(--easyui-color-error) 70%, black);
+  --easyui-color-focus-ring: var(--easyui-color-primary);
+  --easyui-radius-sm: 8px;
+  --easyui-radius-md: 12px;
+  --easyui-radius-lg: 14px;
+  --easyui-border-width-sm: 1px;
+  --easyui-border-width-md: 2px;
+  --easyui-border-width-lg: 3px;
+}
