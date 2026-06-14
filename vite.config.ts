@@ -16,7 +16,9 @@ export default defineConfig({
     tailwindcss(),
     dts({
       include: ['src'],
-      exclude: ['src/stories', '**/*.stories.*'],
+      exclude: ['src/stories', '**/*.stories.*', '**/stories/**', '**/*.test.*'],
+      tsconfigPath: 'tsconfig.app.json',
+      entryRoot: 'src',
     }),
   ],
   build: {
