@@ -12,6 +12,10 @@ export function Example() {
 }
 ```
 
+```jsx live
+<Button color="primary">Click me</Button>
+```
+
 ## Variants
 
 | Variant    | Description                                  |
@@ -21,7 +25,7 @@ export function Example() {
 | `flat`     | Tinted background, darker text               |
 | `light`    | No background, colored text, tinted on hover |
 
-```tsx
+```jsx live
 <Button variant="solid">Solid</Button>
 ```
 
@@ -34,7 +38,7 @@ export function Example() {
 - `warning`
 - `error`
 
-```tsx
+```jsx live
 <Button color="primary">Primary</Button>
 ```
 
@@ -46,7 +50,7 @@ Each color maps to a set of `--easyui-color-*` CSS variables that can be overrid
 - `md`
 - `lg`
 
-```tsx
+```jsx live
 <Button size="sm">Small</Button>
 ```
 
@@ -58,7 +62,7 @@ Each color maps to a set of `--easyui-color-*` CSS variables that can be overrid
 - `lg`
 - `full`
 
-```tsx
+```jsx live
 <Button radius="sm">Rounded</Button>
 ```
 
@@ -70,11 +74,11 @@ Add an icon (or any node) before/after the label with `startContent` / `endConte
 By default, they sit inside the button.
 set the `startContentPlacement` / `endContentPlacement` to `outside` to render them outside the clickable area.
 
-```tsx
-<Button 
-  startContent={<ArrowLeft/>} 
+```jsx live
+<Button
+  startContent={<ArrowLeft/>}
   startContentPlacement={"outside"}
-  endContent={<ArrowRight/>} 
+  endContent={<ArrowRight/>}
   endContentPlacement={"outside"}
 >
   Click me
@@ -86,20 +90,20 @@ set the `startContentPlacement` / `endContentPlacement` to `outside` to render t
 ### Loading
 Set `loading` to replace the content with a spinner and mark the button as `aria-busy`. The button is automatically disabled while loading.
 
-```tsx
+```jsx live
 <Button loading>Saving…</Button>
 ```
 
 ### Disabled
 Set `disabled` to mark the button as disabled.
 
-```tsx
+```jsx live
 <Button disabled>Disabled</Button>
 ```
 
 ## Full width
 
-```tsx
+```jsx live
 <Button fullWidth>Submit</Button>
 ```
 
@@ -107,7 +111,7 @@ Set `disabled` to mark the button as disabled.
 
 Add a field label above the button and a helper text. Both are optional.
 
-```tsx
+```jsx live
 <Button label="Account" description="This action cannot be undone.">
   Delete account
 </Button>
@@ -115,7 +119,7 @@ Add a field label above the button and a helper text. Both are optional.
 
 Use `descriptionPlacement` to render the description below the `label` instead of below the button itself:
 
-```tsx
+```jsx live
 <Button label="Account" description="This action cannot be undone." descriptionPlacement="label">
   Delete account
 </Button>
@@ -135,7 +139,7 @@ Customize individual parts via `classNames`:
 | `label`        | The field label element             |
 | `description`  | The description/helper text element |
 
-```tsx
+```jsx live
 <Button classNames={{ base: 'shadow-md', text: 'tracking-wide' }}>
   Click me
 </Button>

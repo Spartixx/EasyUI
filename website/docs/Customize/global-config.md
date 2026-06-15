@@ -29,9 +29,9 @@ export function App() {
 
 Without a provider, components render exactly as if no config existed.
 
-## Authoring the config with `defineConfig`
+## Define the config with `defineConfig`
 
-Keep the config in its own file and use `defineConfig` for autocompletion and type-checking, the same way you would with `vite.config.ts`:
+Get the config in its own file and use `defineConfig` for autocompletion and type-checking, the same way you would with `vite.config.ts`:
 
 ```ts
 // easyui.config.ts
@@ -61,7 +61,7 @@ export function App() {
 `wrappers` has one optional key per component, named after the component.
 For example, the `Button` component has the `button` wrapper.
 Each key accepts the same slots as that component's `classNames` prop. 
-see [Button's slots](../Components/Primitives/button.md#slots) for the full list.
+see [Button's slots](../Components/Primitives/button.mdx#slots) for the full list.
 
 ```ts
 {
