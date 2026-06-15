@@ -5,6 +5,9 @@ You might want your components to share the same look, without repeating the sam
 
 To override the underlying colors, radius and border widths instead, see the [theming guide](./theming.md).
 
+If you find yourself repeating the same combination of props and classes for a recurring "role" of a component
+(a "primary" or a "cancel" button for example), see [presets](./presets.md) instead.
+
 ## Setup
 
 Wrap your application with `EasyUIProvider` and pass it a config object:
@@ -111,3 +114,6 @@ For a given slot, classes are merged following these conditions:
 
 `wrappers` is designed to grow: 
 - as new components adopt the `classNames`slots pattern, they get their own optional key (`wrappers.input`, `wrappers.selector`, ...) into the wrapper config following the same rules described above.
+- those same components also get a `presets.<component>` config and a `preset` prop, following the
+  [presets](./presets.md) convention. Have a look at [presets precedence](./presets.md#precedence) to see for how a preset interacts
+  with (and replaces) the global wrapper.

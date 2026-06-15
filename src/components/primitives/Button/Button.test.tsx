@@ -195,4 +195,130 @@ describe('Button', () => {
       expect(screen.getByText('Helper text').classList.contains('global-description')).toBe(true)
     })
   })
+
+  describe('presets config', () => {
+    test('renders unchanged when no preset prop is set, even if presets are configured', () => {
+      render(
+        <EasyUIProvider
+          config={{
+            presets: {
+              button: {
+                primary: {
+                  props: { variant: 'outlined', color: 'primary' },
+                  classNames: { base: 'preset-base' },
+                },
+              },
+            },
+          }}
+        >
+          <Button>Click</Button>
+        </EasyUIProvider>,
+      )
+
+      const button = screen.getByRole('button')
+      expect(button.classList.contains('preset-base')).toBe(false)
+      expect(button.classList.contains('bg-(--easyui-color-default)')).toBe(true)
+    })
+
+    test('preset props change the rendered classes', () => {
+      render(
+        <EasyUIProvider
+          config={{
+            presets: {
+              button: { primary: { props: { variant: 'outlined', color: 'primary' } } },
+            },
+          }}
+        >
+          <Button preset="primary">Click</Button>
+        </EasyUIProvider>,
+      )
+
+      const button = screen.getByRole('button')
+      expect(button.classList.contains('border-(--easyui-color-primary)')).toBe(true)
+      expect(button.classList.contains('bg-(--easyui-color-default)')).toBe(false)
+    })
+
+    test('explicit instance props win over preset props', () => {
+      render(
+        <EasyUIProvider
+          config={{
+            presets: {
+              button: { primary: { props: { variant: 'outlined', color: 'primary' } } },
+            },
+          }}
+        >
+          <Button preset="primary" variant="solid">
+            Click
+          </Button>
+        </EasyUIProvider>,
+      )
+
+      const button = screen.getByRole('button')
+      expect(button.classList.contains('bg-(--easyui-color-primary)')).toBe(true)
+      expect(button.classList.contains('border-(--easyui-color-primary)')).toBe(false)
+    })
+
+    test('preset className and classNames replace the global wrapper across slots', () => {
+      render(
+        <EasyUIProvider
+          config={{
+            wrappers: { button: { base: 'global-base', spinner: 'global-spinner' } },
+            presets: {
+              button: {
+                primary: {
+                  className: 'preset-class',
+                  classNames: { base: 'preset-base', spinner: 'preset-spinner' },
+                },
+              },
+            },
+          }}
+        >
+          <Button preset="primary" loading>
+            Click
+          </Button>
+        </EasyUIProvider>,
+      )
+
+      const button = screen.getByRole('button')
+      expect(button.classList.contains('preset-class')).toBe(true)
+      expect(button.classList.contains('preset-base')).toBe(true)
+      expect(button.classList.contains('global-base')).toBe(false)
+      expect(button.querySelector('[aria-hidden="true"]')?.classList.contains('preset-spinner')).toBe(true)
+      expect(button.querySelector('[aria-hidden="true"]')?.classList.contains('global-spinner')).toBe(false)
+    })
+
+    test('a preset with only props (no className/classNames) still suppresses the global wrapper', () => {
+      render(
+        <EasyUIProvider
+          config={{
+            wrappers: { button: { base: 'global-base' } },
+            presets: { button: { primary: { props: { variant: 'outlined' } } } },
+          }}
+        >
+          <Button preset="primary">Click</Button>
+        </EasyUIProvider>,
+      )
+
+      const button = screen.getByRole('button')
+      expect(button.classList.contains('global-base')).toBe(false)
+      expect(button.classList.contains('border-solid')).toBe(true)
+    })
+
+    test('an unknown preset name falls back to the global wrapper', () => {
+      render(
+        <EasyUIProvider
+          config={{
+            wrappers: { button: { base: 'global-base' } },
+            presets: { button: { primary: { classNames: { base: 'preset-base' } } } },
+          }}
+        >
+          <Button preset="unknown">Click</Button>
+        </EasyUIProvider>,
+      )
+
+      const button = screen.getByRole('button')
+      expect(button.classList.contains('global-base')).toBe(true)
+      expect(button.classList.contains('preset-base')).toBe(false)
+    })
+  })
 })

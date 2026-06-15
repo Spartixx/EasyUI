@@ -5,6 +5,7 @@ export interface EasyUIBaseProps<TSlots extends string = string> {
   disabled?: boolean
   className?: string
   classNames?: Partial<Record<TSlots, string>>
+  preset?: string
 }
 
 export interface WithContentProps {
