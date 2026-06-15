@@ -3,6 +3,7 @@ import type { ButtonProps } from './Button.types'
 import { cn } from '../../../utils/cn'
 import { SIZE_CLASSES, RADIUS_CLASSES } from '../../../utils/variants'
 import { useSlotClassNames } from '../../../hooks/useSlotClassNames'
+import { usePreset } from '../../../hooks/usePreset'
 import { Spinner } from '../spinners/Spinner'
 import { ButtonContent } from './ButtonContent'
 
@@ -44,113 +45,114 @@ const VARIANT_COLOR_CLASSES: Record<
   },
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      children,
-      className,
-      classNames,
-      label,
-      description,
-      descriptionPlacement = 'element',
-      size = 'md',
-      variant = 'solid',
-      color = 'default',
-      radius = 'md',
-      disabled = false,
-      loading = false,
-      fullWidth = false,
-      startContent,
-      endContent,
-      startContentPlacement = 'inside',
-      endContentPlacement = 'inside',
-      ...nativeProps
-    },
-    ref,
-  ) => {
-    const slotClassName = useSlotClassNames('button', classNames)
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>((rawProps, ref) => {
+  const { preset, ...rest } = rawProps
+  const presetConfig = usePreset('button', preset)
 
-    const isDisabled = disabled || loading
+  const {
+    children,
+    className,
+    classNames,
+    label,
+    description,
+    descriptionPlacement = 'element',
+    size = 'md',
+    variant = 'solid',
+    color = 'default',
+    radius = 'md',
+    disabled = false,
+    loading = false,
+    fullWidth = false,
+    startContent,
+    endContent,
+    startContentPlacement = 'inside',
+    endContentPlacement = 'inside',
+    ...nativeProps
+  } = { ...presetConfig?.props, ...rest }
 
-    const hasOutsideContent =
-      (!!startContent && startContentPlacement === 'outside') ||
-      (!!endContent && endContentPlacement === 'outside')
+  const presetClassNames = presetConfig ? (presetConfig.classNames ?? {}) : undefined
+  const slotClassName = useSlotClassNames('button', classNames, presetClassNames, presetConfig?.className)
 
-    const button = (
-      <button
-        ref={ref}
-        disabled={isDisabled}
-        aria-busy={loading || undefined}
-        className={cn(
-          'inline-flex items-center justify-center gap-2',
-          'font-normal cursor-pointer select-none',
-          'transition-[filter,background-color] duration-150',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--easyui-color-focus-ring)',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
-          SIZE_CLASSES[size],
-          RADIUS_CLASSES[radius],
-          VARIANT_COLOR_CLASSES[variant][color],
-          !hasOutsideContent && fullWidth && 'w-full',
-          hasOutsideContent && fullWidth && 'flex-1',
-          slotClassName('base'),
-          className,
-        )}
-        {...nativeProps}
-      >
-        {startContent && startContentPlacement === 'inside' && (
-          <ButtonContent className={slotClassName('startContent')}>
-            {startContent}
-          </ButtonContent>
-        )}
-        {loading && <Spinner size={size} className={slotClassName('spinner')} />}
-        <span className={slotClassName('text')}>{children}</span>
-        {endContent && endContentPlacement === 'inside' && (
-          <ButtonContent className={slotClassName('endContent')}>
-            {endContent}
-          </ButtonContent>
-        )}
-      </button>
-    )
+  const isDisabled = disabled || loading
 
-    const content = !hasOutsideContent ? (
-      button
-    ) : (
-      <span className={cn('inline-flex items-center gap-2', fullWidth && 'w-full')}>
-        {startContent && startContentPlacement === 'outside' && (
-          <ButtonContent className={slotClassName('startContent')}>
-            {startContent}
-          </ButtonContent>
-        )}
-        {button}
-        {endContent && endContentPlacement === 'outside' && (
-          <ButtonContent className={slotClassName('endContent')}>
-            {endContent}
-          </ButtonContent>
-        )}
-      </span>
-    )
+  const hasOutsideContent =
+    (!!startContent && startContentPlacement === 'outside') ||
+    (!!endContent && endContentPlacement === 'outside')
 
-    if (!label && !description) return content
+  const button = (
+    <button
+      ref={ref}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
+      className={cn(
+        'inline-flex items-center justify-center gap-2',
+        'font-normal cursor-pointer select-none',
+        'transition-[filter,background-color] duration-150',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--easyui-color-focus-ring)',
+        'disabled:opacity-50 disabled:cursor-not-allowed',
+        SIZE_CLASSES[size],
+        RADIUS_CLASSES[radius],
+        VARIANT_COLOR_CLASSES[variant][color],
+        !hasOutsideContent && fullWidth && 'w-full',
+        hasOutsideContent && fullWidth && 'flex-1',
+        slotClassName('base'),
+        className,
+      )}
+      {...nativeProps}
+    >
+      {startContent && startContentPlacement === 'inside' && (
+        <ButtonContent className={slotClassName('startContent')}>
+          {startContent}
+        </ButtonContent>
+      )}
+      {loading && <Spinner size={size} className={slotClassName('spinner')} />}
+      <span className={slotClassName('text')}>{children}</span>
+      {endContent && endContentPlacement === 'inside' && (
+        <ButtonContent className={slotClassName('endContent')}>
+          {endContent}
+        </ButtonContent>
+      )}
+    </button>
+  )
 
-    const descriptionElement = description && (
-      <span className={cn('text-xs text-(--easyui-color-default-foreground)/60', slotClassName('description'))}>
-        {description}
-      </span>
-    )
+  const content = !hasOutsideContent ? (
+    button
+  ) : (
+    <span className={cn('inline-flex items-center gap-2', fullWidth && 'w-full')}>
+      {startContent && startContentPlacement === 'outside' && (
+        <ButtonContent className={slotClassName('startContent')}>
+          {startContent}
+        </ButtonContent>
+      )}
+      {button}
+      {endContent && endContentPlacement === 'outside' && (
+        <ButtonContent className={slotClassName('endContent')}>
+          {endContent}
+        </ButtonContent>
+      )}
+    </span>
+  )
 
-    return (
-      <div className={cn('inline-flex flex-col gap-1', fullWidth && 'w-full')}>
-        {label && (
-          <span className={cn('text-sm font-medium text-(--easyui-color-default-foreground)', slotClassName('label'))}>
-            {label}
-          </span>
-        )}
-        {descriptionPlacement === 'label' && descriptionElement}
-        {content}
-        {descriptionPlacement === 'element' && descriptionElement}
-      </div>
-    )
-  },
-)
+  if (!label && !description) return content
+
+  const descriptionElement = description && (
+    <span className={cn('text-xs text-(--easyui-color-default-foreground)/60', slotClassName('description'))}>
+      {description}
+    </span>
+  )
+
+  return (
+    <div className={cn('inline-flex flex-col gap-1', fullWidth && 'w-full')}>
+      {label && (
+        <span className={cn('text-sm font-medium text-(--easyui-color-default-foreground)', slotClassName('label'))}>
+          {label}
+        </span>
+      )}
+      {descriptionPlacement === 'label' && descriptionElement}
+      {content}
+      {descriptionPlacement === 'element' && descriptionElement}
+    </div>
+  )
+})
 
 Button.displayName = 'Button'
