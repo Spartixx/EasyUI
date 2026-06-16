@@ -13,6 +13,22 @@ EasyUI requires **React 17 or later** as a peer dependency. Make sure it is alre
 
 ---
 
+## Installation
+
+Install the package:
+
+```sh
+npm install @easy-ui-react/easy-ui-react
+```
+
+Then import EasyUI's css:
+
+```css
+@import "@easy-ui-react/easy-ui-react/styles.css";
+```
+
+---
+
 ## Requirements
 
 | Requirement | Version    |
