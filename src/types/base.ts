@@ -2,7 +2,9 @@ import type { ReactNode } from 'react'
 
 export interface EasyUIBaseProps<TSlots extends string = string> {
   size?: 'sm' | 'md' | 'lg'
-  disabled?: boolean
+  isDisabled?: boolean
+  isLoading?: boolean
+  isFullWidth?: boolean
   className?: string
   classNames?: Partial<Record<TSlots, string>>
   preset?: string

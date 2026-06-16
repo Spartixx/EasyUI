@@ -1,0 +1,226 @@
+# Input
+
+A text input field for collecting user data.
+
+## Usage
+
+```tsx
+import { Input } from '@easy-ui-react/easy-ui-react'
+
+export function Example() {
+  const [value, setValue] = useState('')
+  return <Input value={value} onValueChange={setValue} placeholder="Type here..." />
+}
+```
+
+```jsx live
+<Input color="primary" placeholder="Type here..." />
+```
+
+## Variants
+
+| Variant      | Description                                   |
+|--------------|-----------------------------------------------|
+| `bordered`   | Full border, transparent background (default) |
+| `faded`      | Full border, tinted background                |
+| `flat`       | Tinted background, no border                  |
+| `underlined` | Bottom border only, no radius                 |
+
+```jsx live
+<Input variant="bordered" placeholder="Bordered" />
+```
+
+## Colors
+
+- `default`
+- `primary`
+- `secondary`
+- `success`
+- `warning`
+- `error`
+
+Variant affects colors. Have a look to [Storybook](pathname:///storybook/?path=/story/primitives-input--default) to see how the component is rendering depending on the variant.
+
+```jsx live
+<Input color="primary" placeholder="Primary" />
+```
+
+## Sizes
+
+- `sm`
+- `md`
+- `lg`
+
+```jsx live
+<Input size="sm" placeholder="Small" />
+```
+
+## Radius
+
+- `none`
+- `sm`
+- `md`
+- `lg`
+- `full`
+
+```jsx live
+<Input radius="sm" placeholder="Rounded" />
+```
+
+`sm`, `md` and `lg` map to `--easyui-radius-*` CSS variables, see the [theming guide](../../Customize/theming.md).
+
+> The `underlined` variant always uses `rounded-none` regardless of the `radius` prop.
+
+## Content
+
+Add an icon (or any node) before/after the input with `startContent` / `endContent`.
+By default, they sit inside the bordered box.
+Set `startContentPlacement` / `endContentPlacement` to `outside` to render them outside the input area.
+
+```jsx live
+<Input
+  startContent={<Search size={16} />}
+  endContent={<Mail size={16} />}
+  placeholder="Search..."
+/>
+```
+
+## States
+
+### Loading
+
+Set `isLoading` to show a spinner and disable the input.
+
+```jsx live
+<Input isLoading placeholder="Loading..." />
+```
+
+### Disabled
+
+```jsx live
+<Input isDisabled placeholder="Disabled" />
+```
+
+### Read only
+
+```jsx live
+<Input isReadOnly value="Read-only value" />
+```
+
+## Full width
+
+```jsx live
+<Input isFullWidth placeholder="Full width" />
+```
+
+## Label & description
+
+```jsx live
+<Input
+  label="Email address"
+  description="We will never share your email."
+  placeholder="you@example.com"
+/>
+```
+
+Use `descriptionPlacement` to render the description below the `label` instead of below the input:
+
+```jsx live
+<Input
+  label="Email address"
+  description="We will never share your email."
+  descriptionPlacement="label"
+  placeholder="you@example.com"
+/>
+```
+
+## Required
+
+Add `isRequired` to mark the field as required — an asterisk appears next to the label.
+
+```jsx live
+<Input label="Email" isRequired placeholder="you@example.com" />
+```
+
+## Error
+
+Pass an `error` string to show a validation message below the input.
+
+```jsx live
+<Input label="Email" error="Invalid email address." placeholder="you@example.com" />
+```
+
+## Validation
+
+Use the `validations` prop to define an array of validators. Each validator is a function `(value: string) => string | null` that returns `null` if valid, or an error message string if invalid. Validation runs on blur.
+
+```jsx live
+<Input
+  label="Email"
+  placeholder="you@example.com"
+  validations={[
+    v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? null : 'Invalid email address'
+  ]}
+/>
+```
+
+Multiple validators run in order; the first failure's message is shown.
+
+The `error` prop (external) always takes precedence over a `validations` error.
+
+## Slots
+
+Customize individual parts via `classNames`:
+
+| Slot           | Description                           |
+|----------------|---------------------------------------|
+| `base`         | Root `<div>` wrapping the whole field |
+| `label`        | The `<label>` element                 |
+| `inputWrapper` | The visual bordered/background box    |
+| `input`        | The native `<input>` element          |
+| `startContent` | Wrapper around `startContent`         |
+| `endContent`   | Wrapper around `endContent`           |
+| `spinner`      | The loading spinner                   |
+| `description`  | The helper text element               |
+| `error`        | The error message element             |
+
+```jsx live
+<Input
+  classNames={{ inputWrapper: 'shadow-md', input: 'font-mono' }}
+  placeholder="Custom slots"
+/>
+```
+
+These slots can also be styled globally for every `Input` in your app, see the [global configuration guide](../../Customize/global-config.md).
+
+## Props
+
+| Prop                    | Type                                                                         | Default      | Description                                           |
+|-------------------------|------------------------------------------------------------------------------|--------------|-------------------------------------------------------|
+| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'` | Visual style                                          |
+| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`  | Focus color                                           |
+| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`       | Input size                                            |
+| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`       | Corner radius                                         |
+| `isDisabled`            | `boolean`                                                                    | `false`      | Disables the input                                    |
+| `isLoading`             | `boolean`                                                                    | `false`      | Shows a spinner and disables the input                |
+| `isRequired`            | `boolean`                                                                    | `false`      | Marks the field as required                           |
+| `isReadOnly`            | `boolean`                                                                    | `false`      | Makes the input read-only                             |
+| `isFullWidth`           | `boolean`                                                                    | `false`      | Makes the input take the full available width         |
+| `label`                 | `string`                                                                     | -            | Label rendered above the input                        |
+| `description`           | `string`                                                                     | -            | Helper text                                           |
+| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`  | Render description below the label or below the input |
+| `error`                 | `string`                                                                     | -            | Error message (overrides description slot)            |
+| `validations`           | `Array<(value: string) => string \| null>`                                   | -            | Validators run on blur                                |
+| `onValueChange`         | `(value: string) => void`                                                    | -            | Shorthand for `onChange` returning just the value     |
+| `startContent`          | `ReactNode`                                                                  | -            | Content rendered before the input text                |
+| `endContent`            | `ReactNode`                                                                  | -            | Content rendered after the input text                 |
+| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `startContent` is rendered                      |
+| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `endContent` is rendered                        |
+| `className`             | `string`                                                                     | -            | Class applied to the root element                     |
+| `classNames`            | `Partial<Record<InputSlots, string>>`                                        | -            | Per-slot class overrides                              |
+
+`Input` also accepts every native `<input>` attribute (`value`, `defaultValue`, `placeholder`, `type`, `name`, `autoComplete`, etc.) and forwards `ref` to the underlying `<input>` element.
+
+## Storybook
+
+[Open in Storybook →](pathname:///storybook/?path=/story/primitives-input--default)

@@ -16,23 +16,23 @@ describe('Button', () => {
     expect(screen.getByRole('button')).toBeDefined()
   })
 
-  test('is disabled when disabled prop is true', () => {
-    render(<Button disabled>Click</Button>)
+  test('is disabled when isDisabled prop is true', () => {
+    render(<Button isDisabled>Click</Button>)
     expect(screen.getByRole('button').hasAttribute('disabled')).toBe(true)
   })
 
-  test('is disabled when loading', () => {
-    render(<Button loading>Click</Button>)
+  test('is disabled when isLoading', () => {
+    render(<Button isLoading>Click</Button>)
     expect(screen.getByRole('button').hasAttribute('disabled')).toBe(true)
   })
 
-  test('has aria-busy when loading', () => {
-    render(<Button loading>Click</Button>)
+  test('has aria-busy when isLoading', () => {
+    render(<Button isLoading>Click</Button>)
     expect(screen.getByRole('button').getAttribute('aria-busy')).toBe('true')
   })
 
-  test('shows spinner when loading', () => {
-    render(<Button loading>Click</Button>)
+  test('shows spinner when isLoading', () => {
+    render(<Button isLoading>Click</Button>)
     const spinner = screen.getByRole('button').querySelector('[aria-hidden="true"]')
     expect(spinner).not.toBeNull()
   })
@@ -66,8 +66,8 @@ describe('Button', () => {
     expect(screen.getByRole('button').contains(screen.getByTestId('icon'))).toBe(false)
   })
 
-  test('applies w-full when fullWidth is true', () => {
-    render(<Button fullWidth>Click</Button>)
+  test('applies w-full when isFullWidth is true', () => {
+    render(<Button isFullWidth>Click</Button>)
     expect(screen.getByRole('button').classList.contains('w-full')).toBe(true)
   })
 
@@ -177,7 +177,7 @@ describe('Button', () => {
             description="Helper text"
             startContent={<span data-testid="start">+</span>}
             endContent={<span data-testid="end">→</span>}
-            loading
+            isLoading
           >
             Click
           </Button>
@@ -273,7 +273,7 @@ describe('Button', () => {
             },
           }}
         >
-          <Button preset="primary" loading>
+          <Button preset="primary" isLoading>
             Click
           </Button>
         </EasyUIProvider>,

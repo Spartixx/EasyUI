@@ -60,9 +60,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((rawProps, ref)
     variant = 'solid',
     color = 'default',
     radius = 'md',
-    disabled = false,
-    loading = false,
-    fullWidth = false,
+    isDisabled = false,
+    isLoading = false,
+    isFullWidth = false,
     startContent,
     endContent,
     startContentPlacement = 'inside',
@@ -73,7 +73,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((rawProps, ref)
   const presetClassNames = presetConfig ? (presetConfig.classNames ?? {}) : undefined
   const slotClassName = useSlotClassNames('button', classNames, presetClassNames, presetConfig?.className)
 
-  const isDisabled = disabled || loading
+  const isButtonDisabled = isDisabled || isLoading
 
   const hasOutsideContent =
     (!!startContent && startContentPlacement === 'outside') ||
@@ -82,8 +82,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((rawProps, ref)
   const button = (
     <button
       ref={ref}
-      disabled={isDisabled}
-      aria-busy={loading || undefined}
+      disabled={isButtonDisabled}
+      aria-busy={isLoading || undefined}
       className={cn(
         'inline-flex items-center justify-center gap-2',
         'font-normal cursor-pointer select-none',
@@ -93,8 +93,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((rawProps, ref)
         SIZE_CLASSES[size],
         RADIUS_CLASSES[radius],
         VARIANT_COLOR_CLASSES[variant][color],
-        !hasOutsideContent && fullWidth && 'w-full',
-        hasOutsideContent && fullWidth && 'flex-1',
+        !hasOutsideContent && isFullWidth && 'w-full',
+        hasOutsideContent && isFullWidth && 'flex-1',
         slotClassName('base'),
         className,
       )}
@@ -105,7 +105,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((rawProps, ref)
           {startContent}
         </ButtonContent>
       )}
-      {loading && <Spinner size={size} className={slotClassName('spinner')} />}
+      {isLoading && <Spinner size={size} className={slotClassName('spinner')} />}
       <span className={slotClassName('text')}>{children}</span>
       {endContent && endContentPlacement === 'inside' && (
         <ButtonContent className={slotClassName('endContent')}>
@@ -118,7 +118,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((rawProps, ref)
   const content = !hasOutsideContent ? (
     button
   ) : (
-    <span className={cn('inline-flex items-center gap-2', fullWidth && 'w-full')}>
+    <span className={cn('inline-flex items-center gap-2', isFullWidth && 'w-full')}>
       {startContent && startContentPlacement === 'outside' && (
         <ButtonContent className={slotClassName('startContent')}>
           {startContent}
@@ -142,7 +142,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((rawProps, ref)
   )
 
   return (
-    <div className={cn('inline-flex flex-col gap-1', fullWidth && 'w-full')}>
+    <div className={cn('inline-flex flex-col gap-1', isFullWidth && 'w-full')}>
       {label && (
         <span className={cn('text-sm font-medium text-(--easyui-color-default-foreground)', slotClassName('label'))}>
           {label}
