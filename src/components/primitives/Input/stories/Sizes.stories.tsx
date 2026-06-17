@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { buttonMeta } from './meta.ts'
+import { inputMeta } from './meta.ts'
 
-const meta = { ...buttonMeta, title: 'Primitives/Button/Sizes' } satisfies Meta<typeof buttonMeta.component>
+const meta = { ...inputMeta, title: 'Primitives/Input/Sizes' } satisfies Meta<typeof inputMeta.component>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -15,7 +15,7 @@ export const FullWidth: Story = {
   args: { isFullWidth: true },
   decorators: [
     (Story) => (
-      <div style={{ width: '300px' }}>
+      <div style={{ width: '400px' }}>
         <Story />
       </div>
     ),

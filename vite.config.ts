@@ -40,11 +40,17 @@ export default defineConfig({
       provider: playwright({}),
       instances: [{ browser: 'chromium' }],
     },
-    projects: [{
-      extends: true,
-      plugins: [
-        storybookTest({ configDir: path.join(dirname, '.storybook') }),
-      ]
-    }],
+    projects: [
+      {
+        extends: true,
+        plugins: [
+          storybookTest({ configDir: path.join(dirname, '.storybook') }),
+        ],
+      },
+      {
+        extends: true,
+        test: { name: 'unit', globals: true },
+      },
+    ],
   },
 });

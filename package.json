@@ -34,7 +34,7 @@
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test": "vitest run --project=storybook --coverage"
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.2.1",
