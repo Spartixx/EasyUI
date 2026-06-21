@@ -1,0 +1,6 @@
+.playgroundContainer {
+  margin-bottom: var(--ifm-leading);
+  border-radius: var(--ifm-global-radius);
+  border: 1px solid var(--easyui-color-default);
+  overflow: hidden;
+}

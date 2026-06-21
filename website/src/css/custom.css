@@ -20,7 +20,17 @@
   --ifm-color-primary-lighter: #359962;
   --ifm-color-primary-lightest: #3cad6e;
   --ifm-code-font-size: 95%;
+  --ifm-background-color: var(--easyui-color-background);
+  --ifm-color-content: var(--easyui-color-foreground);
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-transition-fast: 200ms;
+  --ifm-font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+  --ifm-font-weight-bold: 700;
+  --ifm-global-radius: 0.4rem;
+  --ifm-leading-desktop: 1.25;
+  --ifm-leading: calc(var(--ifm-leading-desktop) * 1rem);
+  --ifm-pre-line-height: 1.45;
 }
 
 [data-theme='dark'] {
@@ -32,4 +42,9 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme='dark'] {
+  --ifm-background-color: var(--easyui-color-background);
+  --ifm-color-content: var(--easyui-color-foreground);
 }
