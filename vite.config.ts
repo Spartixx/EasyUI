@@ -34,11 +34,18 @@ export default defineConfig({
   test: {
     name: 'storybook',
     passWithNoTests: true,
+    fileParallelism: false,
     browser: {
       enabled: true,
       headless: true,
       provider: playwright({}),
       instances: [{ browser: 'chromium' }],
+      expect: {
+        toMatchScreenshot: {
+          comparatorName: 'pixelmatch',
+          comparatorOptions: { threshold: 0.2, allowedMismatchedPixelRatio: 0.01 },
+        },
+      },
     },
     projects: [
       {
@@ -49,7 +56,7 @@ export default defineConfig({
       },
       {
         extends: true,
-        test: { name: 'unit', globals: true },
+        test: { name: 'unit', globals: true, setupFiles: ['./src/test/setup.ts'] },
       },
     ],
   },
