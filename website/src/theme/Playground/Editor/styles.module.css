@@ -1,0 +1,15 @@
+.playgroundEditor {
+  font: var(--ifm-code-font-size) / var(--ifm-pre-line-height)
+    var(--ifm-font-family-monospace) !important;
+  /* rtl:ignore */
+  direction: ltr;
+  padding: 1rem;
+  background-color: var(--easyui-color-background);
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.playgroundEditor pre{
+  border-radius: 0;
+  background: var(--easyui-color-background)important;
+}

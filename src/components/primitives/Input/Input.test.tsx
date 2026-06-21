@@ -169,7 +169,7 @@ describe('Input', () => {
     test('flat variant: wrapper background reflects color prop', () => {
       render(<Input variant="flat" color="primary" />)
       const wrapper = screen.getByRole('textbox').parentElement!
-      expect(wrapper.classList.contains('bg-(--easyui-color-primary)/10')).toBe(true)
+      expect(wrapper.classList.contains('bg-(--easyui-color-primary)/30')).toBe(true)
     })
 
     test('flat variant: wrapper background uses the default color by default', () => {
@@ -181,13 +181,13 @@ describe('Input', () => {
     test('faded variant: wrapper background reflects color prop', () => {
       render(<Input variant="faded" color="primary" />)
       const wrapper = screen.getByRole('textbox').parentElement!
-      expect(wrapper.classList.contains('bg-(--easyui-color-primary)/10')).toBe(true)
+      expect(wrapper.classList.contains('bg-(--easyui-color-primary)/30')).toBe(true)
     })
 
     test('faded variant: wrapper background uses the default color by default', () => {
       render(<Input variant="faded" />)
       const wrapper = screen.getByRole('textbox').parentElement!
-      expect(wrapper.classList.contains('bg-(--easyui-color-default)/10')).toBe(true)
+      expect(wrapper.classList.contains('bg-(--easyui-color-default)/40')).toBe(true)
     })
 
     test('non-bordered variant: label reflects color prop', () => {

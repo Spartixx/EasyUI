@@ -25,12 +25,12 @@ const INPUT_TEXT_SIZE_CLASSES: Record<NonNullable<InputProps['size']>, string> =
 }
 
 const INPUT_TEXT_COLOR_CLASSES: Record<NonNullable<InputProps['color']>, string> = {
-  default: 'text-(--easyui-color-default-foreground) placeholder:text-(--easyui-color-default-foreground)/40',
-  primary: 'text-(--easyui-color-primary-dark) placeholder:text-(--easyui-color-primary-dark)/40',
-  secondary: 'text-(--easyui-color-secondary-dark) placeholder:text-(--easyui-color-secondary-dark)/40',
-  success: 'text-(--easyui-color-success-dark) placeholder:text-(--easyui-color-success-dark)/40',
-  warning: 'text-(--easyui-color-warning-dark) placeholder:text-(--easyui-color-warning-dark)/40',
-  error: 'text-(--easyui-color-error-dark) placeholder:text-(--easyui-color-error-dark)/40',
+  default: 'text-(--easyui-color-default-foreground) placeholder:text-(--easyui-color-default-foreground)',
+  primary: 'text-(--easyui-color-primary-dark) placeholder:text-(--easyui-color-primary-dark)',
+  secondary: 'text-(--easyui-color-secondary-dark) placeholder:text-(--easyui-color-secondary-dark)',
+  success: 'text-(--easyui-color-success-dark) placeholder:text-(--easyui-color-success-dark)',
+  warning: 'text-(--easyui-color-warning-dark) placeholder:text-(--easyui-color-warning-dark)',
+  error: 'text-(--easyui-color-error-dark) placeholder:text-(--easyui-color-error-dark)',
 }
 
 const CONTENT_TEXT_COLOR_CLASSES: Record<NonNullable<InputProps['color']>, string> = {
@@ -64,26 +64,26 @@ const WRAPPER_VARIANT_COLOR_CLASSES: Record<
   // colored border + tinted bg
   faded: {
     default:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) bg-(--easyui-color-default)/10 focus-within:border-(--easyui-color-default)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) bg-(--easyui-color-default)/40 focus-within:border-(--easyui-color-default)',
     primary:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-primary) bg-(--easyui-color-primary)/10 focus-within:border-(--easyui-color-primary)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-primary) bg-(--easyui-color-primary)/30 focus-within:border-(--easyui-color-primary)',
     secondary:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-secondary) bg-(--easyui-color-secondary)/10 focus-within:border-(--easyui-color-secondary)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-secondary) bg-(--easyui-color-secondary)/30 focus-within:border-(--easyui-color-secondary)',
     success:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-success) bg-(--easyui-color-success)/10 focus-within:border-(--easyui-color-success)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-success) bg-(--easyui-color-success)/30 focus-within:border-(--easyui-color-success)',
     warning:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-warning) bg-(--easyui-color-warning)/10 focus-within:border-(--easyui-color-warning)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-warning) bg-(--easyui-color-warning)/30 focus-within:border-(--easyui-color-warning)',
     error:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-error) bg-(--easyui-color-error)/10 focus-within:border-(--easyui-color-error)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-error) bg-(--easyui-color-error)/30 focus-within:border-(--easyui-color-error)',
   },
   // tinted bg, no border
   flat: {
     default: 'bg-(--easyui-color-default)/40 focus-within:bg-(--easyui-color-default)/50',
-    primary: 'bg-(--easyui-color-primary)/10 focus-within:bg-(--easyui-color-primary)/20',
-    secondary: 'bg-(--easyui-color-secondary)/10 focus-within:bg-(--easyui-color-secondary)/20',
-    success: 'bg-(--easyui-color-success)/10 focus-within:bg-(--easyui-color-success)/20',
-    warning: 'bg-(--easyui-color-warning)/10 focus-within:bg-(--easyui-color-warning)/20',
-    error: 'bg-(--easyui-color-error)/10 focus-within:bg-(--easyui-color-error)/20',
+    primary: 'bg-(--easyui-color-primary)/30 focus-within:bg-(--easyui-color-primary)/20',
+    secondary: 'bg-(--easyui-color-secondary)/30 focus-within:bg-(--easyui-color-secondary)/20',
+    success: 'bg-(--easyui-color-success)/30 focus-within:bg-(--easyui-color-success)/20',
+    warning: 'bg-(--easyui-color-warning)/30 focus-within:bg-(--easyui-color-warning)/20',
+    error: 'bg-(--easyui-color-error)/30 focus-within:bg-(--easyui-color-error)/20',
   },
   // colored bottom border
   underlined: {
@@ -254,7 +254,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
       {usesInsideLabel && (
         <label
           htmlFor={inputId}
-          className={cn('text-xs font-medium leading-none opacity-70', effectiveLabelColor, slotClassName('label'))}
+          className={cn('text-xs font-medium leading-none', effectiveLabelColor, slotClassName('label'))}
         >
           {label}
           {isRequired && (

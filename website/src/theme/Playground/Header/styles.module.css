@@ -1,0 +1,25 @@
+.playgroundHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  letter-spacing: 0.08rem;
+  padding: 0.75rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  background-color: var(--easyui-color-background);
+  color: var(--easyui-color-default-foreground);
+  font-size: var(--ifm-code-font-size);
+  border-bottom: 1px solid var(--easyui-color-default);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.playgroundHeaderContent {
+  font-weight: var(--ifm-font-weight-bold);
+  font-size: 0.875rem;
+}
+
+.playgroundHeaderButtons {
+  display: flex;
+  gap: 0.5rem;
+}
