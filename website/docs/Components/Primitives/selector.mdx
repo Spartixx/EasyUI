@@ -1,0 +1,303 @@
+# Selector
+
+A custom-styled dropdown select for choosing a single value among a list of options.
+
+## Usage
+
+```tsx
+import { Selector } from '@easy-ui-react/easy-ui-react'
+
+const fruitOptions = [
+  { value: 'apple', label: 'Apple' },
+  { value: 'banana', label: 'Banana' },
+  { value: 'cherry', label: 'Cherry' },
+]
+
+export function Example() {
+  const [value, setValue] = useState<string>()
+  return <Selector options={fruitOptions} value={value} onValueChange={setValue} placeholder="Select a fruit..." />
+}
+```
+
+```jsx live
+<Selector
+  color="primary"
+  placeholder="Select a fruit..."
+  options={[
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'cherry', label: 'Cherry' },
+  ]}
+/>
+```
+
+## Variants
+
+| Variant      | Description                                   |
+|--------------|-----------------------------------------------|
+| `bordered`   | Full border, transparent background (default) |
+| `faded`      | Full border, tinted background                |
+| `flat`       | Tinted background, no border                  |
+| `underlined` | Bottom border only, no radius                 |
+
+```jsx live
+<Selector
+  variant="bordered"
+  placeholder="Bordered"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Colors
+
+- `default`
+- `primary`
+- `secondary`
+- `success`
+- `warning`
+- `error`
+
+Variant affects colors. Have a look to [Storybook](pathname:///storybook/?path=/story/primitives-selector--default) to see how the component is rendering depending on the variant.
+
+```jsx live
+<Selector
+  color="primary"
+  placeholder="Primary"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Sizes
+
+- `sm`
+- `md`
+- `lg`
+
+```jsx live
+<Selector
+  size="sm"
+  placeholder="Small"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Radius
+
+- `none`
+- `sm`
+- `md`
+- `lg`
+- `full`
+
+```jsx live
+<Selector
+  radius="sm"
+  placeholder="Rounded"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+`sm`, `md` and `lg` map to `--easyui-radius-*` CSS variables, see the [theming guide](../../Customize/theming.md).
+
+> The `underlined` variant always uses `rounded-none` regardless of the `radius` prop.
+
+## Content
+
+Add an icon (or any node) before/after the value with `startContent` / `endContent`.
+By default, they sit inside the trigger box. Set `startContentPlacement` / `endContentPlacement` to `outside` to render them outside it.
+
+```jsx live
+<Selector
+  startContent={<Apple size={16} />}
+  placeholder="Select a fruit..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Arrow
+
+A `ChevronDown` icon is shown by default at the end of the trigger, and rotates when the listbox opens.
+
+- `isArrowHidden` removes it entirely
+- `arrowPlacement` moves it to the `start` or `end` (default) of the trigger
+- `arrow` replaces the default icon with any node
+
+```jsx live
+<Selector
+  arrowPlacement="start"
+  placeholder="Arrow on the left"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## States
+
+### Loading
+
+Set `isLoading` to show a spinner and disable the selector.
+
+```jsx live
+<Selector
+  isLoading
+  placeholder="Loading..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+### Disabled
+
+```jsx live
+<Selector
+  isDisabled
+  placeholder="Disabled"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Full width
+
+```jsx live
+<Selector
+  isFullWidth
+  placeholder="Full width"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Label & description
+
+```jsx live
+<Selector
+  label="Fruit"
+  description="Pick your favorite fruit."
+  placeholder="Select a fruit..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+Use `descriptionPlacement` to render the description below the `label` instead of below the selector:
+
+```jsx live
+<Selector
+  label="Fruit"
+  description="Pick your favorite fruit."
+  descriptionPlacement="label"
+  placeholder="Select a fruit..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Required
+
+Add `isRequired` to mark the field as required — an asterisk appears next to the label.
+
+```jsx live
+<Selector
+  label="Fruit"
+  isRequired
+  placeholder="Select a fruit..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Error
+
+Pass an `error` string to show a validation message below the selector.
+
+```jsx live
+<Selector
+  label="Fruit"
+  error="Please select a fruit."
+  placeholder="Select a fruit..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Options
+
+Each entry in `options` accepts:
+
+| Field         | Type        | Description                              |
+|---------------|-------------|-------------------------------------------|
+| `value`       | `string`    | Unique value, passed to `onValueChange`   |
+| `label`       | `string`    | Text shown in the trigger and the listbox |
+| `description` | `string`    | Helper text shown below the option label  |
+| `isDisabled`  | `boolean`   | Prevents selecting this option            |
+| `startContent`| `ReactNode` | Icon (or any node) shown before the label |
+| `endContent`  | `ReactNode` | Icon (or any node) shown after the label  |
+
+```jsx live
+<Selector
+  placeholder="Select a fruit..."
+  options={[
+    { value: 'apple', label: 'Apple', description: 'Crisp and sweet', startContent: <Apple size={16} /> },
+    { value: 'banana', label: 'Banana', description: 'Soft and creamy' },
+  ]}
+/>
+```
+
+## Slots
+
+Customize individual parts via `classNames`:
+
+| Slot           | Description                              |
+|----------------|-------------------------------------------|
+| `base`         | Root `<div>` wrapping the whole field     |
+| `label`        | The `<label>` element                    |
+| `trigger`      | The trigger `<button>`                    |
+| `value`        | Wrapper around the selected value/placeholder |
+| `startContent` | Wrapper around `startContent`             |
+| `endContent`   | Wrapper around `endContent`               |
+| `arrow`        | Wrapper around the arrow icon             |
+| `spinner`      | The loading spinner                       |
+| `listbox`      | The options `<ul>` container              |
+| `option`       | Each `<li>` option                        |
+| `description`  | The helper text element                   |
+| `error`        | The error message element                 |
+
+```jsx live
+<Selector
+  classNames={{ trigger: 'shadow-md', listbox: 'shadow-lg' }}
+  placeholder="Custom slots"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+These slots can also be styled globally for every `Selector` in your app, see the [global configuration guide](../../Customize/global-config.md).
+
+## Props
+
+| Prop                    | Type                                                                         | Default      | Description                                            |
+|-------------------------|-------------------------------------------------------------------------------|--------------|---------------------------------------------------------|
+| `options`               | `SelectorOption[]`                                                           | -            | The list of selectable options                         |
+| `value`                 | `string`                                                                     | -            | Controlled selected value                               |
+| `defaultValue`          | `string`                                                                     | -            | Initial value for uncontrolled usage                     |
+| `onValueChange`         | `(value: string) => void`                                                    | -            | Called when an option is selected                        |
+| `placeholder`           | `string`                                                                     | -            | Text shown when no value is selected                     |
+| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'` | Visual style                                            |
+| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`  | Focus color                                              |
+| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`       | Selector size                                            |
+| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`       | Corner radius                                            |
+| `isDisabled`            | `boolean`                                                                    | `false`      | Disables the selector                                    |
+| `isLoading`             | `boolean`                                                                    | `false`      | Shows a spinner and disables the selector                |
+| `isRequired`            | `boolean`                                                                    | `false`      | Marks the field as required                              |
+| `isFullWidth`           | `boolean`                                                                    | `false`      | Makes the selector take the full available width         |
+| `label`                 | `string`                                                                     | -            | Label rendered above the trigger                         |
+| `description`           | `string`                                                                     | -            | Helper text                                              |
+| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`  | Render description below the label or below the trigger  |
+| `error`                 | `string`                                                                     | -            | Error message (overrides description slot)               |
+| `startContent`          | `ReactNode`                                                                  | -            | Content rendered before the value                         |
+| `endContent`            | `ReactNode`                                                                  | -            | Content rendered after the value                          |
+| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `startContent` is rendered                          |
+| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `endContent` is rendered                            |
+| `arrow`                 | `ReactNode`                                                                  | -            | Custom node replacing the default chevron icon            |
+| `arrowPlacement`        | `'start' \| 'end'`                                                           | `'end'`      | Where the arrow is rendered                                |
+| `isArrowHidden`         | `boolean`                                                                    | `false`      | Hides the arrow                                            |
+| `className`             | `string`                                                                     | -            | Class applied to the root element                         |
+| `classNames`            | `Partial<Record<SelectorSlots, string>>`                                    | -            | Per-slot class overrides                                   |
+
+`Selector` forwards `ref` to the underlying trigger `<button>` element.
+
+## Storybook
+
+[Open in Storybook →](pathname:///storybook/?path=/story/primitives-selector--default) and see more combinations.
