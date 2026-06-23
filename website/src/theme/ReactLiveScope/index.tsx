@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button, Spinner, Input } from '../../../../src';
-import { ArrowLeft, ArrowRight, Search, Mail } from 'lucide-react';
+import { Button, Spinner, Input, Selector } from '../../../../src';
+import { ArrowLeft, ArrowRight, Search, Mail, Apple } from 'lucide-react';
 
 const ReactLiveScope: unknown = {
   React,
@@ -8,10 +8,12 @@ const ReactLiveScope: unknown = {
   Button,
   Spinner,
   Input,
+  Selector,
   ArrowLeft,
   ArrowRight,
   Search,
   Mail,
+  Apple,
 };
 
 export default ReactLiveScope;
