@@ -1,50 +1,19 @@
-import { forwardRef, useEffect, useId, useRef, useState } from 'react'
+import { forwardRef, useRef, useState } from 'react'
 import type { KeyboardEvent, MouseEvent } from 'react'
 import type { SelectorOption as SelectorOptionData, SelectorProps } from './Selector.types'
 import { cn } from '../../../utils/cn'
-import { RADIUS_CLASSES } from '../../../utils/variants'
-import { useSlotClassNames } from '../../../hooks'
-import { usePreset } from '../../../hooks'
+import { RADIUS_CLASSES, LABEL_COLOR_CLASSES } from '../../../utils/class-maps'
+import { useSlotClassNames, usePreset } from '../../../hooks'
 import { Spinner } from '../spinners/Spinner'
-import { SelectorListbox } from './SelectorListbox'
-import { SelectorOption } from './SelectorOption'
+import { ArrowIcon } from '../../internal/icons'
+import { Listbox, OptionItem, useListboxNavigation } from '../../internal/listbox'
+import { ContentSlot, OutsideContentRow, hasOutsideContent as computeHasOutsideContent } from '../../internal/content'
+import { useControllableValue, useFieldIds, useFieldDescribedBy, useFieldColors, FieldLayout } from '../../internal/field'
 
 const TRIGGER_SIZE_CLASSES: Record<NonNullable<SelectorProps['size']>, string> = {
   sm: 'h-8 px-3 gap-1.5 text-xs',
   md: 'h-10 px-3 gap-2 text-sm',
   lg: 'h-12 px-4 gap-2 text-base',
-}
-
-const ARROW_SIZE_CLASSES: Record<NonNullable<SelectorProps['size']>, string> = {
-  sm: 'size-3',
-  md: 'size-4',
-  lg: 'size-6',
-}
-
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
-      <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-const VALUE_TEXT_COLOR_CLASSES: Record<NonNullable<SelectorProps['color']>, string> = {
-  default: 'text-(--easyui-color-default-foreground)',
-  primary: 'text-(--easyui-color-primary-dark)',
-  secondary: 'text-(--easyui-color-secondary-dark)',
-  success: 'text-(--easyui-color-success-dark)',
-  warning: 'text-(--easyui-color-warning-dark)',
-  error: 'text-(--easyui-color-error-dark)',
-}
-
-const CONTENT_TEXT_COLOR_CLASSES: Record<NonNullable<SelectorProps['color']>, string> = {
-  default: 'text-(--easyui-color-default-foreground)/60',
-  primary: 'text-(--easyui-color-primary-dark)/60',
-  secondary: 'text-(--easyui-color-secondary-dark)/60',
-  success: 'text-(--easyui-color-success-dark)/60',
-  warning: 'text-(--easyui-color-warning-dark)/60',
-  error: 'text-(--easyui-color-error-dark)/60',
 }
 
 const TRIGGER_VARIANT_COLOR_CLASSES: Record<
@@ -92,17 +61,7 @@ const ERROR_TRIGGER_CLASSES: Record<NonNullable<SelectorProps['variant']>, strin
   underlined: 'border-(--easyui-color-error) focus-visible:border-(--easyui-color-error)',
 }
 
-const LABEL_COLOR_CLASSES: Record<NonNullable<SelectorProps['color']>, string> = {
-  default: 'text-(--easyui-color-default-foreground)',
-  primary: 'text-(--easyui-color-primary-dark)',
-  secondary: 'text-(--easyui-color-secondary-dark)',
-  success: 'text-(--easyui-color-success-dark)',
-  warning: 'text-(--easyui-color-warning-dark)',
-  error: 'text-(--easyui-color-error-dark)',
-}
-
 const ERROR_TEXT_COLOR = 'text-(--easyui-color-error-dark)'
-const ERROR_CONTENT_COLOR = 'text-(--easyui-color-error-dark)/60'
 
 export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, ref) => {
   const { preset, ...rest } = rawProps
@@ -142,18 +101,10 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
     ...nativeProps
   } = { ...presetConfig?.props, ...rest }
 
-  const generatedId = useId()
-  const triggerId = idProp ?? generatedId
-  const listboxId = `${triggerId}-listbox`
-  const descriptionId = `${triggerId}-description`
-  const errorId = `${triggerId}-error`
-  const optionId = (index: number) => `${listboxId}-option-${index}`
+  const { fieldId: triggerId, listboxId, descriptionId, errorId, optionId } = useFieldIds(idProp)
 
-  const [internalValue, setInternalValue] = useState(defaultValue)
-  const currentValue = value !== undefined ? value : internalValue
+  const [currentValue, setValue] = useControllableValue(value, defaultValue)
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(-1)
   const [announcement, setAnnouncement] = useState('')
 
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -168,56 +119,17 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
 
   const selectedOption = options.find((option) => option.value === currentValue)
   const hasError = !!error
-  const showsDescription = !!description && (descriptionPlacement === 'label' || !hasError)
-  const ariaDescribedBy =
-    [showsDescription && descriptionId, hasError && errorId].filter(Boolean).join(' ') || undefined
+  const { ariaDescribedBy } = useFieldDescribedBy({ hasError, description, descriptionPlacement, descriptionId, errorId })
 
-  const enabledIndexes = options.reduce<number[]>((acc, option, index) => {
-    if (!option.isDisabled) acc.push(index)
-    return acc
-  }, [])
-
-  const openListbox = () => {
-    const selectedIndex = options.findIndex((option) => option.value === currentValue)
-    setActiveIndex(selectedIndex !== -1 ? selectedIndex : (enabledIndexes[0] ?? -1))
-    setIsOpen(true)
-  }
-
-  const closeListbox = () => {
-    setIsOpen(false)
-    setActiveIndex(-1)
-  }
+  const { isOpen, activeIndex, setActiveIndex, enabledIndexes, openListbox, closeListbox, handleArrowKey } =
+    useListboxNavigation({ options, currentValue, triggerRef, listboxRef, optionId })
 
   const selectOption = (option: SelectorOptionData) => {
-    if (value === undefined) setInternalValue(option.value)
+    setValue(option.value)
     onValueChange?.(option.value)
     setAnnouncement(`Selected: ${option.label}`)
     closeListbox()
   }
-
-  const moveActiveIndex = (direction: 1 | -1) => {
-    if (enabledIndexes.length === 0) return
-    const currentPos = enabledIndexes.indexOf(activeIndex)
-    const nextPos = Math.min(Math.max(currentPos + direction, 0), enabledIndexes.length - 1)
-    setActiveIndex(enabledIndexes[nextPos])
-  }
-
-  useEffect(() => {
-    if (!isOpen || activeIndex === -1) return
-    document.getElementById(optionId(activeIndex))?.scrollIntoView({ block: 'nearest' })
-  }, [isOpen, activeIndex])
-
-  useEffect(() => {
-    if (!isOpen) return
-    const handlePointerDown = (e: PointerEvent) => {
-      const target = e.target as Node
-      if (triggerRef.current?.contains(target)) return
-      if (listboxRef.current?.contains(target)) return
-      closeListbox()
-    }
-    document.addEventListener('pointerdown', handlePointerDown)
-    return () => document.removeEventListener('pointerdown', handlePointerDown)
-  }, [isOpen])
 
   const handleTypeahead = (char: string) => {
     typeaheadRef.current += char.toLowerCase()
@@ -230,7 +142,7 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
       (option) => !option.isDisabled && option.label.toLowerCase().startsWith(typeaheadRef.current),
     )
     if (matchIndex === -1) return
-    if (!isOpen) setIsOpen(true)
+    if (!isOpen) openListbox()
     setActiveIndex(matchIndex)
   }
 
@@ -239,14 +151,10 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
     if (isSelectorDisabled) return
     switch (e.key) {
       case 'ArrowDown':
-        e.preventDefault()
-        if (isOpen) moveActiveIndex(1)
-        else openListbox()
+        handleArrowKey(e, 1)
         break
       case 'ArrowUp':
-        e.preventDefault()
-        if (isOpen) moveActiveIndex(-1)
-        else openListbox()
+        handleArrowKey(e, -1)
         break
       case 'Home':
         if (isOpen) {
@@ -287,44 +195,46 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
     else openListbox()
   }
 
-  const coloredVariant = variant !== 'bordered'
-  const effectiveTextColor = hasError ? ERROR_TEXT_COLOR : VALUE_TEXT_COLOR_CLASSES[coloredVariant ? color : 'default']
-  const effectiveContentColor = hasError ? ERROR_CONTENT_COLOR : CONTENT_TEXT_COLOR_CLASSES[coloredVariant ? color : 'default']
-  const effectiveLabelColor = hasError ? 'text-(--easyui-color-error-dark)' : LABEL_COLOR_CLASSES[coloredVariant ? color : 'default']
+  const { effectiveTextColor, effectiveContentColor, effectiveLabelColor } = useFieldColors({
+    hasError,
+    color,
+    variant,
+    textColorClasses: LABEL_COLOR_CLASSES,
+    errorTextColor: ERROR_TEXT_COLOR,
+  })
 
-  const hasOutsideContent =
-    (!!startContent && startContentPlacement === 'outside') || (!!endContent && endContentPlacement === 'outside')
+  const hasOutsideContent = computeHasOutsideContent({
+    startContent,
+    startContentPlacement,
+    endContent,
+    endContentPlacement,
+  })
 
   const arrowElement = !isArrowHidden && (
-    <span
-      className={cn(
-        'shrink-0 flex items-center transition-transform duration-150',
-        isOpen && 'rotate-180',
-        effectiveContentColor,
-        slotClassName('arrow'),
-      )}
-    >
-      {arrow ?? <ChevronDownIcon className={ARROW_SIZE_CLASSES[size]} />}
-    </span>
+    <ArrowIcon isOpen={isOpen} size={size} colorClass={effectiveContentColor} className={slotClassName('arrow')}>
+      {arrow}
+    </ArrowIcon>
   )
 
   const triggerContent = (
     <>
       {arrowPlacement === 'start' && arrowElement}
-      {startContent && startContentPlacement === 'inside' && (
-        <span className={cn('shrink-0 flex items-center', effectiveContentColor, slotClassName('startContent'))}>
-          {startContent}
-        </span>
-      )}
+      <ContentSlot
+        content={startContent}
+        placement={startContentPlacement}
+        show="inside"
+        className={cn(effectiveContentColor, slotClassName('startContent'))}
+      />
       <span className={cn('flex-1 truncate', !selectedOption && 'opacity-60', slotClassName('value'))}>
         {selectedOption?.label ?? placeholder}
       </span>
       {isLoading && <Spinner size={size} className={cn('shrink-0', slotClassName('spinner'))} />}
-      {endContent && endContentPlacement === 'inside' && (
-        <span className={cn('shrink-0 flex items-center', effectiveContentColor, slotClassName('endContent'))}>
-          {endContent}
-        </span>
-      )}
+      <ContentSlot
+        content={endContent}
+        placement={endContentPlacement}
+        show="inside"
+        className={cn(effectiveContentColor, slotClassName('endContent'))}
+      />
       {arrowPlacement === 'end' && arrowElement}
     </>
   )
@@ -370,13 +280,13 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
     <div className={cn('relative', hasOutsideContent && 'flex-1')}>
       {trigger}
       {isOpen && (
-        <SelectorListbox
+        <Listbox
           id={listboxId}
           listboxRef={listboxRef}
           className={cn(RADIUS_CLASSES[radius], slotClassName('listbox'))}
         >
           {options.map((option, index) => (
-            <SelectorOption
+            <OptionItem
               key={option.value}
               id={optionId(index)}
               option={option}
@@ -387,63 +297,45 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
               onActivate={() => setActiveIndex(index)}
             />
           ))}
-        </SelectorListbox>
+        </Listbox>
       )}
     </div>
   )
 
-  const row = !hasOutsideContent ? (
-    wrapper
-  ) : (
-    <span className={cn('flex items-center gap-2', isFullWidth && 'w-full')}>
-      {startContent && startContentPlacement === 'outside' && (
-        <span className={cn('shrink-0 flex items-center', effectiveContentColor, slotClassName('startContent'))}>
-          {startContent}
-        </span>
-      )}
-      {wrapper}
-      {endContent && endContentPlacement === 'outside' && (
-        <span className={cn('shrink-0 flex items-center', effectiveContentColor, slotClassName('endContent'))}>
-          {endContent}
-        </span>
-      )}
-    </span>
-  )
-
-  const descriptionElement = description && (
-    <span
-      id={descriptionId}
-      className={cn('text-xs text-(--easyui-color-default-foreground)/60', slotClassName('description'))}
+  const row = (
+    <OutsideContentRow
+      startContent={startContent}
+      startContentPlacement={startContentPlacement}
+      startClassName={cn(effectiveContentColor, slotClassName('startContent'))}
+      endContent={endContent}
+      endContentPlacement={endContentPlacement}
+      endClassName={cn(effectiveContentColor, slotClassName('endContent'))}
+      isFullWidth={isFullWidth}
     >
-      {description}
-    </span>
+      {wrapper}
+    </OutsideContentRow>
   )
 
   return (
-    <div className={cn('flex flex-col gap-1', isFullWidth ? 'w-full' : 'w-80', slotClassName('base'), className)}>
-      {label && (
-        <label htmlFor={triggerId} className={cn('text-sm font-medium', effectiveLabelColor, slotClassName('label'))}>
-          {label}
-          {isRequired && (
-            <span aria-hidden="true" className="text-(--easyui-color-error) ml-0.5">
-              *
-            </span>
-          )}
-        </label>
-      )}
-      {descriptionPlacement === 'label' && descriptionElement}
+    <FieldLayout
+      className={className}
+      baseClassName={slotClassName('base')}
+      isFullWidth={isFullWidth}
+      label={label}
+      labelHtmlFor={triggerId}
+      labelClassName={cn(effectiveLabelColor, slotClassName('label'))}
+      isRequired={isRequired}
+      description={description}
+      descriptionId={descriptionId}
+      descriptionClassName={slotClassName('description')}
+      descriptionPlacement={descriptionPlacement}
+      error={error}
+      errorId={errorId}
+      errorClassName={slotClassName('error')}
+      liveRegionText={announcement}
+    >
       {row}
-      {error ? (
-        <span id={errorId} role="alert" className={cn('text-xs text-(--easyui-color-error)', slotClassName('error'))}>
-          {error}
-        </span>
-      ) : (
-        descriptionPlacement === 'element' && descriptionElement
-      )}
-      <span role="status" aria-live="polite" className="sr-only">
-        {announcement}
-      </span>
-    </div>
+    </FieldLayout>
   )
 })
 

@@ -1,7 +1,7 @@
 import { forwardRef } from 'react'
 import type { ButtonProps } from './Button.types'
 import { cn } from '../../../utils/cn'
-import { SIZE_CLASSES, RADIUS_CLASSES } from '../../../utils/variants'
+import { SIZE_CLASSES, RADIUS_CLASSES } from '../../../utils/class-maps'
 import { useSlotClassNames } from '../../../hooks/useSlotClassNames'
 import { usePreset } from '../../../hooks/usePreset'
 import { Spinner } from '../spinners/Spinner'

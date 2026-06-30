@@ -1,7 +1,9 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import type { EasyUIBaseProps, WithContentProps, WithLabelProps, WithVariantProps } from '../../../types/base'
+import type { FormFieldVariant } from '../../../utils/class-maps'
+import type { ListboxOption } from '../../internal/listbox'
 
-export type SelectorVariant = 'bordered' | 'faded' | 'flat' | 'underlined'
+export type SelectorVariant = FormFieldVariant
 
 export type SelectorSlots =
   | 'base'
@@ -17,14 +19,7 @@ export type SelectorSlots =
   | 'error'
   | 'spinner'
 
-export interface SelectorOption {
-  value: string
-  label: string
-  description?: string
-  isDisabled?: boolean
-  startContent?: ReactNode
-  endContent?: ReactNode
-}
+export type SelectorOption = ListboxOption
 
 export interface SelectorProps
   extends Omit<ComponentPropsWithoutRef<'button'>, 'color' | 'disabled' | 'value' | 'onChange'>,

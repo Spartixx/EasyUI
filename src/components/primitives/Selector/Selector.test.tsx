@@ -472,6 +472,12 @@ describe('Selector', () => {
       const value = screen.getByText('Pick')
       expect(arrow.compareDocumentPosition(value) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     })
+
+    test('applies classNames.arrow to the arrow wrapper', () => {
+      render(<Selector options={fruitOptions} classNames={{ arrow: 'custom-arrow' }} />)
+      const trigger = screen.getByRole('combobox')
+      expect(trigger.querySelector('svg')!.parentElement!.classList.contains('custom-arrow')).toBe(true)
+    })
   })
 
   describe('global wrappers config', () => {

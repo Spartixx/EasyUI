@@ -1,0 +1,325 @@
+# Autocomplete
+
+A [Selector](./selector.mdx), with an input filtering options. Only provided options can be returned as the result (another value typed in the input cannot be returned).
+
+## Usage
+
+```tsx
+import { Autocomplete } from '@easy-ui-react/easy-ui-react'
+
+const fruitOptions = [
+  { value: 'apple', label: 'Apple' },
+  { value: 'banana', label: 'Banana' },
+  { value: 'cherry', label: 'Cherry' },
+]
+
+export function Example() {
+  const [value, setValue] = useState<string>()
+  return <Autocomplete options={fruitOptions} value={value} onValueChange={setValue} placeholder="Search a fruit..." />
+}
+```
+
+```jsx live
+<Autocomplete
+  color="primary"
+  placeholder="Search a fruit..."
+  options={[
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'cherry', label: 'Cherry' },
+  ]}
+/>
+```
+
+## Variants
+
+| Variant      | Description                                   |
+|--------------|-----------------------------------------------|
+| `bordered`   | Full border, transparent background (default) |
+| `faded`      | Full border, tinted background                |
+| `flat`       | Tinted background, no border                  |
+| `underlined` | Bottom border only, no radius                 |
+
+```jsx live
+<Autocomplete
+  variant="bordered"
+  placeholder="Bordered"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Colors
+
+- `default`
+- `primary`
+- `secondary`
+- `success`
+- `warning`
+- `error`
+
+Variant affects colors. Have a look to [Storybook](pathname:///storybook/?path=/story/primitives-autocomplete--default) to see how the component is rendering depending on the variant.
+
+```jsx live
+<Autocomplete
+  color="primary"
+  placeholder="Primary"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Sizes
+
+- `sm`
+- `md`
+- `lg`
+
+```jsx live
+<Autocomplete
+  size="sm"
+  placeholder="Small"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Radius
+
+- `none`
+- `sm`
+- `md`
+- `lg`
+- `full`
+
+```jsx live
+<Autocomplete
+  radius="sm"
+  placeholder="Rounded"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+`sm`, `md` and `lg` map to `--easyui-radius-*` CSS variables, see the [theming guide](../../Customize/theming.md).
+
+> The `underlined` variant always uses `rounded-none` regardless of the `radius` prop.
+
+## Content
+
+Add an icon (or any node) before/after the input with `startContent` / `endContent`.
+By default, they sit inside the field. Set `startContentPlacement` / `endContentPlacement` to `outside` to render them outside it.
+
+```jsx live
+<Autocomplete
+  startContent={<Apple size={16} />}
+  placeholder="Search a fruit..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Arrow
+
+A `ChevronDown` icon is shown by default at the end of the field, and rotates when the listbox opens. Clicking it focuses the input and opens the listbox, same as clicking anywhere else in the field.
+
+- `isArrowHidden` removes it entirely
+- `arrowPlacement` moves it to the `start` or `end` (default) of the field
+- `arrow` replaces the default icon with any node
+
+```jsx live
+<Autocomplete
+  arrowPlacement="start"
+  placeholder="Arrow on the left"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Filtering
+
+Typing narrows `options` to a case-insensitive **substring** match against each option's `label`, not just a prefix match, so typing `"an"` matches `Banana` (the match can be anywhere in the label).
+
+Only an option selected from the list can be committed as the value. Typed text is never committed directly.
+On blur or `Escape`, the input reverts to the committed option's label (or clears if nothing is selected).
+
+When no option matches the typed text, the listbox shows a customizable "No results found" message instead of an empty list.
+
+```jsx live
+<Autocomplete
+  placeholder={'Try typing "an"...'}
+  options={[
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'mango', label: 'Mango' },
+    { value: 'cherry', label: 'Cherry' },
+  ]}
+/>
+```
+
+## States
+
+### Loading
+
+Set `isLoading` to show a spinner and disable the field.
+
+```jsx live
+<Autocomplete
+  isLoading
+  placeholder="Loading..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+### Disabled
+
+```jsx live
+<Autocomplete
+  isDisabled
+  placeholder="Disabled"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Full width
+
+```jsx live
+<Autocomplete
+  isFullWidth
+  placeholder="Full width"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Label & description
+
+```jsx live
+<Autocomplete
+  label="Fruit"
+  description="Pick your favorite fruit."
+  placeholder="Search a fruit..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+Use `descriptionPlacement` to render the description below the `label` instead of below the field:
+
+```jsx live
+<Autocomplete
+  label="Fruit"
+  description="Pick your favorite fruit."
+  descriptionPlacement="label"
+  placeholder="Search a fruit..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Required
+
+Add `isRequired` to mark the field as required. An asterisk appears next to the label.
+
+```jsx live
+<Autocomplete
+  label="Fruit"
+  isRequired
+  placeholder="Search a fruit..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Error
+
+Pass an `error` string to show a validation message below the field.
+
+```jsx live
+<Autocomplete
+  label="Fruit"
+  error="Please select a fruit."
+  placeholder="Search a fruit..."
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+## Options
+
+Each entry in `options` accepts:
+
+| Field          | Type        | Description                               |
+|----------------|-------------|-------------------------------------------|
+| `value`        | `string`    | Unique value, passed to `onValueChange`   |
+| `label`        | `string`    | Text shown in the input and the listbox   |
+| `description`  | `string`    | Helper text shown below the option label  |
+| `isDisabled`   | `boolean`   | Prevents selecting this option            |
+| `startContent` | `ReactNode` | Icon (or any node) shown before the label |
+| `endContent`   | `ReactNode` | Icon (or any node) shown after the label  |
+
+```jsx live
+<Autocomplete
+  placeholder="Search a fruit..."
+  options={[
+    { value: 'apple', label: 'Apple', description: 'Crisp and sweet', startContent: <Apple size={16} /> },
+    { value: 'banana', label: 'Banana', description: 'Soft and creamy' },
+  ]}
+/>
+```
+
+## Slots
+
+Customize individual parts via `classNames`:
+
+| Slot           | Description                                |
+|----------------|--------------------------------------------|
+| `base`         | Root `<div>` wrapping the whole field      |
+| `label`        | The `<label>` element                      |
+| `inputWrapper` | The bordered/tinted box wrapping the input |
+| `input`        | The `<input>` element                      |
+| `startContent` | Wrapper around `startContent`              |
+| `endContent`   | Wrapper around `endContent`                |
+| `arrow`        | Wrapper around the arrow icon              |
+| `spinner`      | The loading spinner                        |
+| `listbox`      | The options `<ul>` container               |
+| `option`       | Each `<li>` option                         |
+| `description`  | The helper text element                    |
+| `error`        | The error message element                  |
+
+```jsx live
+<Autocomplete
+  classNames={{ inputWrapper: 'shadow-md', listbox: 'shadow-lg' }}
+  placeholder="Custom slots"
+  options={[{ value: 'apple', label: 'Apple' }, { value: 'banana', label: 'Banana' }]}
+/>
+```
+
+These slots can also be styled globally for every `Autocomplete` in your app, see the [global configuration guide](../../Customize/global-config.md).
+
+## Props
+
+| Prop                    | Type                                                                         | Default              | Description                                           |
+|-------------------------|------------------------------------------------------------------------------|----------------------|-------------------------------------------------------|
+| `options`               | `AutocompleteOption[]`                                                       | -                    | The list of selectable options                        |
+| `value`                 | `string`                                                                     | -                    | Controlled selected value                             |
+| `defaultValue`          | `string`                                                                     | -                    | Initial value for uncontrolled usage                  |
+| `onValueChange`         | `(value: string) => void`                                                    | -                    | Called when an option is selected                     |
+| `placeholder`           | `string`                                                                     | -                    | Text shown when the field is empty                    |
+| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'`         | Visual style                                          |
+| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`          | Focus color                                           |
+| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`               | Field size                                            |
+| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`               | Corner radius                                         |
+| `isDisabled`            | `boolean`                                                                    | `false`              | Disables the field                                    |
+| `isLoading`             | `boolean`                                                                    | `false`              | Shows a spinner and disables the field                |
+| `isRequired`            | `boolean`                                                                    | `false`              | Marks the field as required                           |
+| `isFullWidth`           | `boolean`                                                                    | `false`              | Makes the field take the full available width         |
+| `label`                 | `string`                                                                     | -                    | Label rendered above the field                        |
+| `description`           | `string`                                                                     | -                    | Helper text                                           |
+| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`          | Render description below the label or below the field |
+| `error`                 | `string`                                                                     | -                    | Error message (overrides description slot)            |
+| `startContent`          | `ReactNode`                                                                  | -                    | Content rendered before the input                     |
+| `endContent`            | `ReactNode`                                                                  | -                    | Content rendered after the input                      |
+| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `startContent` is rendered                      |
+| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `endContent` is rendered                        |
+| `noResultsMessage`      | `string`                                                                     | `'No results found'` | Message shown when no option matches the typed text   |
+| `arrow`                 | `ReactNode`                                                                  | -                    | Custom node replacing the default chevron icon        |
+| `arrowPlacement`        | `'start' \| 'end'`                                                           | `'end'`              | Where the arrow is rendered                           |
+| `isArrowHidden`         | `boolean`                                                                    | `false`              | Hides the arrow                                       |
+| `className`             | `string`                                                                     | -                    | Class applied to the root element                     |
+| `classNames`            | `Partial<Record<AutocompleteSlots, string>>`                                 | -                    | Per-slot class overrides                              |
+
+`Autocomplete` forwards `ref` to the underlying `<input>` element.
+
+## Storybook
+
+[Open in Storybook →](pathname:///storybook/?path=/story/primitives-autocomplete--default) and see more combinations.
