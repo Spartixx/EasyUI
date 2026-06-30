@@ -1,13 +1,6 @@
 import type { Meta } from '@storybook/react-vite'
 import { Selector } from '../index.ts'
-import type { SelectorOption } from '../index.ts'
-
-export const fruitOptions: SelectorOption[] = [
-  { value: 'apple', label: 'Apple' },
-  { value: 'banana', label: 'Banana' },
-  { value: 'cherry', label: 'Cherry' },
-  { value: 'date', label: 'Date' },
-]
+import { fruitOptions } from '../../../internal/listbox/listboxOptionFixtures.tsx'
 
 export const selectorMeta = {
   component: Selector,

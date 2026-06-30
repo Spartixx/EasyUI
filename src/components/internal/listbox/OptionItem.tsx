@@ -1,9 +1,9 @@
 import { cn } from '../../../utils/cn'
-import type { SelectorOption as SelectorOptionData } from './Selector.types'
+import type { ListboxOption } from './Listbox.types'
 
-interface SelectorOptionProps {
+interface OptionItemProps {
   id: string
-  option: SelectorOptionData
+  option: ListboxOption
   isSelected: boolean
   isActive: boolean
   className?: string
@@ -11,7 +11,7 @@ interface SelectorOptionProps {
   onActivate: () => void
 }
 
-export function SelectorOption({ id, option, isSelected, isActive, className, onSelect, onActivate }: SelectorOptionProps) {
+export function OptionItem({ id, option, isSelected, isActive, className, onSelect, onActivate }: OptionItemProps) {
   return (
     <li
       id={id}
@@ -19,6 +19,7 @@ export function SelectorOption({ id, option, isSelected, isActive, className, on
       aria-selected={isSelected}
       aria-disabled={option.isDisabled || undefined}
       onMouseMove={() => !option.isDisabled && onActivate()}
+      onMouseDown={(e) => e.preventDefault()}
       onClick={() => !option.isDisabled && onSelect()}
       className={cn(
         'flex items-center gap-2 px-3 py-2 text-sm cursor-pointer select-none',

@@ -1,4 +1,5 @@
 export * from './Button'
 export * from './Input'
 export * from './Selector'
+export * from './Autocomplete'
 export * from './spinners/Spinner'

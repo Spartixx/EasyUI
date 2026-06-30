@@ -1,14 +1,16 @@
 import type { ReactNode, Ref } from 'react'
 import { cn } from '../../../utils/cn'
 
-interface SelectorListboxProps {
+interface ListboxProps {
   id: string
   listboxRef: Ref<HTMLUListElement>
   className?: string
+  isEmpty?: boolean
+  noResultsMessage?: string
   children: ReactNode
 }
 
-export function SelectorListbox({ id, listboxRef, className, children }: SelectorListboxProps) {
+export function Listbox({ id, listboxRef, className, isEmpty = false, noResultsMessage = 'No results found', children }: ListboxProps) {
   return (
     <ul
       id={id}
@@ -21,7 +23,11 @@ export function SelectorListbox({ id, listboxRef, className, children }: Selecto
         className,
       )}
     >
-      {children}
+      {isEmpty ? (
+        <li className="px-3 py-2 text-sm text-(--easyui-color-default-foreground)/60">{noResultsMessage}</li>
+      ) : (
+        children
+      )}
     </ul>
   )
 }
