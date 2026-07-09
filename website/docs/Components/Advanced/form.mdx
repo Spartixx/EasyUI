@@ -1,0 +1,271 @@
+# Form
+
+A declarative, config-driven form that renders fields, manages their state, runs validation, handles conditional visibility, and calls your `onSubmit` with the collected values.
+
+The states live in a `useForm` hook. the `<Form>` component is the renderer bound to it. You never create a `useState` per field.
+
+## Usage
+
+```tsx
+import { Form, useForm, type FormFields } from '@easy-ui-react/easy-ui-react'
+
+const fields = {
+  firstName: { type: 'input', label: 'First name', isRequired: true },
+  email: { type: 'input', kind: 'email', label: 'Email' },
+  country: {
+    type: 'selector',
+    label: 'Country',
+    options: [
+      { value: 'fr', label: 'France' },
+      { value: 'de', label: 'Germany' },
+    ],
+  },
+} satisfies FormFields
+
+export function Example() {
+  const form = useForm(fields)
+  return (
+    <Form
+      form={form}
+      title="Create your profile"
+      description="Both the title and description are optional."
+      onSubmit={(values) => console.log(values)}
+    />
+  )
+}
+```
+
+The form ships with a default bordered, padded style. Override it via `className` / `classNames.base` (or the global `wrappers.form.base`). `title` and `description` are both optional.
+
+You can read values or drive fields during completion via the form instance:
+
+```tsx
+form.values.email            // current value
+form.fields.email.setValue('a@b.com')
+form.fields.email.error      // current error (or null)
+form.reset()
+```
+
+## Field types
+
+Each field declares a `type` (its category). The `input` type additionally accepts a `kind` mapped to the native `<input type>` (`email`, `tel`, `password`, `url`, ...).
+
+| Type           | Value type       | Notes                              |
+|----------------|------------------|------------------------------------|
+| `input`        | `string`         | `kind` sets the native input type  |
+| `selector`     | `string`         | requires `options`                 |
+| `autocomplete` | `string`         | requires `options`                 |
+| `number`       | `number \| null` | `null` = empty (distinct from `0`) |
+| `custom`       | `string`         | requires a `render` function       |
+
+Per-component props go under `props`:
+
+```tsx
+const fields = {
+  email: { type: 'input', kind: 'email', label: 'Email', props: { variant: 'faded' } },
+} satisfies FormFields
+```
+
+## Validation
+
+The Form owns validation. A validator returns `null` when valid, or an error message. The second argument gives access to all values for cross-field checks.
+
+```tsx
+const fields = {
+  password: { type: 'input', kind: 'password', label: 'Password', isRequired: true },
+  confirm: {
+    type: 'input',
+    kind: 'password',
+    label: 'Confirm',
+    validators: [(value, values) => (value === values.password ? null : 'Passwords do not match')],
+  },
+} satisfies FormFields
+```
+
+Validation runs on submit: an invalid form blocks `onSubmit` and displays the errors. `isRequired` fields must be non-empty.
+
+### When errors appear (`validateOn`)
+
+A field's error is only shown once the field has been *touched*. Pass `validateOn` to `useForm` to choose when that happens:
+
+```tsx
+const form = useForm(fields, { validateOn: 'blur' })
+```
+
+| Mode                 | A field is validated / starts showing its error… |
+|----------------------|--------------------------------------------------|
+| `'submit'` (default) | after the first submit attempt                   |
+| `'blur'`             | when it loses focus                              |
+| `'change'`           | as the user types                                |
+
+Submitting always validates everything and blocks on errors, regardless of the mode. Once a field is touched, its error re-validates live as the value changes.
+
+## Conditional fields
+
+Use `dependsOn` to show a field only when other fields match. `null` means "the referenced field is visible", a string means "visible and equal to this value". All keys must match (AND).
+
+```tsx
+const fields = {
+  hosting: {
+    type: 'selector',
+    label: 'Hosting',
+    options: [
+      { value: 'shared', label: 'Shared' },
+      { value: 'custom', label: 'Custom domain' },
+    ],
+  },
+  // Shown only when hosting === 'custom'
+  domain: { type: 'input', label: 'Domain', dependsOn: { hosting: 'custom' } },
+  // Shown only once "domain" is itself visible (nested dependency)
+  tld: { type: 'input', label: 'TLD', dependsOn: { domain: null } },
+} satisfies FormFields
+```
+
+For advanced cases, use `isHidden: (values) => boolean` (the field is hidden when it returns `true`).
+
+A hidden field is excluded from validation and from the submitted values, and its value is reset to its initial value.
+
+## Custom fields
+
+A `custom` field plugs any component into the Form's state and validation through the render context.
+
+```tsx
+const fields = {
+  color: {
+    type: 'custom',
+    defaultValue: '',
+    validators: [(value) => (value ? null : 'Please pick a color')],
+    render: (ctx) => (
+      <ColorPicker value={ctx.value} onChange={ctx.setValue} disabled={ctx.isDisabled} error={ctx.error} />
+    ),
+  },
+} satisfies FormFields
+```
+
+The context is `{ name, value, setValue, error, isDisabled }`. A custom field value is always a string. parse it (e.g. `Number(value)`) if you need another type, or read it later from `form.fields.color.value`. Styling of custom fields is your responsibility.
+
+## Variants and colors
+
+`variant` and `color` are set once on the form and cascade to every field and button. `variant` accepts the union of all variants (field variants + button variants). An element that does not support the given variant falls back to its own default. Both can be overridden per field in its definition via `props`, and per button via `actions.submitProps` / `actions.cancelProps`.
+
+```tsx
+const fields = {
+  name: { type: 'input', label: 'Name' },
+  // Override variant
+  country: { type: 'selector', label: 'Country', options, props: { variant: 'bordered' } },
+} satisfies FormFields
+
+<Form form={form} onSubmit={onSubmit} variant="flat" color="primary" />
+```
+
+## Loading and disabled state
+
+`isLoading` and `isSubmitting` are two independent states, even though fields and buttons render the same way in both:
+
+- **`isLoading`** (a prop you control) means the form's **resources** are loading. For example while fetching a selector's options from an API. Set it to `true` until the data is ready. It puts every field into its loading state and disables the actions. It does **not** imply the form is being submitted.
+- **`isSubmitting`** (read from `form.isSubmitting`) is managed automatically: it is `true` only while an async `onSubmit` is running. It drives the submit button spinner and also puts the fields into their loading state.
+
+In both cases the fields render the same loading state. What differs is the meaning (`isLoading` = resources loading; `isSubmitting` = submission in progress) and the submit button, which only spins during submission.
+- `isDisabled` disables every field and action.
+- `loadingMessage` / `disabledMessage` temporarily replace the description in the header while the form is loading / disabled (loading takes priority when both apply).
+
+```tsx
+export function Example() {
+  const form = useForm(fields)
+  const { data, isPending } = useQuery(/* fetch the selector options */)
+
+  return (
+    <Form
+      form={form}
+      onSubmit={onSubmit}
+      title="Team member"
+      loadingMessage="Loading options…"
+      isLoading={isPending}
+    />
+  )
+}
+```
+
+## Actions
+
+The submit and cancel buttons sit at the bottom right, cancel to the left of submit. Submit defaults to `primary` / `solid`, cancel to `default` / `light`. Cancel is shown when `onCancel` is provided.
+
+`loadingLabel` and `submittingLabel` optionally replace the submit label while the form is loading resources (`isLoading`) or submitting (`isSubmitting`). `submittingLabel` wins if both apply.
+
+```tsx
+<Form
+  form={form}
+  onSubmit={onSubmit}
+  actions={{
+    submitLabel: 'Create account',
+    loadingLabel: 'Loading…',
+    submittingLabel: 'Creating…',
+    cancelLabel: 'Discard',
+    onCancel: () => form.reset(),
+    submitProps: { color: 'success' },
+  }}
+/>
+```
+
+## Slots
+
+Each field type has its own slot, alongside the container and action slots. Field slots are applied to the rendered component's root.
+
+| Slot                | Description                            |
+|---------------------|----------------------------------------|
+| `base`              | the `<form>` root (default card style) |
+| `header`            | wrapper around title + description     |
+| `title`             | the title heading                      |
+| `description`       | the description text                   |
+| `fieldsWrapper`     | container of all fields                |
+| `inputField`        | rendered `input` fields                |
+| `selectorField`     | rendered `selector` fields             |
+| `autocompleteField` | rendered `autocomplete` fields         |
+| `numberField`       | rendered `number` fields               |
+| `actions`           | footer wrapping the buttons            |
+| `submitButton`      | the submit button                      |
+| `cancelButton`      | the cancel button                      |
+
+```tsx
+<Form form={form} onSubmit={onSubmit} classNames={{ submitButton: 'w-full' }} />
+```
+
+These slots can also be set globally via [`EasyUIProvider`](../../Customize/global-config) under `wrappers.form`.
+
+## Props
+
+| Prop              | Type                                 | Default | Description                                    |
+|-------------------|--------------------------------------|---------|------------------------------------------------|
+| `form`            | `FormInstance`                       | —       | The instance returned by `useForm(fields)`     |
+| `onSubmit`        | `(values) => void \| Promise<void>`  | —       | Called with the visible fields' values         |
+| `title`           | `string`                             | —       | Optional heading at the top of the form        |
+| `description`     | `string`                             | —       | Optional text under the title                  |
+| `actions`         | `FormActionsConfig`                  | —       | Submit/cancel labels, `onCancel`, button props |
+| `variant`         | `FormVariant`                        | —       | Cascades to every field/button (see below)     |
+| `color`           | `FormColor`                          | —       | Cascades to every field/button                 |
+| `isDisabled`      | `boolean`                            | `false` | Disables every field and action                |
+| `isLoading`       | `boolean`                            | `false` | The form's resources are loading (see below)   |
+| `loadingMessage`  | `string`                             | —       | Replaces the description while `isLoading`     |
+| `disabledMessage` | `string`                             | —       | Replaces the description while `isDisabled`    |
+| `className`       | `string`                             | —       | Class on the `<form>` root                     |
+| `classNames`      | `Partial<Record<FormSlots, string>>` | —       | Per-slot classes                               |
+| `preset`          | `string`                             | —       | Named preset from the global config            |
+
+### `useForm(fields)` returns
+
+| Member          | Description                                        |
+|-----------------|----------------------------------------------------|
+| `fields[name]`  | `{ value, setValue, error, isVisible, isTouched }` |
+| `values`        | current values of every field                      |
+| `setValue`      | `(name, value) => void`                            |
+| `getFieldState` | `(name) => fields[name]`                           |
+| `validate`      | validate all visible fields, returns `boolean`     |
+| `handleSubmit`  | validate then call the submit handler              |
+| `reset`         | reset all fields to their initial values           |
+| `isValid`       | whether the form currently passes validation       |
+| `isSubmitting`  | `true` while an async `onSubmit` is running        |
+| `isDirty`       | whether any value differs from its initial value   |
+
+## Storybook
+
+See the [Form stories](pathname:///storybook/?path=/story/advanced-form--default) for live examples.
