@@ -85,6 +85,28 @@ Set `startContentPlacement` / `endContentPlacement` to `outside` to render them 
 />
 ```
 
+## Number
+
+With `type="number"`, `Input` replaces the browser's default spinner arrows with a styled stepper. It stays a native number field: `min`, `max` and `step` still apply, and the value is clamped natively when you increment or decrement.
+
+```jsx live
+<Input type="number" label="Quantity" defaultValue={3} min={0} max={10} placeholder="0" />
+```
+
+When a bound is reached, the matching chevron is disabled.
+
+```jsx live
+<Input type="number" label="Reached max" defaultValue={10} min={0} max={10} />
+```
+
+Set `showStepper={false}` to hide the stepper entirely while keeping a number field (the value is still editable by typing).
+
+```jsx live
+<Input type="number" showStepper={false} defaultValue={3} />
+```
+
+The stepper zone has its own slots (`stepper`, `incrementButton`, `decrementButton`), so it can be restyled without touching `endContent`. See [Slots](#slots).
+
 ## States
 
 ### Loading
@@ -172,17 +194,20 @@ The `error` prop (external) always takes precedence over a `validations` error.
 
 Customize individual parts via `classNames`:
 
-| Slot           | Description                           |
-|----------------|---------------------------------------|
-| `base`         | Root `<div>` wrapping the whole field |
-| `label`        | The `<label>` element                 |
-| `inputWrapper` | The visual bordered/background box    |
-| `input`        | The native `<input>` element          |
-| `startContent` | Wrapper around `startContent`         |
-| `endContent`   | Wrapper around `endContent`           |
-| `spinner`      | The loading spinner                   |
-| `description`  | The helper text element               |
-| `error`        | The error message element             |
+| Slot              | Description                                       |
+|-------------------|---------------------------------------------------|
+| `base`            | Root `<div>` wrapping the whole field             |
+| `label`           | The `<label>` element                             |
+| `inputWrapper`    | The visual bordered/background box                |
+| `input`           | The native `<input>` element                      |
+| `startContent`    | Wrapper around `startContent`                     |
+| `endContent`      | Wrapper around `endContent`                       |
+| `spinner`         | The loading spinner                               |
+| `stepper`         | Wrapper around the number stepper buttons         |
+| `incrementButton` | The increment (up) button of the number stepper   |
+| `decrementButton` | The decrement (down) button of the number stepper |
+| `description`     | The helper text element                           |
+| `error`           | The error message element                         |
 
 ```jsx live
 <Input
@@ -206,6 +231,7 @@ These slots can also be styled globally for every `Input` in your app, see the [
 | `isRequired`            | `boolean`                                                                    | `false`      | Marks the field as required                           |
 | `isReadOnly`            | `boolean`                                                                    | `false`      | Makes the input read-only                             |
 | `isFullWidth`           | `boolean`                                                                    | `false`      | Makes the input take the full available width         |
+| `showStepper`           | `boolean`                                                                    | `true`       | Shows the stepper buttons when `type="number"`        |
 | `label`                 | `string`                                                                     | -            | Label rendered above the input                        |
 | `description`           | `string`                                                                     | -            | Helper text                                           |
 | `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`  | Render description below the label or below the input |

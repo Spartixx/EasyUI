@@ -145,6 +145,7 @@ export function useForm<TFields extends FormFields>(
   const [errors, setErrors] = useState<Record<string, string | null>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [resetToken, setResetToken] = useState(0)
 
   const visibility = useMemo(() => computeVisibility(fields, values), [fields, values])
 
@@ -219,6 +220,7 @@ export function useForm<TFields extends FormFields>(
     setValues({ ...initialValues })
     setErrors({})
     setTouched({})
+    setResetToken((token) => token + 1)
   }, [initialValues])
 
   const fieldStates = useMemo(() => {
@@ -257,6 +259,7 @@ export function useForm<TFields extends FormFields>(
     validate,
     handleSubmit,
     reset,
+    resetToken,
     isValid,
     isSubmitting,
     isDirty,

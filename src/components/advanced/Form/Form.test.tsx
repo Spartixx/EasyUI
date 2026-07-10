@@ -419,6 +419,18 @@ describe('Form', () => {
     expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('Ada')
   })
 
+  test('reset remounts the fields with a fresh DOM node', async () => {
+    function ResetForm() {
+      const form = useForm({ amount: { type: 'number', label: 'Amount' } })
+      return <Form form={form} onSubmit={() => {}} actions={{ cancelLabel: 'Reset', onCancel: () => form.reset() }} />
+    }
+    render(<ResetForm />)
+    const before = screen.getByLabelText('Amount')
+    await userEvent.click(screen.getByRole('button', { name: 'Reset' }))
+    const after = screen.getByLabelText('Amount')
+    expect(after).not.toBe(before)
+  })
+
   describe('presets config', () => {
     test('applies a form preset classNames from the global config', () => {
       renderForm(

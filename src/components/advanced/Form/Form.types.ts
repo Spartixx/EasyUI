@@ -138,6 +138,7 @@ export interface FormInstance<TFields extends FormFields = FormFields> {
   validate: () => boolean
   handleSubmit: (onSubmit: FormSubmitHandler) => void | Promise<void>
   reset: () => void
+  resetToken: number
   isValid: boolean
   isSubmitting: boolean
   isDirty: boolean

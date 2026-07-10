@@ -85,7 +85,7 @@ function FormInner<TFields extends FormFields>(rawProps: FormProps<TFields>, ref
         {fieldNames.map((fieldName) =>
           form.fields[fieldName].isVisible ? (
             <FormField
-              key={fieldName}
+              key={`${form.resetToken}:${fieldName}`}
               form={form}
               fieldName={fieldName}
               isFormDisabled={isDisabled}
