@@ -306,6 +306,135 @@ describe('Input', () => {
     expect(screen.queryByText('Validation error')).toBeNull()
   })
 
+  describe('number stepper', () => {
+    const getStepperButtons = (input: HTMLElement) => {
+      const buttons = input.parentElement!.querySelectorAll('button')
+      return { incrementButton: buttons[0], decrementButton: buttons[1] }
+    }
+
+    test('renders increment and decrement buttons for type number', () => {
+      render(<Input type="number" />)
+      const { incrementButton, decrementButton } = getStepperButtons(screen.getByRole('spinbutton'))
+      expect(incrementButton).toBeInstanceOf(HTMLButtonElement)
+      expect(decrementButton).toBeInstanceOf(HTMLButtonElement)
+    })
+
+    test('does not render a stepper for non-number inputs', () => {
+      render(<Input type="text" />)
+      expect(screen.getByRole('textbox').parentElement!.querySelector('button')).toBeNull()
+    })
+
+    test('does not render a stepper when showStepper is false', () => {
+      render(<Input type="number" showStepper={false} />)
+      expect(screen.getByRole('spinbutton').parentElement!.querySelector('button')).toBeNull()
+    })
+
+    test('does not render a stepper when the field is read-only', () => {
+      render(<Input type="number" isReadOnly />)
+      expect(screen.getByRole('spinbutton').parentElement!.querySelector('button')).toBeNull()
+    })
+
+    test('stepper buttons are removed from the tab order', () => {
+      render(<Input type="number" />)
+      const { incrementButton, decrementButton } = getStepperButtons(screen.getByRole('spinbutton'))
+      expect(incrementButton.getAttribute('tabindex')).toBe('-1')
+      expect(decrementButton.getAttribute('tabindex')).toBe('-1')
+    })
+
+    test('increment button increases the value by the step', async () => {
+      render(<Input type="number" defaultValue={3} step={2} />)
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      const { incrementButton } = getStepperButtons(input)
+      await userEvent.click(incrementButton)
+      expect(input.value).toBe('5')
+    })
+
+    test('decrement button decreases the value by the step', async () => {
+      render(<Input type="number" defaultValue={3} step={2} />)
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      const { decrementButton } = getStepperButtons(input)
+      await userEvent.click(decrementButton)
+      expect(input.value).toBe('1')
+    })
+
+    test('increment button is disabled when the value is at the max', () => {
+      render(<Input type="number" defaultValue={10} min={0} max={10} />)
+      const { incrementButton, decrementButton } = getStepperButtons(screen.getByRole('spinbutton'))
+      expect(incrementButton.hasAttribute('disabled')).toBe(true)
+      expect(decrementButton.hasAttribute('disabled')).toBe(false)
+    })
+
+    test('decrement button is disabled when the value is at the min', () => {
+      render(<Input type="number" defaultValue={0} min={0} max={10} />)
+      const { incrementButton, decrementButton } = getStepperButtons(screen.getByRole('spinbutton'))
+      expect(decrementButton.hasAttribute('disabled')).toBe(true)
+      expect(incrementButton.hasAttribute('disabled')).toBe(false)
+    })
+
+    test('both buttons are enabled when the value is between the bounds', () => {
+      render(<Input type="number" defaultValue={5} min={0} max={10} />)
+      const { incrementButton, decrementButton } = getStepperButtons(screen.getByRole('spinbutton'))
+      expect(incrementButton.hasAttribute('disabled')).toBe(false)
+      expect(decrementButton.hasAttribute('disabled')).toBe(false)
+    })
+
+    test('increment button becomes disabled after stepping up to the max', async () => {
+      render(<Input type="number" defaultValue={9} min={0} max={10} />)
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      const { incrementButton } = getStepperButtons(input)
+      await userEvent.click(incrementButton)
+      expect(input.value).toBe('10')
+      expect(getStepperButtons(input).incrementButton.hasAttribute('disabled')).toBe(true)
+    })
+
+    test('stepping notifies onValueChange with the new value', async () => {
+      const onValueChange = vi.fn()
+      render(<Input type="number" defaultValue={3} onValueChange={onValueChange} />)
+      const input = screen.getByRole('spinbutton')
+      const { incrementButton } = getStepperButtons(input)
+      await userEvent.click(incrementButton)
+      expect(onValueChange).toHaveBeenLastCalledWith('4')
+    })
+
+    test('disables the stepper buttons when the field is disabled', () => {
+      render(<Input type="number" defaultValue={3} isDisabled />)
+      const { incrementButton, decrementButton } = getStepperButtons(screen.getByRole('spinbutton'))
+      expect(incrementButton.hasAttribute('disabled')).toBe(true)
+      expect(decrementButton.hasAttribute('disabled')).toBe(true)
+    })
+
+    test('does not throw when stepping with step="any"', async () => {
+      render(<Input type="number" step="any" defaultValue={1} />)
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      const { incrementButton } = getStepperButtons(input)
+      await userEvent.click(incrementButton)
+      expect(input.value).toBe('1')
+    })
+
+    test('hides the native spinner appearance', () => {
+      render(<Input type="number" />)
+      expect(screen.getByRole('spinbutton').classList.contains('[appearance:textfield]')).toBe(true)
+    })
+
+    test('applies stepper slot classNames', () => {
+      render(
+        <Input
+          type="number"
+          classNames={{
+            stepper: 'custom-stepper',
+            incrementButton: 'custom-increment',
+            decrementButton: 'custom-decrement',
+          }}
+        />,
+      )
+      const input = screen.getByRole('spinbutton')
+      const { incrementButton, decrementButton } = getStepperButtons(input)
+      expect(incrementButton.closest('.custom-stepper')).not.toBeNull()
+      expect(incrementButton.classList.contains('custom-increment')).toBe(true)
+      expect(decrementButton.classList.contains('custom-decrement')).toBe(true)
+    })
+  })
+
   describe('global wrappers config', () => {
     test('renders unchanged when no provider is present', () => {
       render(<Input />)

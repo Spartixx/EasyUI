@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from 'react'
+import React, { forwardRef, useRef, useState } from 'react'
 import type { InputProps } from './Input.types'
 import { cn } from '../../../utils/cn'
 import {
@@ -12,9 +12,17 @@ import {
 } from '../../../utils/class-maps'
 import { useSlotClassNames } from '../../../hooks'
 import { usePreset } from '../../../hooks'
+import { useMergedRefs } from '../../../hooks'
 import { Spinner } from '../spinners/Spinner'
 import { ContentSlot, OutsideContentRow, hasOutsideContent as computeHasOutsideContent } from '../../internal/content'
-import { useFieldIds, useFieldDescribedBy, useFieldColors, FieldLayout } from '../../internal/field'
+import {
+  useFieldIds,
+  useFieldDescribedBy,
+  useFieldColors,
+  FieldLayout,
+  NumberStepper,
+  type NumberStepDirection,
+} from '../../internal/field'
 
 const WRAPPER_INSIDE_LABEL_SIZE_CLASSES: Record<NonNullable<InputProps['size']>, string> = {
   sm: 'h-12 px-3 py-1.5 gap-0.5',
@@ -44,6 +52,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
     isLoading = false,
     isReadOnly = false,
     isFullWidth = false,
+    showStepper = true,
     startContent,
     endContent,
     startContentPlacement = 'inside',
@@ -59,6 +68,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
 
   const [validationError, setValidationError] = useState<string | null>(null)
 
+  const [trackedNumberValue, setTrackedNumberValue] = useState(() => String(nativeProps.defaultValue ?? ''))
+
+  const inputElementRef = useRef<HTMLInputElement | null>(null)
+  const assignInputRef = useMergedRefs(inputElementRef, ref)
+
   const presetClassNames = presetConfig ? (presetConfig.classNames ?? {}) : undefined
   const slotClassName = useSlotClassNames('input', classNames, presetClassNames, presetConfig?.className)
 
@@ -68,7 +82,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
 
   const { ariaDescribedBy } = useFieldDescribedBy({ hasError, description, descriptionPlacement, descriptionId, errorId })
 
-  const { effectiveTextColor, effectiveContentColor, effectiveLabelColor } = useFieldColors({
+  const { effectiveTextColor, effectiveContentColor, effectiveStrongContentColor, effectiveLabelColor } = useFieldColors({
     hasError,
     color,
     variant,
@@ -96,6 +110,26 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
     setValidationError(null)
   }
 
+  const isNumberField = nativeProps.type === 'number'
+  const showsStepper = isNumberField && showStepper && !isReadOnly
+
+  const currentValue = nativeProps.value ?? trackedNumberValue
+  const numericValue = currentValue === '' ? NaN : Number(currentValue)
+  const isAtMax = numericValue >= Number(nativeProps.max)
+  const isAtMin = numericValue <= Number(nativeProps.min)
+
+  const stepValue = (direction: NumberStepDirection) => {
+    const inputElement = inputElementRef.current
+    if (!inputElement) return
+    try {
+      if (direction === 'increment') inputElement.stepUp()
+      else inputElement.stepDown()
+    } catch {
+      return
+    }
+    inputElement.dispatchEvent(new Event('input', { bubbles: true }))
+  }
+
   const usesInsideLabel = labelPlacement === 'inside' && !!label
 
   const inputContent = (
@@ -107,7 +141,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
         className={cn(effectiveContentColor, slotClassName('startContent'))}
       />
       <input
-        ref={ref}
+        ref={assignInputRef}
         id={inputId}
         disabled={isInputDisabled}
         required={isRequired}
@@ -121,9 +155,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
           effectiveTextColor,
           isInputDisabled && 'cursor-not-allowed',
           isReadOnly && 'cursor-default',
+          isNumberField &&
+            '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0',
           slotClassName('input'),
         )}
         onChange={(e) => {
+          if (isNumberField && nativeProps.value == null) setTrackedNumberValue(e.target.value)
           onChange?.(e)
           onValueChange?.(e.target.value)
         }}
@@ -137,6 +174,19 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
         show="inside"
         className={cn(effectiveContentColor, slotClassName('endContent'))}
       />
+      {showsStepper && (
+        <NumberStepper
+          size={size}
+          colorClass={effectiveStrongContentColor}
+          isDisabled={isInputDisabled}
+          isIncrementDisabled={isAtMax}
+          isDecrementDisabled={isAtMin}
+          onStep={stepValue}
+          className={slotClassName('stepper')}
+          incrementClassName={slotClassName('incrementButton')}
+          decrementClassName={slotClassName('decrementButton')}
+        />
+      )}
     </>
   )
 

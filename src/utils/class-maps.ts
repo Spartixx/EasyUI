@@ -40,6 +40,17 @@ export const CONTENT_COLOR_CLASSES: Record<NonNullable<WithVariantProps['color']
 
 export const ERROR_CONTENT_COLOR = 'text-(--easyui-color-error-dark)/60'
 
+export const CONTENT_COLOR_STRONG_CLASSES: Record<NonNullable<WithVariantProps['color']>, string> = {
+  default: 'text-(--easyui-color-default-foreground)',
+  primary: 'text-(--easyui-color-primary-dark)',
+  secondary: 'text-(--easyui-color-secondary-dark)',
+  success: 'text-(--easyui-color-success-dark)',
+  warning: 'text-(--easyui-color-warning-dark)',
+  error: 'text-(--easyui-color-error-dark)',
+}
+
+export const ERROR_CONTENT_COLOR_STRONG = 'text-(--easyui-color-error-dark)'
+
 export type FormFieldVariant = 'bordered' | 'faded' | 'flat' | 'underlined'
 
 export const TEXT_FIELD_WRAPPER_SIZE_CLASSES: Record<NonNullable<EasyUIBaseProps['size']>, string> = {

@@ -14,6 +14,9 @@ export type InputSlots =
   | 'description'
   | 'error'
   | 'spinner'
+  | 'stepper'
+  | 'incrementButton'
+  | 'decrementButton'
 
 export interface InputProps
   extends Omit<ComponentPropsWithoutRef<'input'>, 'size' | 'color' | 'disabled' | 'required' | 'readOnly'>,
@@ -27,5 +30,6 @@ export interface InputProps
   onValueChange?: (value: string) => void
   isRequired?: boolean
   isReadOnly?: boolean
+  showStepper?: boolean
   validations?: Array<(value: string) => string | null>
 }
