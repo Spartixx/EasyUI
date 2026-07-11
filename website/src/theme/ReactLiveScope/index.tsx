@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Spinner, Input, Selector, Autocomplete } from '../../../../src';
+import { Button, Spinner, Input, InputNumber, Selector, Autocomplete } from '../../../../src';
 import { ArrowLeft, ArrowRight, Search, Mail, Apple } from 'lucide-react';
 
 const ReactLiveScope: unknown = {
@@ -8,6 +8,7 @@ const ReactLiveScope: unknown = {
   Button,
   Spinner,
   Input,
+  InputNumber,
   Selector,
   Autocomplete,
   ArrowLeft,

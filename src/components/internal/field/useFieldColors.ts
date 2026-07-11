@@ -21,6 +21,7 @@ export function useFieldColors({ hasError, color, variant, textColorClasses, err
   const resolvedColor = coloredVariant ? color : 'default'
 
   return {
+    resolvedColor,
     effectiveTextColor: hasError ? errorTextColor : textColorClasses[resolvedColor],
     effectiveContentColor: hasError ? ERROR_CONTENT_COLOR : CONTENT_COLOR_CLASSES[resolvedColor],
     effectiveStrongContentColor: hasError ? ERROR_CONTENT_COLOR_STRONG : CONTENT_COLOR_STRONG_CLASSES[resolvedColor],
