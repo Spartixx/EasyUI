@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
-export function useControllableValue(value: string | undefined, defaultValue: string | undefined) {
+export function useControllableValue<T>(value: T | undefined, defaultValue: T | undefined) {
   const [internalValue, setInternalValue] = useState(defaultValue)
   const currentValue = value !== undefined ? value : internalValue
 
-  const setValue = (next: string) => {
+  const setValue = (next: T) => {
     if (value === undefined) setInternalValue(next)
   }
 

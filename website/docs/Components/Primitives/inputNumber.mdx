@@ -1,0 +1,249 @@
+# InputNumber
+
+A numeric input field with strict digit filtering, increment/decrement controls, mouse-wheel stepping, and an optional prefix/suffix.
+
+Unlike `Input` with `type="number"` (a native number field), `InputNumber` is built on a text input, so it filters the value to digits, a single dot and a leading minus, and exposes the value as `number | null`.
+
+## Usage
+
+```tsx
+import { InputNumber } from '@easy-ui-react/easy-ui-react'
+
+export function Example() {
+  const [value, setValue] = useState<number | null>(0)
+  return <InputNumber value={value} onValueChange={setValue} placeholder="0" />
+}
+```
+
+```jsx live
+<InputNumber defaultValue={1} placeholder="0" />
+```
+
+The value is `number | null`: `null` means the field is empty. Intermediate keystrokes such as `2.` or `-` are shown while typing and reported as `2` / `null` respectively.
+
+## Designs
+
+Use `stepperPlacement` to pick between the two layouts:
+
+| Value   | Description                                                          |
+|---------|----------------------------------------------------------------------|
+| `end`   | Up/down chevrons docked to the right edge (default)                  |
+| `sides` | A `−` button on the left and a `+` button on the right of the number |
+
+```jsx live
+<div className={"flex gap-2"} >
+    <InputNumber stepperPlacement="end" label="End" defaultValue={3} min={0} max={10} />
+    <InputNumber stepperPlacement="sides" label="Sides" defaultValue={3} min={0} max={10} />
+</div>
+```
+
+## Prefix & suffix
+
+`prefix` and `suffix` render as static text before / after the number, separated by a single space. They are never part of the editable value.
+
+```jsx live
+<div className={"flex flex-wrap gap-2"} >
+    <InputNumber prefix="€" defaultValue={1250} />
+    <InputNumber suffix="kg" defaultValue={75} />
+    <InputNumber prefix="$" suffix="USD" defaultValue={99} />
+</div>
+```
+
+## Bounds & step
+
+`min`, `max` and `step` drive the increment/decrement controls and the mouse wheel. The value is clamped to `[min, max]`, and the matching control is disabled once a bound is reached.
+
+```jsx live
+<div className={"flex gap-2"} >
+    <InputNumber label="Between 0 and 10" defaultValue={5} min={0} max={10} step={1} />
+    <InputNumber label="Between 0 and 100" stepperPlacement={"sides"} defaultValue={5} min={0} max={100} step={5} />
+</div>
+```
+
+When empty, stepping starts from `min` (or `0` when there is no `min`).
+
+## Mouse wheel
+
+While the field is focused, scrolling the mouse wheel increments or decrements the value. This is enabled by default. Set `isWheelStepEnabled={false}` to turn it off.
+
+```jsx live
+<InputNumber label="Scroll me while focused" defaultValue={0} step={5} />
+```
+
+## Variants
+
+| Variant      | Description                            |
+|--------------|----------------------------------------|
+| `bordered`   | Full border, transparent background    |
+| `faded`      | Full border, tinted background         |
+| `flat`       | Tinted background, no border (default) |
+| `underlined` | Bottom border only, no radius          |
+
+```jsx live
+<InputNumber variant="bordered" defaultValue={1} />
+```
+
+## Colors
+
+- `default`
+- `primary`
+- `secondary`
+- `success`
+- `warning`
+- `error`
+
+```jsx live
+<InputNumber color="success" defaultValue={1} />
+```
+
+## Sizes
+
+- `sm`
+- `md`
+- `lg`
+
+```jsx live
+<InputNumber size="lg" defaultValue={1} />
+```
+
+## Radius
+
+- `none`
+- `sm`
+- `md`
+- `lg`
+- `full`
+
+```jsx live
+<InputNumber radius="full" defaultValue={1} />
+```
+
+> The `underlined` variant always uses `rounded-none` regardless of the `radius` prop.
+
+## Content
+
+Add an icon (or any node) before/after the number with `startContent` / `endContent`, inside or outside the box (`startContentPlacement` / `endContentPlacement`).
+
+```jsx live
+<InputNumber startContent={<Search size={16} />} defaultValue={1} />
+```
+
+## States
+
+Many states are supported, such as :
+- isLoading
+- isDisabled
+- isReadOnly
+- isRequired
+- isFullWidth
+
+```jsx live
+<div className={"flex flex-wrap gap-2 w-full"} >
+    <InputNumber isLoading label={"Loading"} defaultValue={1} />
+    <InputNumber isDisabled label={"Disabled"} defaultValue={1} />
+    <InputNumber isRequired label={"Required"} defaultValue={1} />
+    <div class={"flex flex-row flex-wrap lg:flex-nowrap gap-2 w-full"}>
+        <InputNumber
+            isReadOnly
+            label={"Read only"}
+            description={"Read-only hides the increment/decrement controls and the wheel stepping."}
+            defaultValue={1}
+        />
+        <InputNumber isFullWidth label={"Full width"} defaultValue={1} />
+    </div>
+</div>
+```
+
+## Label & description
+
+Label and description are supported. You can also configure placements.
+
+```jsx live
+<div className={"flex flex-wrap gap-2"} >
+    <InputNumber label="Quantity" description="How many items to order." defaultValue={1} />
+    <InputNumber label="Quantity" description={"How many items to order."} descriptionPlacement={"label"} defaultValue={1} />
+    <InputNumber label="Quantity" description={"How many items to order."} labelPlacement={"inside"} defaultValue={1} />
+</div>
+```
+
+## Validation
+
+Use `validations`: an array of `(value: number | null) => string | null` functions, run on blur. `null` value means there is no validation error, `string` value represents the error message to display.
+
+```jsx live
+<InputNumber
+  label="Age"
+  validations={[
+      v => (v !== null && v >= 18 ? null : 'Must be at least 18')
+  ]}
+/>
+```
+
+The `error` prop always takes precedence over a `validations` error.
+
+## Slots
+
+| Slot              | Description                                            |
+|-------------------|--------------------------------------------------------|
+| `base`            | Root `<div>` wrapping the whole field                  |
+| `label`           | The `<label>` element                                  |
+| `inputWrapper`    | The visual bordered/background box                     |
+| `input`           | The native `<input>` element                           |
+| `prefix`          | The static prefix text                                 |
+| `suffix`          | The static suffix text                                 |
+| `startContent`    | Wrapper around `startContent`                          |
+| `endContent`      | Wrapper around `endContent`                            |
+| `spinner`         | The loading spinner                                    |
+| `stepper`         | Wrapper around the chevrons (`stepperPlacement="end"`) |
+| `incrementButton` | The increment control (up chevron or `+` button)       |
+| `decrementButton` | The decrement control (down chevron or `−` button)     |
+| `description`     | The helper text element                                |
+| `error`           | The error message element                              |
+
+```jsx live
+<InputNumber classNames={{ inputWrapper: 'shadow-md', input: 'font-mono' }} defaultValue={1} />
+```
+
+These slots can also be styled globally for every `InputNumber` in your app, see the [global configuration guide](../../Customize/global-config.md).
+
+## Props
+
+| Prop                    | Type                                                                         | Default     | Description                                       |
+|-------------------------|------------------------------------------------------------------------------|-------------|---------------------------------------------------|
+| `value`                 | `number \| null`                                                             | -           | Controlled value (`null` is empty)                |
+| `defaultValue`          | `number \| null`                                                             | `null`      | Uncontrolled initial value                        |
+| `onValueChange`         | `(value: number \| null) => void`                                            | -           | Called with the parsed value on every change      |
+| `stepperPlacement`      | `'end' \| 'sides'`                                                           | `'end'`     | Layout of the increment/decrement controls        |
+| `prefix`                | `string`                                                                     | -           | Static text before the number                     |
+| `suffix`                | `string`                                                                     | -           | Static text after the number                      |
+| `min`                   | `number`                                                                     | -           | Minimum value (clamps and disables decrement)     |
+| `max`                   | `number`                                                                     | -           | Maximum value (clamps and disables increment)     |
+| `step`                  | `number`                                                                     | `1`         | Increment/decrement amount                        |
+| `isWheelStepEnabled`    | `boolean`                                                                    | `true`      | Step with the mouse wheel while focused           |
+| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'flat'`    | Visual style                                      |
+| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'` | Focus color                                       |
+| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`      | Field size                                        |
+| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`      | Corner radius                                     |
+| `isDisabled`            | `boolean`                                                                    | `false`     | Disables the field                                |
+| `isLoading`             | `boolean`                                                                    | `false`     | Shows a spinner and disables the field            |
+| `isRequired`            | `boolean`                                                                    | `false`     | Marks the field as required                       |
+| `isReadOnly`            | `boolean`                                                                    | `false`     | Read-only (hides the controls and wheel stepping) |
+| `isFullWidth`           | `boolean`                                                                    | `false`     | Takes the full available width                    |
+| `label`                 | `string`                                                                     | -           | Field label                                       |
+| `labelPlacement`        | `'outside' \| 'inside'`                                                      | `'outside'` | Render the label above or inside the box          |
+| `description`           | `string`                                                                     | -           | Helper text                                       |
+| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'` | Render description below the label or the field   |
+| `error`                 | `string`                                                                     | -           | Error message (overrides description slot)        |
+| `validations`           | `Array<(value: number \| null) => string \| null>`                           | -           | Validators run on blur                            |
+| `startContent`          | `ReactNode`                                                                  | -           | Content rendered before the number                |
+| `endContent`            | `ReactNode`                                                                  | -           | Content rendered after the number                 |
+| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`  | Where `startContent` is rendered                  |
+| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`  | Where `endContent` is rendered                    |
+| `className`             | `string`                                                                     | -           | Class applied to the root element                 |
+| `classNames`            | `Partial<Record<InputNumberSlots, string>>`                                  | -           | Per-slot class overrides                          |
+
+`InputNumber` also accepts native `<input>` attributes (`placeholder`, `name`, `autoFocus`, etc.) and forwards `ref` to the underlying `<input>` element.
+
+## Storybook
+
+[Open in Storybook →](pathname:///storybook/?path=/story/primitives-inputnumber--default) and see more combinations.
