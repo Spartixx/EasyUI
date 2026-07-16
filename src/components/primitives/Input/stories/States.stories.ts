@@ -11,6 +11,9 @@ export const Loading: Story = { args: { isLoading: true } }
 export const Disabled: Story = { args: { isDisabled: true } }
 export const ReadOnly: Story = { args: { isReadOnly: true, value: 'Read-only value' } }
 export const Required: Story = { args: { isRequired: true, label: 'Email' } }
+export const RequiredWithCustomMessage: Story = {
+  args: { isRequired: true, isRequiredMessage: 'An email address is mandatory', label: 'Email' },
+}
 export const WithError: Story = { args: { error: 'This field is required.' } }
 export const WithValidation: Story = {
   args: {

@@ -82,7 +82,7 @@ const fields = {
 } satisfies FormFields
 ```
 
-Validation runs on submit: an invalid form blocks `onSubmit` and displays the errors. `isRequired` fields must be non-empty.
+Validation runs on submit: an invalid form blocks `onSubmit` and displays the errors. `isRequired` fields must be non-empty. Customize the message of a required field with `isRequiredMessage`. Set a default for the whole app via `defaults.requiredMessage` in the [defaults global config](../../Customize/defaults.md).
 
 ### When errors appear (`validateOn`)
 

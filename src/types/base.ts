@@ -28,3 +28,8 @@ export interface WithLabelProps {
   description?: string
   descriptionPlacement?: 'label' | 'element'
 }
+
+export interface WithFieldValidationProps {
+  isRequiredMessage?: string
+  isFormControlled?: boolean
+}

@@ -1,5 +1,11 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
-import type { EasyUIBaseProps, WithContentProps, WithLabelProps, WithVariantProps } from '../../../types/base'
+import type {
+  EasyUIBaseProps,
+  WithContentProps,
+  WithFieldValidationProps,
+  WithLabelProps,
+  WithVariantProps,
+} from '../../../types/base'
 import type { FormFieldVariant } from '../../../utils/class-maps'
 import type { ListboxOption } from '../../internal/listbox'
 
@@ -26,6 +32,7 @@ export interface SelectorProps
     EasyUIBaseProps<SelectorSlots>,
     WithContentProps,
     WithLabelProps,
+    WithFieldValidationProps,
     Omit<WithVariantProps, 'variant'> {
   variant?: SelectorVariant
   options: SelectorOption[]
@@ -35,6 +42,7 @@ export interface SelectorProps
   placeholder?: string
   error?: string
   isRequired?: boolean
+  validations?: Array<(option: SelectorOption) => string | null>
   arrow?: ReactNode
   arrowPlacement?: 'start' | 'end'
   isArrowHidden?: boolean

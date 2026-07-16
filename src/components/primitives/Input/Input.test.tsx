@@ -306,6 +306,65 @@ describe('Input', () => {
     expect(screen.queryByText('Validation error')).toBeNull()
   })
 
+  describe('required self-validation', () => {
+    test('shows the required error on blur when empty and isRequired', async () => {
+      render(<Input isRequired />)
+      await userEvent.click(screen.getByRole('textbox'))
+      await userEvent.tab()
+      expect(screen.getByText('This field is required')).toBeDefined()
+    })
+
+    test('does not show the required error on blur when a value is present', async () => {
+      render(<Input isRequired />)
+      const input = screen.getByRole('textbox')
+      await userEvent.type(input, 'hello')
+      await userEvent.tab()
+      expect(screen.queryByText('This field is required')).toBeNull()
+    })
+
+    test('shows a custom isRequiredMessage', async () => {
+      render(<Input isRequired isRequiredMessage="Please fill this in" />)
+      await userEvent.click(screen.getByRole('textbox'))
+      await userEvent.tab()
+      expect(screen.getByText('Please fill this in')).toBeDefined()
+    })
+
+    test('resolves the required message from the global config default', async () => {
+      render(
+        <EasyUIProvider config={{ defaults: { requiredMessage: 'Champ obligatoire' } }}>
+          <Input isRequired />
+        </EasyUIProvider>,
+      )
+      await userEvent.click(screen.getByRole('textbox'))
+      await userEvent.tab()
+      expect(screen.getByText('Champ obligatoire')).toBeDefined()
+    })
+
+    test('clears the required error as the user types after it is shown', async () => {
+      render(<Input isRequired />)
+      const input = screen.getByRole('textbox')
+      await userEvent.click(input)
+      await userEvent.tab()
+      expect(screen.getByText('This field is required')).toBeDefined()
+      await userEvent.type(input, 'a')
+      expect(screen.queryByText('This field is required')).toBeNull()
+    })
+
+    test('validates on Enter', async () => {
+      render(<Input isRequired />)
+      await userEvent.click(screen.getByRole('textbox'))
+      await userEvent.keyboard('{Enter}')
+      expect(screen.getByText('This field is required')).toBeDefined()
+    })
+
+    test('does not self-validate when isFormControlled', async () => {
+      render(<Input isRequired isFormControlled />)
+      await userEvent.click(screen.getByRole('textbox'))
+      await userEvent.tab()
+      expect(screen.queryByText('This field is required')).toBeNull()
+    })
+  })
+
   describe('number stepper', () => {
     const getStepperButtons = (input: HTMLElement) => {
       const buttons = input.parentElement!.querySelectorAll('button')

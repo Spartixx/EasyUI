@@ -18,6 +18,7 @@ import {
   useFieldDescribedBy,
   useFieldColors,
   useControllableValue,
+  useFieldValidation,
   FieldLayout,
   NumberStepper,
   type NumberStepDirection,
@@ -61,6 +62,8 @@ export const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>((rawPr
     radius = 'md',
     isDisabled = false,
     isRequired = false,
+    isRequiredMessage,
+    isFormControlled = false,
     isLoading = false,
     isReadOnly = false,
     isFullWidth = false,
@@ -87,7 +90,13 @@ export const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>((rawPr
 
   const { fieldId: inputId, descriptionId, errorId } = useFieldIds(idProp)
 
-  const [validationError, setValidationError] = useState<string | null>(null)
+  const fieldValidation = useFieldValidation<number | null>({
+    isRequired,
+    isRequiredMessage,
+    isFormControlled,
+    isEmpty: (candidate) => candidate === null,
+    validations,
+  })
   const [displayText, setDisplayText] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [committedValue, setCommittedValue] = useControllableValue<number | null>(value, defaultValue ?? null)
@@ -101,7 +110,7 @@ export const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>((rawPr
 
   const currentValue = committedValue ?? null
   const isInputDisabled = isDisabled || isLoading
-  const displayedError = error ?? validationError
+  const displayedError = error ?? fieldValidation.error
   const hasError = !!displayedError
 
   const { ariaDescribedBy } = useFieldDescribedBy({ hasError, description, descriptionPlacement, descriptionId, errorId })
@@ -133,7 +142,9 @@ export const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>((rawPr
     const sanitized = sanitizeNumericText(e.target.value)
     setDisplayText(sanitized)
     setIsEditing(true)
-    commitValue(parseNumericText(sanitized))
+    const parsed = parseNumericText(sanitized)
+    commitValue(parsed)
+    fieldValidation.revalidate(parsed)
   }
 
   const clampCurrentValue = (): number | null => {
@@ -147,15 +158,7 @@ export const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>((rawPr
     setIsEditing(false)
     onBlur?.(e)
     const effectiveValue = clampCurrentValue()
-    if (!validations?.length) return
-    for (const validate of validations) {
-      const result = validate(effectiveValue)
-      if (result !== null) {
-        setValidationError(result)
-        return
-      }
-    }
-    setValidationError(null)
+    fieldValidation.validate(effectiveValue)
   }
 
   const stepInDirection = (direction: NumberStepDirection) => {
@@ -179,7 +182,7 @@ export const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>((rawPr
       stepInDirection('decrement')
     } else if (event.key === 'Enter') {
       setIsEditing(false)
-      clampCurrentValue()
+      fieldValidation.validate(clampCurrentValue())
     }
   }
 

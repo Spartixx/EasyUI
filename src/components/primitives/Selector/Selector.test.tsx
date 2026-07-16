@@ -339,6 +339,93 @@ describe('Selector', () => {
     })
   })
 
+  describe('required self-validation', () => {
+    test('shows the required error on blur when nothing is selected', () => {
+      render(<Selector options={fruitOptions} isRequired />)
+      const trigger = screen.getByRole('combobox')
+      trigger.focus()
+      fireEvent.blur(trigger)
+      expect(screen.getByText('This field is required')).toBeDefined()
+    })
+
+    test('clears the required error after selecting an option', async () => {
+      render(<Selector options={fruitOptions} isRequired />)
+      const trigger = screen.getByRole('combobox')
+      trigger.focus()
+      fireEvent.blur(trigger)
+      expect(screen.getByText('This field is required')).toBeDefined()
+      await userEvent.click(trigger)
+      await userEvent.click(screen.getByText('Banana'))
+      expect(screen.queryByText('This field is required')).toBeNull()
+    })
+
+    test('uses a custom isRequiredMessage', () => {
+      render(<Selector options={fruitOptions} isRequired isRequiredMessage="Pick something" />)
+      const trigger = screen.getByRole('combobox')
+      trigger.focus()
+      fireEvent.blur(trigger)
+      expect(screen.getByText('Pick something')).toBeDefined()
+    })
+
+    test('does not self-validate when isFormControlled', () => {
+      render(<Selector options={fruitOptions} isRequired isFormControlled />)
+      const trigger = screen.getByRole('combobox')
+      trigger.focus()
+      fireEvent.blur(trigger)
+      expect(screen.queryByText('This field is required')).toBeNull()
+    })
+  })
+
+  describe('option validations', () => {
+    const validations = [(option: SelectorOption) => (option.value === 'banana' ? 'Out of stock' : null)]
+
+    test('disables an invalid option and shows the error as its description', async () => {
+      render(<Selector options={fruitOptions} validations={validations} />)
+      await userEvent.click(screen.getByRole('combobox'))
+      const banana = screen.getByText('Banana').closest('[role="option"]')!
+      expect(banana.getAttribute('aria-disabled')).toBe('true')
+      expect(screen.getByText('Out of stock')).toBeDefined()
+    })
+
+    test('does not select an invalid option on click', async () => {
+      const onValueChange = vi.fn()
+      render(<Selector options={fruitOptions} validations={validations} onValueChange={onValueChange} />)
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(screen.getByText('Banana'))
+      expect(onValueChange).not.toHaveBeenCalled()
+    })
+
+    test('auto-deselects a defaultValue that becomes invalid', () => {
+      const onValueChange = vi.fn()
+      render(
+        <Selector
+          options={fruitOptions}
+          validations={validations}
+          defaultValue="banana"
+          placeholder="Pick a fruit"
+          onValueChange={onValueChange}
+        />,
+      )
+      expect(onValueChange).toHaveBeenCalledWith('')
+      expect(screen.getByText('Pick a fruit')).toBeDefined()
+    })
+
+    test('notifies onValueChange once to deselect a controlled invalid value', () => {
+      const onValueChange = vi.fn()
+      render(
+        <Selector
+          options={fruitOptions}
+          validations={validations}
+          value="banana"
+          placeholder="Pick a fruit"
+          onValueChange={onValueChange}
+        />,
+      )
+      expect(onValueChange).toHaveBeenCalledWith('')
+      expect(onValueChange).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('live region announcement', () => {
     test('announces the selected option label', async () => {
       render(<Selector options={fruitOptions} />)

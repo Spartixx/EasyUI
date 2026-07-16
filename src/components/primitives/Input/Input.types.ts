@@ -1,5 +1,11 @@
 import type { ComponentPropsWithoutRef } from 'react'
-import type { EasyUIBaseProps, WithContentProps, WithLabelProps, WithVariantProps } from '../../../types/base'
+import type {
+  EasyUIBaseProps,
+  WithContentProps,
+  WithFieldValidationProps,
+  WithLabelProps,
+  WithVariantProps,
+} from '../../../types/base'
 import type { FormFieldVariant } from '../../../utils/class-maps'
 
 export type InputVariant = FormFieldVariant
@@ -23,6 +29,7 @@ export interface InputProps
     EasyUIBaseProps<InputSlots>,
     WithContentProps,
     WithLabelProps,
+    WithFieldValidationProps,
     Omit<WithVariantProps, 'variant'> {
   variant?: InputVariant
   labelPlacement?: 'outside' | 'inside'

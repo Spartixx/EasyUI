@@ -161,6 +161,16 @@ describe('Autocomplete', () => {
       expect(screen.queryByRole('listbox')).toBeNull()
     })
 
+    test('reopens the listbox by typing after it was closed', async () => {
+      render(<Autocomplete options={fruitOptions} />)
+      const input = screen.getByRole('combobox')
+      await userEvent.click(input)
+      await userEvent.keyboard('{Escape}')
+      expect(screen.queryByRole('listbox')).toBeNull()
+      await userEvent.type(input, 'a')
+      expect(screen.getByRole('listbox')).toBeDefined()
+    })
+
     test('reopens the listbox with ArrowDown after Escape', async () => {
       render(<Autocomplete options={fruitOptions} />)
       const input = screen.getByRole('combobox')
@@ -515,6 +525,74 @@ describe('Autocomplete', () => {
       const icon = screen.getByTestId('end-icon')
       const label = screen.getByText('Apple')
       expect(label.compareDocumentPosition(icon) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+  })
+
+  describe('required self-validation', () => {
+    test('shows the required error on blur when nothing is selected', async () => {
+      render(<Autocomplete options={fruitOptions} isRequired />)
+      const input = screen.getByRole('combobox')
+      await userEvent.click(input)
+      fireEvent.blur(input)
+      expect(screen.getByText('This field is required')).toBeDefined()
+    })
+
+    test('uses a custom isRequiredMessage', async () => {
+      render(<Autocomplete options={fruitOptions} isRequired isRequiredMessage="Choose a city" />)
+      const input = screen.getByRole('combobox')
+      await userEvent.click(input)
+      fireEvent.blur(input)
+      expect(screen.getByText('Choose a city')).toBeDefined()
+    })
+
+    test('does not self-validate when isFormControlled', async () => {
+      render(<Autocomplete options={fruitOptions} isRequired isFormControlled />)
+      const input = screen.getByRole('combobox')
+      await userEvent.click(input)
+      fireEvent.blur(input)
+      expect(screen.queryByText('This field is required')).toBeNull()
+    })
+
+    test('does not self-validate on blur when isDisabled', () => {
+      render(<Autocomplete options={fruitOptions} isRequired isDisabled />)
+      // fireEvent bypasses the fact that a real disabled input can't be blurred.
+      fireEvent.blur(screen.getByRole('combobox'))
+      expect(screen.queryByText('This field is required')).toBeNull()
+    })
+  })
+
+  describe('option validations', () => {
+    const validations = [(option: AutocompleteOption) => (option.value === 'banana' ? 'Not available' : null)]
+
+    test('disables an invalid option and shows the error as its description', async () => {
+      render(<Autocomplete options={fruitOptions} validations={validations} />)
+      await userEvent.click(screen.getByRole('combobox'))
+      const banana = screen.getByText('Banana').closest('[role="option"]')!
+      expect(banana.getAttribute('aria-disabled')).toBe('true')
+      expect(screen.getByText('Not available')).toBeDefined()
+    })
+
+    test('auto-deselects a defaultValue that becomes invalid', () => {
+      const onValueChange = vi.fn()
+      render(
+        <Autocomplete
+          options={fruitOptions}
+          validations={validations}
+          defaultValue="banana"
+          onValueChange={onValueChange}
+        />,
+      )
+      expect(onValueChange).toHaveBeenCalledWith('')
+      expect((screen.getByRole('combobox') as HTMLInputElement).value).toBe('')
+    })
+
+    test('notifies onValueChange once to deselect a controlled invalid value', () => {
+      const onValueChange = vi.fn()
+      render(
+        <Autocomplete options={fruitOptions} validations={validations} value="banana" onValueChange={onValueChange} />,
+      )
+      expect(onValueChange).toHaveBeenCalledWith('')
+      expect(onValueChange).toHaveBeenCalledTimes(1)
     })
   })
 

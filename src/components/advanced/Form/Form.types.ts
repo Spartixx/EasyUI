@@ -48,6 +48,7 @@ interface BaseFieldConfig<TValue extends FieldValueType = string> {
   description?: string
   defaultValue?: TValue
   isRequired?: boolean
+  isRequiredMessage?: string
   isDisabled?: boolean
   validators?: Array<FieldValidator<TValue>>
   dependsOn?: Record<string, string | null>
@@ -56,15 +57,15 @@ interface BaseFieldConfig<TValue extends FieldValueType = string> {
 
 type InputFieldProps = Omit<
   InputProps,
-  'value' | 'defaultValue' | 'onValueChange' | 'onChange' | 'error' | 'label' | 'description' | 'isRequired' | 'isDisabled' | 'validations' | 'name' | 'type' | 'className'
+  'value' | 'defaultValue' | 'onValueChange' | 'onChange' | 'error' | 'label' | 'description' | 'isRequired' | 'isRequiredMessage' | 'isFormControlled' | 'isDisabled' | 'validations' | 'name' | 'type' | 'className'
 >
 type SelectorFieldProps = Omit<
   SelectorProps,
-  'value' | 'defaultValue' | 'onValueChange' | 'error' | 'label' | 'description' | 'isRequired' | 'isDisabled' | 'options' | 'name' | 'className'
+  'value' | 'defaultValue' | 'onValueChange' | 'error' | 'label' | 'description' | 'isRequired' | 'isRequiredMessage' | 'isFormControlled' | 'isDisabled' | 'options' | 'validations' | 'name' | 'className'
 >
 type AutocompleteFieldProps = Omit<
   AutocompleteProps,
-  'value' | 'defaultValue' | 'onValueChange' | 'error' | 'label' | 'description' | 'isRequired' | 'isDisabled' | 'options' | 'name' | 'className'
+  'value' | 'defaultValue' | 'onValueChange' | 'error' | 'label' | 'description' | 'isRequired' | 'isRequiredMessage' | 'isFormControlled' | 'isDisabled' | 'options' | 'validations' | 'name' | 'className'
 >
 
 export interface InputFieldConfig extends BaseFieldConfig<string> {

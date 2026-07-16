@@ -164,6 +164,25 @@ describe('Form', () => {
     })
   })
 
+  describe('required message', () => {
+    test('uses a per-field isRequiredMessage', async () => {
+      renderForm({
+        fields: { name: { type: 'input', label: 'Name', isRequired: true, isRequiredMessage: 'Name is mandatory' } },
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.getByText('Name is mandatory')).toBeDefined()
+    })
+
+    test('falls back to the global default requiredMessage from config', async () => {
+      renderForm(
+        { fields: { name: { type: 'input', label: 'Name', isRequired: true } } },
+        { defaults: { requiredMessage: 'Obligatoire' } },
+      )
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.getByText('Obligatoire')).toBeDefined()
+    })
+  })
+
   test('submits the collected values', async () => {
     const onSubmit = vi.fn()
     renderForm({

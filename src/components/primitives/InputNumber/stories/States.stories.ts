@@ -11,6 +11,9 @@ export const Loading: Story = { args: { isLoading: true } }
 export const Disabled: Story = { args: { isDisabled: true } }
 export const ReadOnly: Story = { args: { isReadOnly: true, defaultValue: 1200 } }
 export const Required: Story = { args: { isRequired: true, label: 'Quantity' } }
+export const RequiredWithCustomMessage: Story = {
+  args: { isRequired: true, isRequiredMessage: 'A quantity is mandatory', label: 'Quantity' },
+}
 export const WithError: Story = { args: { error: 'This field is required.' } }
 export const WithBounds: Story = { args: { defaultValue: 5, min: 0, max: 10, label: 'Between 0 and 10' } }
 export const WithValidation: Story = {

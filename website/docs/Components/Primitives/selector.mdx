@@ -202,7 +202,7 @@ Add `isRequired` to mark the field as required — an asterisk appears next to t
 
 ## Error
 
-Pass an `error` string to show a validation message below the selector.
+Pass an `error` string to show a message below the selector. This is the externally controlled error channel: use it for errors the field cannot produce on its own (a server-side response, an async check, a cross-field rule). It always takes precedence over the field's own validation (`isRequired`, per-option `validations`), so a non-empty `error` is always the message shown.
 
 ```jsx live
 <Selector
@@ -232,6 +232,24 @@ Each entry in `options` accepts:
   options={[
     { value: 'apple', label: 'Apple', description: 'Crisp and sweet', startContent: <Apple size={16} /> },
     { value: 'banana', label: 'Banana', description: 'Soft and creamy' },
+  ]}
+/>
+```
+
+## Validation
+
+Unlike text fields, `validations` runs against **each option**, not the selected value. It is an array of `(option: SelectorOption) => string | null` functions: an option for which a validator returns a message is disabled, and the message is shown as that option's description. If the currently selected value becomes invalid, it is automatically deselected.
+
+The only value-level check is `isRequired`, which verifies that an option is selected.
+
+```jsx live
+<Selector
+  placeholder="Select a fruit..."
+  validations={[(option) => (option.value === 'cherry' ? 'Out of season' : null)]}
+  options={[
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'cherry', label: 'Cherry' },
   ]}
 />
 ```
@@ -281,11 +299,13 @@ These slots can also be styled globally for every `Selector` in your app, see th
 | `isDisabled`            | `boolean`                                                                    | `false`      | Disables the selector                                    |
 | `isLoading`             | `boolean`                                                                    | `false`      | Shows a spinner and disables the selector                |
 | `isRequired`            | `boolean`                                                                    | `false`      | Marks the field as required                              |
+| `isRequiredMessage`     | `string`                                                                     | -            | Message shown when a required field has no selection     |
 | `isFullWidth`           | `boolean`                                                                    | `false`      | Makes the selector take the full available width         |
 | `label`                 | `string`                                                                     | -            | Label rendered above the trigger                         |
 | `description`           | `string`                                                                     | -            | Helper text                                              |
 | `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`  | Render description below the label or below the trigger  |
-| `error`                 | `string`                                                                     | -            | Error message (overrides description slot)               |
+| `error`                 | `string`                                                                     | -            | Externally controlled error, takes precedence over local validation |
+| `validations`           | `Array<(option: SelectorOption) => string \| null>`                          | -            | Per-option validators; invalid options are disabled      |
 | `startContent`          | `ReactNode`                                                                  | -            | Content rendered before the value                         |
 | `endContent`            | `ReactNode`                                                                  | -            | Content rendered after the value                          |
 | `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `startContent` is rendered                          |

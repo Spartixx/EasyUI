@@ -19,6 +19,7 @@ import {
   useFieldIds,
   useFieldDescribedBy,
   useFieldColors,
+  useFieldValidation,
   FieldLayout,
   NumberStepper,
   type NumberStepDirection,
@@ -49,6 +50,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
     radius = 'md',
     isDisabled = false,
     isRequired = false,
+    isRequiredMessage,
+    isFormControlled = false,
     isLoading = false,
     isReadOnly = false,
     isFullWidth = false,
@@ -59,6 +62,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
     endContentPlacement = 'inside',
     onChange,
     onBlur,
+    onKeyDown,
     onValueChange,
     validations,
     ...nativeProps
@@ -66,7 +70,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
 
   const { fieldId: inputId, descriptionId, errorId } = useFieldIds(idProp)
 
-  const [validationError, setValidationError] = useState<string | null>(null)
+  const fieldValidation = useFieldValidation<string>({
+    isRequired,
+    isRequiredMessage,
+    isFormControlled,
+    isEmpty: (value) => value.trim() === '',
+    validations,
+  })
 
   const [trackedNumberValue, setTrackedNumberValue] = useState(() => String(nativeProps.defaultValue ?? ''))
 
@@ -77,7 +87,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
   const slotClassName = useSlotClassNames('input', classNames, presetClassNames, presetConfig?.className)
 
   const isInputDisabled = isDisabled || isLoading
-  const displayedError = error ?? validationError
+  const displayedError = error ?? fieldValidation.error
   const hasError = !!displayedError
 
   const { ariaDescribedBy } = useFieldDescribedBy({ hasError, description, descriptionPlacement, descriptionId, errorId })
@@ -99,15 +109,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     onBlur?.(e)
-    if (!validations?.length) return
-    for (const validate of validations) {
-      const result = validate(e.target.value)
-      if (result !== null) {
-        setValidationError(result)
-        return
-      }
-    }
-    setValidationError(null)
+    fieldValidation.validate(e.target.value)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    onKeyDown?.(e)
+    if (e.key === 'Enter') fieldValidation.validate(e.currentTarget.value)
   }
 
   const isNumberField = nativeProps.type === 'number'
@@ -163,8 +170,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
           if (isNumberField && nativeProps.value == null) setTrackedNumberValue(e.target.value)
           onChange?.(e)
           onValueChange?.(e.target.value)
+          fieldValidation.revalidate(e.target.value)
         }}
         onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
         {...nativeProps}
       />
       {isLoading && <Spinner size={size} className={cn('shrink-0', slotClassName('spinner'))} />}

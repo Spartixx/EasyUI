@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { assertNever } from '../../../utils/assertNever'
+import { DEFAULT_REQUIRED_MESSAGE } from '../../internal/field'
+import { useEasyUIConfig } from '../../../providers/EasyUIContext'
 import type {
   FieldConfig,
   FieldState,
@@ -11,8 +13,6 @@ import type {
   FormValues,
   UseFormOptions,
 } from './Form.types'
-
-const REQUIRED_MESSAGE = 'This field is required'
 
 function initialValueFor(config: FieldConfig): FieldValueType {
   if (config.defaultValue !== undefined) return config.defaultValue
@@ -83,7 +83,11 @@ function computeVisibility(fields: FormFields, values: FormValues): Record<strin
   return visibilityByName
 }
 
-function computeErrors(fields: FormFields, values: FormValues): Record<string, string | null> {
+function computeErrors(
+  fields: FormFields,
+  values: FormValues,
+  defaultRequiredMessage: string,
+): Record<string, string | null> {
   const visibility = computeVisibility(fields, values)
   const errors: Record<string, string | null> = {}
   for (const fieldName of Object.keys(fields)) {
@@ -95,7 +99,7 @@ function computeErrors(fields: FormFields, values: FormValues): Record<string, s
     const value = values[fieldName]
     let error: string | null = null
     if (config.isRequired && isEmpty(value)) {
-      error = REQUIRED_MESSAGE
+      error = config.isRequiredMessage ?? defaultRequiredMessage
     }
     if (!error && config.validators) {
       for (const validate of config.validators) {
@@ -139,6 +143,8 @@ export function useForm<TFields extends FormFields>(
   options: UseFormOptions = {},
 ): FormInstance<TFields> {
   const { validateOn = 'submit' } = options
+  const { defaults } = useEasyUIConfig()
+  const defaultRequiredMessage = defaults?.requiredMessage ?? DEFAULT_REQUIRED_MESSAGE
   const [initialValues] = useState<FormValues>(() => buildInitialValues(fields))
 
   const [values, setValues] = useState<FormValues>(() => ({ ...initialValues }))
@@ -167,35 +173,35 @@ export function useForm<TFields extends FormFields>(
 
       const revalidate = validateOn === 'change' || touched[fieldName]
       setErrors((previousErrors) => {
-        const next = revalidate ? computeErrors(fields, nextValues) : { ...previousErrors, [fieldName]: null }
+        const next = revalidate ? computeErrors(fields, nextValues, defaultRequiredMessage) : { ...previousErrors, [fieldName]: null }
         for (const otherName of Object.keys(fields)) {
           if (!nextVisibility[otherName] && next[otherName]) next[otherName] = null
         }
         return next
       })
     },
-    [fields, values, initialValues, validateOn, touched, markTouched],
+    [fields, values, initialValues, validateOn, touched, markTouched, defaultRequiredMessage],
   )
 
   const handleBlur = useCallback(
     (fieldName: string) => {
       if (validateOn !== 'blur') return
       markTouched([fieldName])
-      setErrors(computeErrors(fields, values))
+      setErrors(computeErrors(fields, values, defaultRequiredMessage))
     },
-    [validateOn, fields, values, markTouched],
+    [validateOn, fields, values, markTouched, defaultRequiredMessage],
   )
 
   const validate = useCallback((): boolean => {
-    const nextErrors = computeErrors(fields, values)
+    const nextErrors = computeErrors(fields, values, defaultRequiredMessage)
     setErrors(nextErrors)
     markTouched(Object.keys(nextErrors))
     return isFormValid(nextErrors)
-  }, [fields, values, markTouched])
+  }, [fields, values, markTouched, defaultRequiredMessage])
 
   const handleSubmit = useCallback(
     async (onSubmit: FormSubmitHandler) => {
-      const nextErrors = computeErrors(fields, values)
+      const nextErrors = computeErrors(fields, values, defaultRequiredMessage)
       setErrors(nextErrors)
       markTouched(Object.keys(nextErrors))
       if (!isFormValid(nextErrors)) return
@@ -213,7 +219,7 @@ export function useForm<TFields extends FormFields>(
         setIsSubmitting(false)
       }
     },
-    [fields, values, markTouched],
+    [fields, values, markTouched, defaultRequiredMessage],
   )
 
   const reset = useCallback(() => {
@@ -247,7 +253,10 @@ export function useForm<TFields extends FormFields>(
     () => Object.keys(fields).some((fieldName) => values[fieldName] !== initialValues[fieldName]),
     [fields, values, initialValues],
   )
-  const isValid = useMemo(() => isFormValid(computeErrors(fields, values)), [fields, values])
+  const isValid = useMemo(
+    () => isFormValid(computeErrors(fields, values, defaultRequiredMessage)),
+    [fields, values, defaultRequiredMessage],
+  )
 
   return {
     fields: fieldStates,
