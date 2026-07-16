@@ -40,6 +40,7 @@ function renderInputField<TConfig extends InputFieldConfig | NumberFieldConfig>(
       label={config.label}
       description={config.description}
       isRequired={config.isRequired}
+      isFormControlled
       isDisabled={ctx.isDisabled}
       isLoading={ctx.isLoading}
       isFullWidth
@@ -71,6 +72,7 @@ export const fieldRegistry: BuiltinFieldRegistry = {
       label={ctx.config.label}
       description={ctx.config.description}
       isRequired={ctx.config.isRequired}
+      isFormControlled
       isDisabled={ctx.isDisabled}
       isLoading={ctx.isLoading}
       isFullWidth
@@ -91,6 +93,7 @@ export const fieldRegistry: BuiltinFieldRegistry = {
       label={ctx.config.label}
       description={ctx.config.description}
       isRequired={ctx.config.isRequired}
+      isFormControlled
       isDisabled={ctx.isDisabled}
       isLoading={ctx.isLoading}
       isFullWidth

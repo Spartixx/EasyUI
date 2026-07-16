@@ -1,4 +1,5 @@
 export { Listbox } from './Listbox'
 export { OptionItem } from './OptionItem'
 export { useListboxNavigation } from './useListboxNavigation'
+export { applyOptionValidations, getOptionValidationError } from './applyOptionValidations'
 export type { ListboxOption } from './Listbox.types'

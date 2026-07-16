@@ -27,21 +27,24 @@ export type ButtonPresetProps = Partial<
 >
 
 export type InputPresetProps = Partial<
-  Omit<InputProps, 'className' | 'classNames' | 'preset' | 'validations' | 'onValueChange' | 'onChange' | 'onBlur'>
+  Omit<InputProps, 'className' | 'classNames' | 'preset' | 'validations' | 'isFormControlled' | 'error' | 'onValueChange' | 'onChange' | 'onBlur'>
 >
 
 export type InputNumberPresetProps = Partial<
-  Omit<InputNumberProps, 'className' | 'classNames' | 'preset' | 'validations' | 'onValueChange' | 'onBlur' | 'onFocus'>
+  Omit<InputNumberProps, 'className' | 'classNames' | 'preset' | 'validations' | 'isFormControlled' | 'error' | 'onValueChange' | 'onBlur' | 'onFocus'>
 >
 
 export type SelectorPresetProps = Partial<
-  Omit<SelectorProps, 'className' | 'classNames' | 'preset' | 'options' | 'onValueChange' | 'onClick' | 'onKeyDown' | 'onBlur'>
+  Omit<
+    SelectorProps,
+    'className' | 'classNames' | 'preset' | 'options' | 'validations' | 'isFormControlled' | 'error' | 'onValueChange' | 'onClick' | 'onKeyDown' | 'onBlur'
+  >
 >
 
 export type AutocompletePresetProps = Partial<
   Omit<
     AutocompleteProps,
-    'className' | 'classNames' | 'preset' | 'options' | 'onValueChange' | 'onFocus' | 'onKeyDown' | 'onBlur'
+    'className' | 'classNames' | 'preset' | 'options' | 'validations' | 'isFormControlled' | 'error' | 'onValueChange' | 'onFocus' | 'onKeyDown' | 'onBlur'
   >
 >
 
@@ -57,6 +60,7 @@ export interface EasyUIPresetsConfig {
 }
 
 export interface EasyUIDefaultsConfig {
+  requiredMessage?: string
   autocomplete?: {
     noResultsMessage?: string
   }

@@ -223,7 +223,7 @@ Add `isRequired` to mark the field as required. An asterisk appears next to the 
 
 ## Error
 
-Pass an `error` string to show a validation message below the field.
+Pass an `error` string to show a message below the field. This is the externally controlled error channel: use it for errors the field cannot produce on its own (a server-side response, an async check, a cross-field rule). It always takes precedence over the field's own validation (`isRequired`, per-option `validations`), so a non-empty `error` is always the message shown.
 
 ```jsx live
 <Autocomplete
@@ -253,6 +253,24 @@ Each entry in `options` accepts:
   options={[
     { value: 'apple', label: 'Apple', description: 'Crisp and sweet', startContent: <Apple size={16} /> },
     { value: 'banana', label: 'Banana', description: 'Soft and creamy' },
+  ]}
+/>
+```
+
+## Validation
+
+Unlike text fields, `validations` runs against **each option**, not the selected value. It is an array of `(option: AutocompleteOption) => string | null` functions: an option for which a validator returns a message is disabled, and the message is shown as that option's description. If the currently selected value becomes invalid, it is automatically deselected.
+
+The only value-level check is `isRequired`, which verifies that an option is selected.
+
+```jsx live
+<Autocomplete
+  placeholder="Search a fruit..."
+  validations={[(option) => (option.value === 'cherry' ? 'Out of season' : null)]}
+  options={[
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'cherry', label: 'Cherry' },
   ]}
 />
 ```
@@ -302,11 +320,13 @@ These slots can also be styled globally for every `Autocomplete` in your app, se
 | `isDisabled`            | `boolean`                                                                    | `false`              | Disables the field                                    |
 | `isLoading`             | `boolean`                                                                    | `false`              | Shows a spinner and disables the field                |
 | `isRequired`            | `boolean`                                                                    | `false`              | Marks the field as required                           |
+| `isRequiredMessage`     | `string`                                                                     | -                    | Message shown when a required field has no selection  |
 | `isFullWidth`           | `boolean`                                                                    | `false`              | Makes the field take the full available width         |
 | `label`                 | `string`                                                                     | -                    | Label rendered above the field                        |
 | `description`           | `string`                                                                     | -                    | Helper text                                           |
 | `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`          | Render description below the label or below the field |
-| `error`                 | `string`                                                                     | -                    | Error message (overrides description slot)            |
+| `error`                 | `string`                                                                     | -                    | Externally controlled error, takes precedence over local validation |
+| `validations`           | `Array<(option: AutocompleteOption) => string \| null>`                      | -                    | Per-option validators; invalid options are disabled   |
 | `startContent`          | `ReactNode`                                                                  | -                    | Content rendered before the input                     |
 | `endContent`            | `ReactNode`                                                                  | -                    | Content rendered after the input                      |
 | `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `startContent` is rendered                      |

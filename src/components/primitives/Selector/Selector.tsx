@@ -1,14 +1,21 @@
-import { forwardRef, useRef, useState } from 'react'
-import type { KeyboardEvent, MouseEvent } from 'react'
+import { forwardRef, useEffect, useRef, useState } from 'react'
+import type { FocusEvent, KeyboardEvent, MouseEvent } from 'react'
 import type { SelectorOption as SelectorOptionData, SelectorProps } from './Selector.types'
 import { cn } from '../../../utils/cn'
 import { RADIUS_CLASSES, LABEL_COLOR_CLASSES } from '../../../utils/class-maps'
 import { useSlotClassNames, usePreset } from '../../../hooks'
 import { Spinner } from '../spinners/Spinner'
 import { ArrowIcon } from '../../internal/icons'
-import { Listbox, OptionItem, useListboxNavigation } from '../../internal/listbox'
+import { Listbox, OptionItem, useListboxNavigation, applyOptionValidations, getOptionValidationError } from '../../internal/listbox'
 import { ContentSlot, OutsideContentRow, hasOutsideContent as computeHasOutsideContent } from '../../internal/content'
-import { useControllableValue, useFieldIds, useFieldDescribedBy, useFieldColors, FieldLayout } from '../../internal/field'
+import {
+  useControllableValue,
+  useFieldIds,
+  useFieldDescribedBy,
+  useFieldColors,
+  useFieldValidation,
+  FieldLayout,
+} from '../../internal/field'
 
 const TRIGGER_SIZE_CLASSES: Record<NonNullable<SelectorProps['size']>, string> = {
   sm: 'h-8 px-3 gap-1.5 text-xs',
@@ -86,6 +93,8 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
     radius = 'md',
     isDisabled = false,
     isRequired = false,
+    isRequiredMessage,
+    isFormControlled = false,
     isLoading = false,
     isFullWidth = false,
     startContent,
@@ -98,12 +107,36 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
     onKeyDown,
     onClick,
     onBlur,
+    validations,
     ...nativeProps
   } = { ...presetConfig?.props, ...rest }
 
   const { fieldId: triggerId, listboxId, descriptionId, errorId, optionId } = useFieldIds(idProp)
 
   const [currentValue, setValue] = useControllableValue(value, defaultValue)
+
+  const fieldValidation = useFieldValidation<string>({
+    isRequired,
+    isRequiredMessage,
+    isFormControlled,
+    isEmpty: (candidate) => candidate === '',
+  })
+
+  const resolvedOptions = applyOptionValidations(options, validations)
+
+  const commitValue = (next: string) => {
+    setValue(next)
+    onValueChange?.(next)
+  }
+  const commitValueRef = useRef(commitValue)
+  useEffect(() => {
+    commitValueRef.current = commitValue
+  })
+  useEffect(() => {
+    if (currentValue === undefined || currentValue === '') return
+    const selected = options.find((option) => option.value === currentValue)
+    if (selected && getOptionValidationError(selected, validations) !== null) commitValueRef.current('')
+  }, [currentValue, options, validations])
 
   const [announcement, setAnnouncement] = useState('')
 
@@ -117,18 +150,25 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
 
   const isSelectorDisabled = isDisabled || isLoading
 
-  const selectedOption = options.find((option) => option.value === currentValue)
-  const hasError = !!error
+  const selectedOption = resolvedOptions.find((option) => option.value === currentValue)
+  const displayedError = error ?? fieldValidation.error
+  const hasError = !!displayedError
   const { ariaDescribedBy } = useFieldDescribedBy({ hasError, description, descriptionPlacement, descriptionId, errorId })
 
   const { isOpen, activeIndex, setActiveIndex, enabledIndexes, openListbox, closeListbox, handleArrowKey } =
-    useListboxNavigation({ options, currentValue, triggerRef, listboxRef, optionId })
+    useListboxNavigation({ options: resolvedOptions, currentValue, triggerRef, listboxRef, optionId })
 
   const selectOption = (option: SelectorOptionData) => {
     setValue(option.value)
     onValueChange?.(option.value)
+    fieldValidation.revalidate(option.value)
     setAnnouncement(`Selected: ${option.label}`)
     closeListbox()
+  }
+
+  const handleBlur = (e: FocusEvent<HTMLButtonElement>) => {
+    onBlur?.(e)
+    fieldValidation.validate(currentValue ?? '')
   }
 
   const handleTypeahead = (char: string) => {
@@ -138,7 +178,7 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
       typeaheadRef.current = ''
     }, 500)
 
-    const matchIndex = options.findIndex(
+    const matchIndex = resolvedOptions.findIndex(
       (option) => !option.isDisabled && option.label.toLowerCase().startsWith(typeaheadRef.current),
     )
     if (matchIndex === -1) return
@@ -172,7 +212,7 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
       case ' ':
         e.preventDefault()
         if (!isOpen) openListbox()
-        else if (activeIndex !== -1) selectOption(options[activeIndex])
+        else if (activeIndex !== -1) selectOption(resolvedOptions[activeIndex])
         break
       case 'Escape':
         if (isOpen) {
@@ -190,7 +230,6 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
 
   const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
     onClick?.(e)
-    if (isSelectorDisabled) return
     if (isOpen) closeListbox()
     else openListbox()
   }
@@ -259,7 +298,7 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
       aria-describedby={ariaDescribedBy}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      onBlur={onBlur}
+      onBlur={handleBlur}
       className={cn(
         'flex w-full items-center text-left cursor-pointer transition-[border-color,background-color,box-shadow] duration-150',
         TRIGGER_SIZE_CLASSES[size],
@@ -285,7 +324,7 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
           listboxRef={listboxRef}
           className={cn(RADIUS_CLASSES[radius], slotClassName('listbox'))}
         >
-          {options.map((option, index) => (
+          {resolvedOptions.map((option, index) => (
             <OptionItem
               key={option.value}
               id={optionId(index)}
@@ -329,7 +368,7 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
       descriptionId={descriptionId}
       descriptionClassName={slotClassName('description')}
       descriptionPlacement={descriptionPlacement}
-      error={error}
+      error={displayedError ?? undefined}
       errorId={errorId}
       errorClassName={slotClassName('error')}
       liveRegionText={announcement}

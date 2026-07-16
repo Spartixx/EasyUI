@@ -1,4 +1,4 @@
-import { forwardRef, useRef, useState } from 'react'
+import { forwardRef, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FocusEvent, KeyboardEvent } from 'react'
 import type { AutocompleteOption as AutocompleteOptionData, AutocompleteProps } from './Autocomplete.types'
 import { cn } from '../../../utils/cn'
@@ -15,9 +15,16 @@ import { useSlotClassNames, usePreset } from '../../../hooks'
 import { useEasyUIConfig } from '../../../providers/EasyUIContext'
 import { Spinner } from '../spinners/Spinner'
 import { ArrowIcon } from '../../internal/icons'
-import { Listbox, OptionItem, useListboxNavigation } from '../../internal/listbox'
+import { Listbox, OptionItem, useListboxNavigation, applyOptionValidations, getOptionValidationError } from '../../internal/listbox'
 import { ContentSlot, OutsideContentRow, hasOutsideContent as computeHasOutsideContent } from '../../internal/content'
-import { useControllableValue, useFieldIds, useFieldDescribedBy, useFieldColors, FieldLayout } from '../../internal/field'
+import {
+  useControllableValue,
+  useFieldIds,
+  useFieldDescribedBy,
+  useFieldColors,
+  useFieldValidation,
+  FieldLayout,
+} from '../../internal/field'
 
 export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>((rawProps, ref) => {
   const { preset, ...rest } = rawProps
@@ -42,6 +49,8 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>((raw
     radius = 'md',
     isDisabled = false,
     isRequired = false,
+    isRequiredMessage,
+    isFormControlled = false,
     isLoading = false,
     isFullWidth = false,
     startContent,
@@ -55,13 +64,37 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>((raw
     onKeyDown,
     onFocus,
     onBlur,
+    validations,
     ...nativeProps
   } = { ...presetConfig?.props, ...rest }
 
   const { fieldId: inputId, listboxId, descriptionId, errorId, optionId } = useFieldIds(idProp)
 
   const [currentValue, setValue] = useControllableValue(value, defaultValue)
-  const committedOption = options.find((option) => option.value === currentValue)
+
+  const fieldValidation = useFieldValidation<string>({
+    isRequired,
+    isRequiredMessage,
+    isFormControlled,
+    isEmpty: (candidate) => candidate === '',
+  })
+
+  const resolvedOptions = applyOptionValidations(options, validations)
+  const committedOption = resolvedOptions.find((option) => option.value === currentValue)
+
+  const commitValue = (next: string) => {
+    setValue(next)
+    onValueChange?.(next)
+  }
+  const commitValueRef = useRef(commitValue)
+  useEffect(() => {
+    commitValueRef.current = commitValue
+  })
+  useEffect(() => {
+    if (currentValue === undefined || currentValue === '') return
+    const selected = options.find((option) => option.value === currentValue)
+    if (selected && getOptionValidationError(selected, validations) !== null) commitValueRef.current('')
+  }, [currentValue, options, validations])
 
   const [typedText, setTypedText] = useState('')
   const [isUserTyping, setIsUserTyping] = useState(false)
@@ -80,12 +113,13 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>((raw
 
   const isAutocompleteDisabled = isDisabled || isLoading
 
-  const hasError = !!error
+  const displayedError = error ?? fieldValidation.error
+  const hasError = !!displayedError
   const { ariaDescribedBy } = useFieldDescribedBy({ hasError, description, descriptionPlacement, descriptionId, errorId })
 
   const filteredOptions = isUserTyping
-    ? options.filter((option) => option.label.toLowerCase().includes(typedText.toLowerCase().trim()))
-    : options
+    ? resolvedOptions.filter((option) => option.label.toLowerCase().includes(typedText.toLowerCase().trim()))
+    : resolvedOptions
 
   const revertInputText = () => {
     setIsUserTyping(false)
@@ -104,6 +138,7 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>((raw
   const selectOption = (option: AutocompleteOptionData) => {
     setValue(option.value)
     onValueChange?.(option.value)
+    fieldValidation.revalidate(option.value)
     setIsUserTyping(false)
     setAnnouncement(`Selected: ${option.label}`)
     closeListbox()
@@ -160,6 +195,7 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>((raw
     if (isAutocompleteDisabled) return
     revertInputText()
     closeListbox()
+    fieldValidation.validate(currentValue ?? '')
   }
 
   const { effectiveTextColor, effectiveContentColor, effectiveLabelColor } = useFieldColors({
@@ -318,7 +354,7 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>((raw
       descriptionId={descriptionId}
       descriptionClassName={slotClassName('description')}
       descriptionPlacement={descriptionPlacement}
-      error={error}
+      error={displayedError ?? undefined}
       errorId={errorId}
       errorClassName={slotClassName('error')}
       liveRegionText={announcement}

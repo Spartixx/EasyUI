@@ -179,7 +179,7 @@ Use `validations`: an array of `(value: number | null) => string | null` functio
 />
 ```
 
-The `error` prop always takes precedence over a `validations` error.
+The `error` prop is the externally controlled error channel: use it for errors the field cannot produce on its own (a server-side response, an async check, a cross-field rule). It always takes precedence over the field's own validation (`isRequired`, `validations`), so a non-empty `error` is always the message shown.
 
 ## Slots
 
@@ -227,13 +227,14 @@ These slots can also be styled globally for every `InputNumber` in your app, see
 | `isDisabled`            | `boolean`                                                                    | `false`     | Disables the field                                |
 | `isLoading`             | `boolean`                                                                    | `false`     | Shows a spinner and disables the field            |
 | `isRequired`            | `boolean`                                                                    | `false`     | Marks the field as required                       |
+| `isRequiredMessage`     | `string`                                                                     | -           | Message shown when a required field is left empty |
 | `isReadOnly`            | `boolean`                                                                    | `false`     | Read-only (hides the controls and wheel stepping) |
 | `isFullWidth`           | `boolean`                                                                    | `false`     | Takes the full available width                    |
 | `label`                 | `string`                                                                     | -           | Field label                                       |
 | `labelPlacement`        | `'outside' \| 'inside'`                                                      | `'outside'` | Render the label above or inside the box          |
 | `description`           | `string`                                                                     | -           | Helper text                                       |
 | `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'` | Render description below the label or the field   |
-| `error`                 | `string`                                                                     | -           | Error message (overrides description slot)        |
+| `error`                 | `string`                                                                     | -           | Externally controlled error, takes precedence over local validation |
 | `validations`           | `Array<(value: number \| null) => string \| null>`                           | -           | Validators run on blur                            |
 | `startContent`          | `ReactNode`                                                                  | -           | Content rendered before the number                |
 | `endContent`            | `ReactNode`                                                                  | -           | Content rendered after the number                 |

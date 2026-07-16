@@ -467,6 +467,35 @@ describe('InputNumber', () => {
       await userEvent.tab()
       expect(screen.queryByText('Must be at least 18')).toBeNull()
     })
+
+    test('shows the required error on blur when empty and isRequired', async () => {
+      render(<InputNumber isRequired />)
+      await userEvent.click(screen.getByRole('textbox'))
+      await userEvent.tab()
+      expect(screen.getByText('This field is required')).toBeDefined()
+    })
+
+    test('does not show the required error when a value is present', async () => {
+      render(<InputNumber isRequired />)
+      const input = screen.getByRole('textbox')
+      await userEvent.type(input, '5')
+      await userEvent.tab()
+      expect(screen.queryByText('This field is required')).toBeNull()
+    })
+
+    test('uses a custom isRequiredMessage', async () => {
+      render(<InputNumber isRequired isRequiredMessage="Enter a number" />)
+      await userEvent.click(screen.getByRole('textbox'))
+      await userEvent.tab()
+      expect(screen.getByText('Enter a number')).toBeDefined()
+    })
+
+    test('does not self-validate when isFormControlled', async () => {
+      render(<InputNumber isRequired isFormControlled />)
+      await userEvent.click(screen.getByRole('textbox'))
+      await userEvent.tab()
+      expect(screen.queryByText('This field is required')).toBeNull()
+    })
   })
 
   describe('global wrappers config', () => {

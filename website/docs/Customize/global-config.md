@@ -8,6 +8,9 @@ To override the underlying colors, radius and border widths instead, see the [th
 If you find yourself repeating the same combination of props and classes for a recurring "role" of a component
 (a "primary" or a "cancel" button for example), see [presets](./presets.md) instead.
 
+To override built-in text values instead of classes (the required-field message, an Autocomplete's "No results found"),
+see [defaults](./defaults.md).
+
 ## Setup
 
 Wrap your application with `EasyUIProvider` and pass it a config object:

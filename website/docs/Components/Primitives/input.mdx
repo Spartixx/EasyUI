@@ -166,7 +166,7 @@ Add `isRequired` to mark the field as required — an asterisk appears next to t
 
 ## Error
 
-Pass an `error` string to show a validation message below the input.
+Pass an `error` string to show a message below the input. This is the externally controlled error channel: use it for errors the field cannot produce on its own (a server-side response, an async check, a cross-field rule). It always takes precedence over the field's own validation (`isRequired`, `validations`), so a non-empty `error` is always the message shown.
 
 ```jsx live
 <Input label="Email" error="Invalid email address." placeholder="you@example.com" />
@@ -229,13 +229,14 @@ These slots can also be styled globally for every `Input` in your app, see the [
 | `isDisabled`            | `boolean`                                                                    | `false`      | Disables the input                                    |
 | `isLoading`             | `boolean`                                                                    | `false`      | Shows a spinner and disables the input                |
 | `isRequired`            | `boolean`                                                                    | `false`      | Marks the field as required                           |
+| `isRequiredMessage`     | `string`                                                                     | -            | Message shown when a required field is left empty     |
 | `isReadOnly`            | `boolean`                                                                    | `false`      | Makes the input read-only                             |
 | `isFullWidth`           | `boolean`                                                                    | `false`      | Makes the input take the full available width         |
 | `showStepper`           | `boolean`                                                                    | `true`       | Shows the stepper buttons when `type="number"`        |
 | `label`                 | `string`                                                                     | -            | Label rendered above the input                        |
 | `description`           | `string`                                                                     | -            | Helper text                                           |
 | `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`  | Render description below the label or below the input |
-| `error`                 | `string`                                                                     | -            | Error message (overrides description slot)            |
+| `error`                 | `string`                                                                     | -            | Externally controlled error, takes precedence over local validation |
 | `validations`           | `Array<(value: string) => string \| null>`                                   | -            | Validators run on blur                                |
 | `onValueChange`         | `(value: string) => void`                                                    | -            | Shorthand for `onChange` returning just the value     |
 | `startContent`          | `ReactNode`                                                                  | -            | Content rendered before the input text                |
