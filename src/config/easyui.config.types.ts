@@ -64,6 +64,9 @@ export interface EasyUIDefaultsConfig {
   autocomplete?: {
     noResultsMessage?: string
   }
+  selector?: {
+    noResultsMessage?: string
+  }
 }
 
 export interface EasyUIConfig {

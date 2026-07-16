@@ -4,6 +4,7 @@ import type { SelectorOption as SelectorOptionData, SelectorProps } from './Sele
 import { cn } from '../../../utils/cn'
 import { RADIUS_CLASSES, LABEL_COLOR_CLASSES } from '../../../utils/class-maps'
 import { useSlotClassNames, usePreset } from '../../../hooks'
+import { useEasyUIConfig } from '../../../providers/EasyUIContext'
 import { Spinner } from '../spinners/Spinner'
 import { ArrowIcon } from '../../internal/icons'
 import { Listbox, OptionItem, useListboxNavigation, applyOptionValidations, getOptionValidationError } from '../../internal/listbox'
@@ -108,8 +109,12 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
     onClick,
     onBlur,
     validations,
+    noResultsMessage,
     ...nativeProps
   } = { ...presetConfig?.props, ...rest }
+
+  const { defaults } = useEasyUIConfig()
+  const resolvedNoResultsMessage = noResultsMessage ?? defaults?.selector?.noResultsMessage
 
   const { fieldId: triggerId, listboxId, descriptionId, errorId, optionId } = useFieldIds(idProp)
 
@@ -322,6 +327,8 @@ export const Selector = forwardRef<HTMLButtonElement, SelectorProps>((rawProps, 
         <Listbox
           id={listboxId}
           listboxRef={listboxRef}
+          isEmpty={resolvedOptions.length === 0}
+          noResultsMessage={resolvedNoResultsMessage}
           className={cn(RADIUS_CLASSES[radius], slotClassName('listbox'))}
         >
           {resolvedOptions.map((option, index) => (

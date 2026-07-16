@@ -213,18 +213,26 @@ Pass an `error` string to show a message below the selector. This is the externa
 />
 ```
 
+## No options
+
+When the `options` list is empty, the listbox shows a customizable "No results found".
+
+```jsx live
+<Selector placeholder="Select a fruit..." options={[]} noResultsMessage="No fruit available" />
+```
+
 ## Options
 
 Each entry in `options` accepts:
 
-| Field         | Type        | Description                              |
-|---------------|-------------|-------------------------------------------|
-| `value`       | `string`    | Unique value, passed to `onValueChange`   |
-| `label`       | `string`    | Text shown in the trigger and the listbox |
-| `description` | `string`    | Helper text shown below the option label  |
-| `isDisabled`  | `boolean`   | Prevents selecting this option            |
-| `startContent`| `ReactNode` | Icon (or any node) shown before the label |
-| `endContent`  | `ReactNode` | Icon (or any node) shown after the label  |
+| Field          | Type        | Description                               |
+|----------------|-------------|-------------------------------------------|
+| `value`        | `string`    | Unique value, passed to `onValueChange`   |
+| `label`        | `string`    | Text shown in the trigger and the listbox |
+| `description`  | `string`    | Helper text shown below the option label  |
+| `isDisabled`   | `boolean`   | Prevents selecting this option            |
+| `startContent` | `ReactNode` | Icon (or any node) shown before the label |
+| `endContent`   | `ReactNode` | Icon (or any node) shown after the label  |
 
 ```jsx live
 <Selector
@@ -258,20 +266,20 @@ The only value-level check is `isRequired`, which verifies that an option is sel
 
 Customize individual parts via `classNames`:
 
-| Slot           | Description                              |
-|----------------|-------------------------------------------|
-| `base`         | Root `<div>` wrapping the whole field     |
-| `label`        | The `<label>` element                    |
-| `trigger`      | The trigger `<button>`                    |
+| Slot           | Description                                   |
+|----------------|-----------------------------------------------|
+| `base`         | Root `<div>` wrapping the whole field         |
+| `label`        | The `<label>` element                         |
+| `trigger`      | The trigger `<button>`                        |
 | `value`        | Wrapper around the selected value/placeholder |
-| `startContent` | Wrapper around `startContent`             |
-| `endContent`   | Wrapper around `endContent`               |
-| `arrow`        | Wrapper around the arrow icon             |
-| `spinner`      | The loading spinner                       |
-| `listbox`      | The options `<ul>` container              |
-| `option`       | Each `<li>` option                        |
-| `description`  | The helper text element                   |
-| `error`        | The error message element                 |
+| `startContent` | Wrapper around `startContent`                 |
+| `endContent`   | Wrapper around `endContent`                   |
+| `arrow`        | Wrapper around the arrow icon                 |
+| `spinner`      | The loading spinner                           |
+| `listbox`      | The options `<ul>` container                  |
+| `option`       | Each `<li>` option                            |
+| `description`  | The helper text element                       |
+| `error`        | The error message element                     |
 
 ```jsx live
 <Selector
@@ -285,36 +293,37 @@ These slots can also be styled globally for every `Selector` in your app, see th
 
 ## Props
 
-| Prop                    | Type                                                                         | Default      | Description                                            |
-|-------------------------|-------------------------------------------------------------------------------|--------------|---------------------------------------------------------|
-| `options`               | `SelectorOption[]`                                                           | -            | The list of selectable options                         |
-| `value`                 | `string`                                                                     | -            | Controlled selected value                               |
-| `defaultValue`          | `string`                                                                     | -            | Initial value for uncontrolled usage                     |
-| `onValueChange`         | `(value: string) => void`                                                    | -            | Called when an option is selected                        |
-| `placeholder`           | `string`                                                                     | -            | Text shown when no value is selected                     |
-| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'` | Visual style                                            |
-| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`  | Focus color                                              |
-| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`       | Selector size                                            |
-| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`       | Corner radius                                            |
-| `isDisabled`            | `boolean`                                                                    | `false`      | Disables the selector                                    |
-| `isLoading`             | `boolean`                                                                    | `false`      | Shows a spinner and disables the selector                |
-| `isRequired`            | `boolean`                                                                    | `false`      | Marks the field as required                              |
-| `isRequiredMessage`     | `string`                                                                     | -            | Message shown when a required field has no selection     |
-| `isFullWidth`           | `boolean`                                                                    | `false`      | Makes the selector take the full available width         |
-| `label`                 | `string`                                                                     | -            | Label rendered above the trigger                         |
-| `description`           | `string`                                                                     | -            | Helper text                                              |
-| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`  | Render description below the label or below the trigger  |
-| `error`                 | `string`                                                                     | -            | Externally controlled error, takes precedence over local validation |
-| `validations`           | `Array<(option: SelectorOption) => string \| null>`                          | -            | Per-option validators; invalid options are disabled      |
-| `startContent`          | `ReactNode`                                                                  | -            | Content rendered before the value                         |
-| `endContent`            | `ReactNode`                                                                  | -            | Content rendered after the value                          |
-| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `startContent` is rendered                          |
-| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `endContent` is rendered                            |
-| `arrow`                 | `ReactNode`                                                                  | -            | Custom node replacing the default chevron icon            |
-| `arrowPlacement`        | `'start' \| 'end'`                                                           | `'end'`      | Where the arrow is rendered                                |
-| `isArrowHidden`         | `boolean`                                                                    | `false`      | Hides the arrow                                            |
-| `className`             | `string`                                                                     | -            | Class applied to the root element                         |
-| `classNames`            | `Partial<Record<SelectorSlots, string>>`                                    | -            | Per-slot class overrides                                   |
+| Prop                    | Type                                                                         | Default              | Description                                                         |
+|-------------------------|------------------------------------------------------------------------------|----------------------|---------------------------------------------------------------------|
+| `options`               | `SelectorOption[]`                                                           | -                    | The list of selectable options                                      |
+| `value`                 | `string`                                                                     | -                    | Controlled selected value                                           |
+| `defaultValue`          | `string`                                                                     | -                    | Initial value for uncontrolled usage                                |
+| `onValueChange`         | `(value: string) => void`                                                    | -                    | Called when an option is selected                                   |
+| `placeholder`           | `string`                                                                     | -                    | Text shown when no value is selected                                |
+| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'`         | Visual style                                                        |
+| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`          | Focus color                                                         |
+| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`               | Selector size                                                       |
+| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`               | Corner radius                                                       |
+| `isDisabled`            | `boolean`                                                                    | `false`              | Disables the selector                                               |
+| `isLoading`             | `boolean`                                                                    | `false`              | Shows a spinner and disables the selector                           |
+| `isRequired`            | `boolean`                                                                    | `false`              | Marks the field as required                                         |
+| `isRequiredMessage`     | `string`                                                                     | -                    | Message shown when a required field has no selection                |
+| `isFullWidth`           | `boolean`                                                                    | `false`              | Makes the selector take the full available width                    |
+| `label`                 | `string`                                                                     | -                    | Label rendered above the trigger                                    |
+| `description`           | `string`                                                                     | -                    | Helper text                                                         |
+| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`          | Render description below the label or below the trigger             |
+| `error`                 | `string`                                                                     | -                    | Externally controlled error, takes precedence over local validation |
+| `validations`           | `Array<(option: SelectorOption) => string \| null>`                          | -                    | Per-option validators; invalid options are disabled                 |
+| `noResultsMessage`      | `string`                                                                     | `'No results found'` | Message shown when the options list is empty                        |
+| `startContent`          | `ReactNode`                                                                  | -                    | Content rendered before the value                                   |
+| `endContent`            | `ReactNode`                                                                  | -                    | Content rendered after the value                                    |
+| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `startContent` is rendered                                    |
+| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `endContent` is rendered                                      |
+| `arrow`                 | `ReactNode`                                                                  | -                    | Custom node replacing the default chevron icon                      |
+| `arrowPlacement`        | `'start' \| 'end'`                                                           | `'end'`              | Where the arrow is rendered                                         |
+| `isArrowHidden`         | `boolean`                                                                    | `false`              | Hides the arrow                                                     |
+| `className`             | `string`                                                                     | -                    | Class applied to the root element                                   |
+| `classNames`            | `Partial<Record<SelectorSlots, string>>`                                     | -                    | Per-slot class overrides                                            |
 
 `Selector` forwards `ref` to the underlying trigger `<button>` element.
 

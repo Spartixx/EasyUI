@@ -43,6 +43,7 @@ export interface SelectorProps
   error?: string
   isRequired?: boolean
   validations?: Array<(option: SelectorOption) => string | null>
+  noResultsMessage?: string
   arrow?: ReactNode
   arrowPlacement?: 'start' | 'end'
   isArrowHidden?: boolean

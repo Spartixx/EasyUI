@@ -249,6 +249,58 @@ describe('Selector', () => {
     })
   })
 
+  describe('no options', () => {
+    test('shows "No results found" when the options list is empty', async () => {
+      render(<Selector options={[]} />)
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByText('No results found')).toBeDefined()
+      expect(screen.queryAllByRole('option')).toHaveLength(0)
+    })
+
+    test('shows custom noResultsMessage when provided', async () => {
+      render(<Selector options={[]} noResultsMessage="Aucune option" />)
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByText('Aucune option')).toBeDefined()
+    })
+
+    test('noResultsMessage from defaults config is used as global fallback', async () => {
+      render(
+        <EasyUIProvider config={{ defaults: { selector: { noResultsMessage: 'Rien' } } }}>
+          <Selector options={[]} />
+        </EasyUIProvider>,
+      )
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByText('Rien')).toBeDefined()
+    })
+
+    test('instance noResultsMessage wins over defaults config', async () => {
+      render(
+        <EasyUIProvider config={{ defaults: { selector: { noResultsMessage: 'Rien' } } }}>
+          <Selector options={[]} noResultsMessage="Aucune option" />
+        </EasyUIProvider>,
+      )
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByText('Aucune option')).toBeDefined()
+      expect(screen.queryByText('Rien')).toBeNull()
+    })
+
+    test('noResultsMessage from preset is applied', async () => {
+      render(
+        <EasyUIProvider
+          config={{
+            presets: {
+              selector: { fr: { props: { noResultsMessage: 'Aucune option' } } },
+            },
+          }}
+        >
+          <Selector options={[]} preset="fr" />
+        </EasyUIProvider>,
+      )
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByText('Aucune option')).toBeDefined()
+    })
+  })
+
   describe('scrolling with many options', () => {
     test('constrains the listbox height and makes it scrollable', async () => {
       render(<Selector options={manyOptions} />)

@@ -16,6 +16,7 @@ type Story = StoryObj<typeof meta>
 
 export const DisabledOption: Story = { args: { options: optionsWithDisabledOption } }
 export const ManyOptions: Story = { args: { options: manyOptions } }
+export const NoOptions: Story = { args: { options: [] } }
 export const WithDescription: Story = { args: { options: optionsWithDescription } }
 export const WithStartContent: Story = { args: { options: optionsWithStartContent } }
 export const WithEndContent: Story = { args: { options: optionsWithEndContent } }
