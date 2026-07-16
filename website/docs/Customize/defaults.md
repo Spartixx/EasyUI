@@ -22,6 +22,9 @@ export default defineConfig({
     autocomplete: {
       noResultsMessage: 'Nothing found',
     },
+    selector: {
+      noResultsMessage: 'No option available',
+    },
   },
 })
 ```
@@ -43,6 +46,7 @@ Without a provider (or with the key left unset), each component falls back to it
 |--------------------------------|----------|------------------------------------------------|---------------------------|
 | `requiredMessage`              | `string` | Every field (`Input`, `InputNumber`, `Selector`, `Autocomplete`, `Form`) | `'This field is required'` |
 | `autocomplete.noResultsMessage`| `string` | `Autocomplete`                                 | `'No results found'`      |
+| `selector.noResultsMessage`    | `string` | `Selector`                                     | `'No results found'`      |
 
 ## `requiredMessage`
 
@@ -70,6 +74,17 @@ The message the `Autocomplete` listbox shows when no option matches the typed te
 ```tsx
 <EasyUIProvider config={{ defaults: { autocomplete: { noResultsMessage: 'Nothing found' } } }}>
   <Autocomplete options={options} />
+</EasyUIProvider>
+```
+
+## `selector.noResultsMessage`
+
+The message the `Selector` listbox shows when the `options` list is empty. The instance
+`noResultsMessage` prop overrides it.
+
+```tsx
+<EasyUIProvider config={{ defaults: { selector: { noResultsMessage: 'No option available' } } }}>
+  <Selector options={[]} />
 </EasyUIProvider>
 ```
 
