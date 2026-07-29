@@ -1,0 +1,169 @@
+# InputsGroup
+
+A dynamic list of homogeneous fields with add/remove controls. Every row holds a value of the **same** kind: all `string` or all `number`.
+The group represents a single repeated piece of data (a list of tags, a list of amounts).
+Validations are therefore **shared** across every row. If a value carries a different meaning, use a separate field instead.
+
+`InputsGroup` is uncontrolled: it owns its own state, seeded once from `initialValues`, and reports changes through two callbacks. Mirror it into your own `useState` if you need the value elsewhere.
+
+## Usage
+
+```tsx
+import { InputsGroup } from '@easy-ui-react/easy-ui-react'
+
+export function Example() {
+  return (
+    <InputsGroup
+      label="Tags"
+      description="Add as many tags as you need."
+      initialValues={[{ value: 'react' }, { value: 'typescript' }]}
+      onValuesChange={(values) => console.log(values)} // ['react', 'typescript', ...] (keeps empties)
+      onNonEmptyValuesChange={(values) => console.log(values)} // same, without '' entries
+    />
+  )
+}
+```
+
+The `label` and `description` are rendered as a header above the list (the description sits right under the label). Every row shows its own validation error under its input, and the remove button is aligned with the input field.
+
+## `text` vs `number`
+
+`type` (default `'text'`) selects both the primitive component and the value shape.
+
+| `type`     | Renders       | Value type       | Empty entry |
+|------------|---------------|------------------|-------------|
+| `'text'`   | `Input`       | `string`         | `''`        |
+| `'number'` | `InputNumber` | `number \| null` | `null`      |
+
+```tsx
+<InputsGroup
+  type="number"
+  label="Amounts"
+  initialValues={[{ value: 10 }, { value: null }]}
+  inputProps={{ prefix: '$', min: 0 }}
+/>
+```
+
+## Values in and out
+
+- `initialValues` seeds the list once: `Array<{ isRequired?: boolean; value }>`. Read at mount only so later changes are ignored (uncontrolled).
+- `onValuesChange` reports the **raw** list, keeping empty entries (`''` / `null`).
+- `onNonEmptyValuesChange` reports the **filtered** list: `string[]` without `''`, or `number[]` without `null`.
+
+```tsx
+const [tags, setTags] = useState<string[]>([])
+
+<InputsGroup label="Tags" initialValues={[{ value: '' }]} onNonEmptyValuesChange={setTags} />
+```
+
+## Required and protected rows
+
+`isRequired` is configured **per initial row** (not on the group). A row that is both **initial** and `isRequired`:
+
+- cannot be removed (no remove button is rendered for it),
+- passes `isRequired` to its input (shows the required error when empty).
+
+Every other row (an initial non-required row, or any row added with the button) is optional and removable.
+
+```tsx
+<InputsGroup
+  label="Team owners"
+  initialValues={[
+    { value: 'owner@example.com', isRequired: true }, // mandatory, no remove button
+    { value: '', isRequired: true },                  // mandatory, no remove button
+    { value: 'guest@example.com' },                   // optional, removable
+  ]}
+/>
+```
+
+## Shared validations
+
+`validations` runs on every row (same value-level semantics as `Input` / `InputNumber`).
+
+```tsx
+<InputsGroup
+  label="Usernames"
+  initialValues={[{ value: '' }]}
+  validations={[(value) => (value.length >= 3 ? null : 'Too short (min 3 characters)')]}
+/>
+```
+
+## Add and remove controls
+
+- `maxItems` defines the max number of rows. The add button is disabled once this number is reached (there is no `minItems`, use required initial rows instead).
+- `isAddButtonHidden` (`false` by default) hides the add button. It is also hidden automatically when the list is fixed, i.e. there are as many required initial rows as `maxItems`, so no row can ever be added or removed.
+- `addButtonLabel` overrides the `"Add"` label. The default is also configurable globally via [`defaults.inputsGroup.addLabel`](../../Customize/defaults.md).
+- `addButtonPlacement` (`'left'`, `'right'` or `'full-width'`; `'full-width'` by default) positions the add button.
+- `removeButtonPlacement` (`'left'` or `'right'`; `'right'` by default) sets the side of the remove button.
+- Both the add and remove buttons use the `outlined` (bordered) `Button` variant. Override via `addButtonProps` / `removeButtonProps`.
+- `renderRemoveButton` fully replaces the remove button. It is not rendered for protected rows.
+
+```tsx
+<InputsGroup
+  label="Tags"
+  initialValues={[{ value: 'react' }]}
+  renderRemoveButton={({ onRemove, index, isDisabled }) => (
+    <button type="button" disabled={isDisabled} onClick={onRemove}>
+      Remove #{index + 1}
+    </button>
+  )}
+/>
+```
+
+`isDisabled` reflects the group's disabled state — not the required protection.
+
+## Slots
+
+| Slot           | Element                                       |
+|----------------|-----------------------------------------------|
+| `base`         | Root `<div>`                                  |
+| `header`       | Wrapper around the label + description        |
+| `label`        | Group `<label>`                               |
+| `description`  | Group description `<p>`                       |
+| `items`        | Wrapper around every row                      |
+| `item`         | One row (input + remove button)               |
+| `input`        | Class forwarded to each `Input`/`InputNumber` |
+| `removeButton` | Default remove button                         |
+| `addButton`    | Add button                                    |
+
+```tsx
+<InputsGroup
+  label="Tags"
+  initialValues={[{ value: 'react' }]}
+  classNames={{ items: 'gap-4', addButton: 'w-full justify-center' }}
+/>
+```
+
+See [global config](../../Customize/global-config.md) (`wrappers.inputsGroup`) and [presets](../../Customize/presets.md) (`presets.inputsGroup`) to apply these across your app.
+
+## Props
+
+| Prop                     | Type                                         | Default        | Description                                                  |
+|--------------------------|----------------------------------------------|----------------|--------------------------------------------------------------|
+| `type`                   | `'text' \| 'number'`                         | `'text'`       | Selects the primitive and value shape                        |
+| `initialValues`          | `Array<{ isRequired?: boolean; value }>`     | `[]`           | Seeds the list once (uncontrolled)                           |
+| `onValuesChange`         | `(values) => void`                           | —              | Raw list, keeps empty entries                                |
+| `onNonEmptyValuesChange` | `(values) => void`                           | —              | Filtered list, without `''` / `null`                         |
+| `validations`            | `Array<(value) => string \| null>`           | —              | Shared validators applied to every row                       |
+| `label`                  | `string`                                     | —              | Label on the first row                                       |
+| `description`            | `string`                                     | —              | Description on the first row                                 |
+| `error`                  | `string`                                     | —              | Error on the first row                                       |
+| `maxItems`               | `number`                                     | —              | Caps the number of rows (disables the add button at the cap) |
+| `addButtonLabel`         | `string`                                     | `'Add'`        | Add button label                                             |
+| `addButtonPlacement`     | `'left' \| 'right' \| 'full-width'`          | `'full-width'` | Position of the add button                                   |
+| `isAddButtonHidden`      | `boolean`                                    | `false`        | Hides the add button (also hidden when the list is fixed)    |
+| `removeButtonPlacement`  | `'left' \| 'right'`                          | `'right'`      | Side of the remove button                                    |
+| `renderRemoveButton`     | `(params) => ReactNode`                      | —              | Replaces the default remove button                           |
+| `addButtonProps`         | `Omit<ButtonProps, 'onClick' \| 'children'>` | —              | Props for the add button                                     |
+| `removeButtonProps`      | `Omit<ButtonProps, 'onClick'>`               | —              | Props for the default remove buttons                         |
+| `inputProps`             | `Omit<InputProps \| InputNumberProps, ...>`  | —              | Props forwarded to every input                               |
+| `size`                   | `'sm' \| 'md' \| 'lg'`                       | `'md'`         | Cascades to inputs and buttons                               |
+| `isDisabled`             | `boolean`                                    | `false`        | Disables inputs and buttons                                  |
+| `isFullWidth`            | `boolean`                                    | `false`        | Root spans the full width                                    |
+| `className`              | `string`                                     | —              | Class on the root                                            |
+| `classNames`             | `Partial<Record<InputsGroupSlots, string>>`  | —              | Per-slot classes                                             |
+| `preset`                 | `string`                                     | —              | Named preset from the global config                          |
+
+## Storybook
+
+[Open in Storybook →](pathname:///storybook/?path=/story/advanced-inputsgroup--default) and see more combinations.

@@ -25,6 +25,9 @@ export default defineConfig({
     selector: {
       noResultsMessage: 'No option available',
     },
+    inputsGroup: {
+      addLabel: 'Add another',
+    },
   },
 })
 ```
@@ -47,6 +50,7 @@ Without a provider (or with the key left unset), each component falls back to it
 | `requiredMessage`              | `string` | Every field (`Input`, `InputNumber`, `Selector`, `Autocomplete`, `Form`) | `'This field is required'` |
 | `autocomplete.noResultsMessage`| `string` | `Autocomplete`                                 | `'No results found'`      |
 | `selector.noResultsMessage`    | `string` | `Selector`                                     | `'No results found'`      |
+| `inputsGroup.addLabel`         | `string` | `InputsGroup`                                  | `'Add'`                   |
 
 ## `requiredMessage`
 
@@ -85,6 +89,17 @@ The message the `Selector` listbox shows when the `options` list is empty. The i
 ```tsx
 <EasyUIProvider config={{ defaults: { selector: { noResultsMessage: 'No option available' } } }}>
   <Selector options={[]} />
+</EasyUIProvider>
+```
+
+## `inputsGroup.addLabel`
+
+The label of the [`InputsGroup`](../Components/Advanced/inputsGroup.mdx) add button. The instance
+`addButtonLabel` prop overrides it.
+
+```tsx
+<EasyUIProvider config={{ defaults: { inputsGroup: { addLabel: 'Add another' } } }}>
+  <InputsGroup label="Tags" initialValues={[{ value: '' }]} />
 </EasyUIProvider>
 ```
 
