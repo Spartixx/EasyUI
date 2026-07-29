@@ -4,6 +4,7 @@ import type { InputNumberProps, InputNumberSlots } from '../components'
 import type { SelectorProps, SelectorSlots } from '../components'
 import type { AutocompleteProps, AutocompleteSlots } from '../components'
 import type { FormProps, FormSlots } from '../components'
+import type { InputsGroupProps, InputsGroupSlots } from '../components'
 
 export type SlotClassNames<TSlots extends string> = Partial<Record<TSlots, string>>
 
@@ -14,6 +15,7 @@ export interface EasyUIWrappersConfig {
   selector?: SlotClassNames<SelectorSlots>
   autocomplete?: SlotClassNames<AutocompleteSlots>
   form?: SlotClassNames<FormSlots>
+  inputsGroup?: SlotClassNames<InputsGroupSlots>
 }
 
 export interface EasyUIPreset<TProps, TSlots extends string> {
@@ -50,6 +52,21 @@ export type AutocompletePresetProps = Partial<
 
 export type FormPresetProps = Partial<Pick<FormProps, 'actions' | 'isDisabled' | 'variant' | 'color'>>
 
+export type InputsGroupPresetProps = Partial<
+  Pick<
+    InputsGroupProps,
+    | 'size'
+    | 'isDisabled'
+    | 'isFullWidth'
+    | 'removeButtonPlacement'
+    | 'maxItems'
+    | 'addButtonLabel'
+    | 'addButtonPlacement'
+    | 'addButtonProps'
+    | 'removeButtonProps'
+  >
+>
+
 export interface EasyUIPresetsConfig {
   button?: Record<string, EasyUIPreset<ButtonPresetProps, ButtonSlots>>
   input?: Record<string, EasyUIPreset<InputPresetProps, InputSlots>>
@@ -57,6 +74,7 @@ export interface EasyUIPresetsConfig {
   selector?: Record<string, EasyUIPreset<SelectorPresetProps, SelectorSlots>>
   autocomplete?: Record<string, EasyUIPreset<AutocompletePresetProps, AutocompleteSlots>>
   form?: Record<string, EasyUIPreset<FormPresetProps, FormSlots>>
+  inputsGroup?: Record<string, EasyUIPreset<InputsGroupPresetProps, InputsGroupSlots>>
 }
 
 export interface EasyUIDefaultsConfig {
@@ -66,6 +84,9 @@ export interface EasyUIDefaultsConfig {
   }
   selector?: {
     noResultsMessage?: string
+  }
+  inputsGroup?: {
+    addLabel?: string
   }
 }
 
