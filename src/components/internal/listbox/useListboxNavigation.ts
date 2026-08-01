@@ -4,7 +4,7 @@ import type { ListboxOption } from './Listbox.types'
 
 interface UseListboxNavigationParams {
   options: ListboxOption[]
-  currentValue: string | undefined
+  selectedValues: string[]
   triggerRef: RefObject<HTMLElement | null>
   listboxRef: RefObject<HTMLUListElement | null>
   optionId: (index: number) => string
@@ -13,7 +13,7 @@ interface UseListboxNavigationParams {
 
 export function useListboxNavigation({
   options,
-  currentValue,
+  selectedValues,
   triggerRef,
   listboxRef,
   optionId,
@@ -28,7 +28,7 @@ export function useListboxNavigation({
   }, [])
 
   const openListbox = () => {
-    const selectedIndex = options.findIndex((option) => option.value === currentValue)
+    const selectedIndex = options.findIndex((option) => selectedValues.includes(option.value))
     setActiveIndex(selectedIndex !== -1 ? selectedIndex : (enabledIndexes[0] ?? -1))
     setIsOpen(true)
   }
@@ -54,7 +54,7 @@ export function useListboxNavigation({
   useEffect(() => {
     if (!isOpen || activeIndex === -1) return
     document.getElementById(optionId(activeIndex))?.scrollIntoView({ block: 'nearest' })
-  }, [isOpen, activeIndex])
+  }, [isOpen, activeIndex, optionId])
 
   const onOutsideCloseRef = useRef(onOutsideClose)
   useEffect(() => {

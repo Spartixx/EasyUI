@@ -1,6 +1,6 @@
 # Selector
 
-A custom-styled dropdown select for choosing a single value among a list of options.
+A custom-styled dropdown select for choosing one or several values among a list of options.
 
 ## Usage
 
@@ -221,6 +221,60 @@ When the `options` list is empty, the listbox shows a customizable "No results f
 <Selector placeholder="Select a fruit..." options={[]} noResultsMessage="No fruit available" />
 ```
 
+## Selection mode
+
+`selectionMode` switches between selecting one value (`'single'`, the default) and several (`'multiple'`). It also switches the type of `value`, `defaultValue` and `onValueChange`:
+
+| `selectionMode` | `value` / `defaultValue` | `onValueChange`               |
+|-----------------|--------------------------|-------------------------------|
+| `'single'`      | `string`                 | `(value: string) => void`     |
+| `'multiple'`    | `string[]`               | `(values: string[]) => void`  |
+
+In multiple mode, the trigger shows one removable chip per selected value, clicking an already selected option deselects it, and the listbox stays open between selections. `Backspace` on the focused trigger removes the last selected value.
+
+```tsx
+const [values, setValues] = useState<string[]>([])
+
+<Selector selectionMode="multiple" options={fruitOptions} value={values} onValueChange={setValues} />
+```
+
+```jsx live
+<Selector
+  selectionMode="multiple"
+  color="primary"
+  placeholder="Select fruits..."
+  defaultValue={['apple', 'banana']}
+  options={[
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'cherry', label: 'Cherry' },
+    { value: 'date', label: 'Date' },
+  ]}
+/>
+```
+
+Chips are removed with a `<span role="button">` rather than a real `<button>`, because the trigger is itself a `<button>` and cannot contain interactive elements. Keyboard users deselect a value from the listbox, or with `Backspace` on the trigger.
+
+## Selection indicator
+
+In the listbox, selected options are marked with a check icon at the very end of the option, after its `endContent` (`selectionIndicator="check"`, the default), in both selection modes. Set `selectionIndicator="none"` to keep only the bolder label as the selected state.
+
+The space for the icon is reserved on the other options so their content stays aligned; since the icon sits on the trailing edge, labels and `startContent` are never shifted.
+
+```jsx live
+<Selector
+  selectionMode="multiple"
+  selectionIndicator="none"
+  placeholder="Select fruits..."
+  defaultValue={['apple']}
+  options={[
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'cherry', label: 'Cherry' },
+  ]}
+/>
+```
+
 ## Options
 
 Each entry in `options` accepts:
@@ -272,6 +326,10 @@ Customize individual parts via `classNames`:
 | `label`        | The `<label>` element                         |
 | `trigger`      | The trigger `<button>`                        |
 | `value`        | Wrapper around the selected value/placeholder |
+| `chips`        | Wrapper around the chips (multiple mode)      |
+| `chip`         | Each selected value chip                      |
+| `chipLabel`    | The label inside a chip                       |
+| `chipRemoveButton` | The remove control inside a chip          |
 | `startContent` | Wrapper around `startContent`                 |
 | `endContent`   | Wrapper around `endContent`                   |
 | `arrow`        | Wrapper around the arrow icon                 |
@@ -296,9 +354,11 @@ These slots can also be styled globally for every `Selector` in your app, see th
 | Prop                    | Type                                                                         | Default              | Description                                                         |
 |-------------------------|------------------------------------------------------------------------------|----------------------|---------------------------------------------------------------------|
 | `options`               | `SelectorOption[]`                                                           | -                    | The list of selectable options                                      |
-| `value`                 | `string`                                                                     | -                    | Controlled selected value                                           |
-| `defaultValue`          | `string`                                                                     | -                    | Initial value for uncontrolled usage                                |
-| `onValueChange`         | `(value: string) => void`                                                    | -                    | Called when an option is selected                                   |
+| `selectionMode`         | `'single' \| 'multiple'`                                                     | `'single'`           | Whether one or several options can be selected                      |
+| `selectionIndicator`    | `'check' \| 'none'`                                                          | `'check'`            | Check icon at the end of selected options in the listbox            |
+| `value`                 | `string` (single) \| `string[]` (multiple)                                   | -                    | Controlled selected value                                           |
+| `defaultValue`          | `string` (single) \| `string[]` (multiple)                                   | -                    | Initial value for uncontrolled usage                                |
+| `onValueChange`         | `(value: string) => void` \| `(values: string[]) => void`                    | -                    | Called when the selection changes                                   |
 | `placeholder`           | `string`                                                                     | -                    | Text shown when no value is selected                                |
 | `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'`         | Visual style                                                        |
 | `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`          | Focus color                                                         |

@@ -7,15 +7,21 @@ import type {
   WithVariantProps,
 } from '../../../types/base'
 import type { FormFieldVariant } from '../../../utils/class-maps'
-import type { ListboxOption } from '../../internal/listbox'
+import type { ListboxOption, SelectionIndicator } from '../../internal/listbox'
 
 export type SelectorVariant = FormFieldVariant
+
+export type SelectorSelectionIndicator = SelectionIndicator
 
 export type SelectorSlots =
   | 'base'
   | 'label'
   | 'trigger'
   | 'value'
+  | 'chips'
+  | 'chip'
+  | 'chipLabel'
+  | 'chipRemoveButton'
   | 'startContent'
   | 'endContent'
   | 'arrow'
@@ -27,8 +33,8 @@ export type SelectorSlots =
 
 export type SelectorOption = ListboxOption
 
-export interface SelectorProps
-  extends Omit<ComponentPropsWithoutRef<'button'>, 'color' | 'disabled' | 'value' | 'onChange'>,
+export interface SelectorCommonProps
+  extends Omit<ComponentPropsWithoutRef<'button'>, 'color' | 'disabled' | 'value' | 'defaultValue' | 'onChange'>,
     EasyUIBaseProps<SelectorSlots>,
     WithContentProps,
     WithLabelProps,
@@ -36,9 +42,7 @@ export interface SelectorProps
     Omit<WithVariantProps, 'variant'> {
   variant?: SelectorVariant
   options: SelectorOption[]
-  value?: string
-  defaultValue?: string
-  onValueChange?: (value: string) => void
+  selectionIndicator?: SelectorSelectionIndicator
   placeholder?: string
   error?: string
   isRequired?: boolean
@@ -48,3 +52,19 @@ export interface SelectorProps
   arrowPlacement?: 'start' | 'end'
   isArrowHidden?: boolean
 }
+
+export interface SelectorSingleProps extends SelectorCommonProps {
+  selectionMode?: 'single'
+  value?: string
+  defaultValue?: string
+  onValueChange?: (value: string) => void
+}
+
+export interface SelectorMultipleProps extends SelectorCommonProps {
+  selectionMode: 'multiple'
+  value?: string[]
+  defaultValue?: string[]
+  onValueChange?: (values: string[]) => void
+}
+
+export type SelectorProps = SelectorSingleProps | SelectorMultipleProps

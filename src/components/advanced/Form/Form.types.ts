@@ -3,9 +3,9 @@ import type { WithVariantProps } from '../../../types/base'
 import type { FormFieldVariant } from '../../../utils/class-maps'
 import type {
   InputProps,
-  SelectorProps,
+  SelectorSingleProps,
   SelectorOption,
-  AutocompleteProps,
+  AutocompleteSingleProps,
   AutocompleteOption,
   ButtonProps,
 } from '../../primitives'
@@ -60,11 +60,11 @@ type InputFieldProps = Omit<
   'value' | 'defaultValue' | 'onValueChange' | 'onChange' | 'error' | 'label' | 'description' | 'isRequired' | 'isRequiredMessage' | 'isFormControlled' | 'isDisabled' | 'validations' | 'name' | 'type' | 'className'
 >
 type SelectorFieldProps = Omit<
-  SelectorProps,
+  SelectorSingleProps,
   'value' | 'defaultValue' | 'onValueChange' | 'error' | 'label' | 'description' | 'isRequired' | 'isRequiredMessage' | 'isFormControlled' | 'isDisabled' | 'options' | 'validations' | 'name' | 'className'
 >
 type AutocompleteFieldProps = Omit<
-  AutocompleteProps,
+  AutocompleteSingleProps,
   'value' | 'defaultValue' | 'onValueChange' | 'error' | 'label' | 'description' | 'isRequired' | 'isRequiredMessage' | 'isFormControlled' | 'isDisabled' | 'options' | 'validations' | 'name' | 'className'
 >
 

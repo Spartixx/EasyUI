@@ -6,16 +6,26 @@ interface ListboxProps {
   listboxRef: Ref<HTMLUListElement>
   className?: string
   isEmpty?: boolean
+  isMultiSelectable?: boolean
   noResultsMessage?: string
   children: ReactNode
 }
 
-export function Listbox({ id, listboxRef, className, isEmpty = false, noResultsMessage = 'No results found', children }: ListboxProps) {
+export function Listbox({
+  id,
+  listboxRef,
+  className,
+  isEmpty = false,
+  isMultiSelectable = false,
+  noResultsMessage = 'No results found',
+  children,
+}: ListboxProps) {
   return (
     <ul
       id={id}
       ref={listboxRef}
       role="listbox"
+      aria-multiselectable={isMultiSelectable || undefined}
       className={cn(
         'absolute top-full inset-x-0 mt-1 z-10 max-h-60 overflow-y-auto',
         'border-solid border-(length:--easyui-border-width-sm) border-(--easyui-color-default)',
