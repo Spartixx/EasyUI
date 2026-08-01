@@ -1,17 +1,28 @@
 import { cn } from '../../../utils/cn'
-import type { ListboxOption } from './Listbox.types'
+import { CheckIcon } from '../icons'
+import type { ListboxOption, SelectionIndicator } from './Listbox.types'
 
 interface OptionItemProps {
   id: string
   option: ListboxOption
   isSelected: boolean
   isActive: boolean
+  selectionIndicator?: SelectionIndicator
   className?: string
   onSelect: () => void
   onActivate: () => void
 }
 
-export function OptionItem({ id, option, isSelected, isActive, className, onSelect, onActivate }: OptionItemProps) {
+export function OptionItem({
+  id,
+  option,
+  isSelected,
+  isActive,
+  selectionIndicator = 'check',
+  className,
+  onSelect,
+  onActivate,
+}: OptionItemProps) {
   return (
     <li
       id={id}
@@ -37,6 +48,9 @@ export function OptionItem({ id, option, isSelected, isActive, className, onSele
         )}
       </span>
       {option.endContent && <span className="shrink-0 flex items-center">{option.endContent}</span>}
+      {selectionIndicator === 'check' && (
+        <span className="shrink-0 flex items-center size-4">{isSelected && <CheckIcon className="size-full" />}</span>
+      )}
     </li>
   )
 }

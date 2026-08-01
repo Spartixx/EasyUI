@@ -1,4 +1,6 @@
 export { useControllableValue } from './useControllableValue'
+export { singleSelectionBehavior, multipleSelectionBehavior } from './selectionBehavior'
+export type { SelectionBehavior } from './selectionBehavior'
 export { useFieldIds } from './useFieldIds'
 export { useFieldDescribedBy } from './useFieldDescribedBy'
 export { useFieldColors } from './useFieldColors'

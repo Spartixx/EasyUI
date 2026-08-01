@@ -7,15 +7,21 @@ import type {
   WithVariantProps,
 } from '../../../types/base'
 import type { FormFieldVariant } from '../../../utils/class-maps'
-import type { ListboxOption } from '../../internal/listbox'
+import type { ListboxOption, SelectionIndicator } from '../../internal/listbox'
 
 export type AutocompleteVariant = FormFieldVariant
+
+export type AutocompleteSelectionIndicator = SelectionIndicator
 
 export type AutocompleteSlots =
   | 'base'
   | 'label'
   | 'inputWrapper'
   | 'input'
+  | 'chips'
+  | 'chip'
+  | 'chipLabel'
+  | 'chipRemoveButton'
   | 'startContent'
   | 'endContent'
   | 'arrow'
@@ -27,8 +33,11 @@ export type AutocompleteSlots =
 
 export type AutocompleteOption = ListboxOption
 
-export interface AutocompleteProps
-  extends Omit<ComponentPropsWithoutRef<'input'>, 'size' | 'color' | 'disabled' | 'required' | 'readOnly' | 'value' | 'onChange'>,
+export interface AutocompleteCommonProps
+  extends Omit<
+      ComponentPropsWithoutRef<'input'>,
+      'size' | 'color' | 'disabled' | 'required' | 'readOnly' | 'value' | 'defaultValue' | 'onChange'
+    >,
     EasyUIBaseProps<AutocompleteSlots>,
     WithContentProps,
     WithLabelProps,
@@ -36,9 +45,7 @@ export interface AutocompleteProps
     Omit<WithVariantProps, 'variant'> {
   variant?: AutocompleteVariant
   options: AutocompleteOption[]
-  value?: string
-  defaultValue?: string
-  onValueChange?: (value: string) => void
+  selectionIndicator?: AutocompleteSelectionIndicator
   placeholder?: string
   error?: string
   isRequired?: boolean
@@ -48,3 +55,19 @@ export interface AutocompleteProps
   arrowPlacement?: 'start' | 'end'
   isArrowHidden?: boolean
 }
+
+export interface AutocompleteSingleProps extends AutocompleteCommonProps {
+  selectionMode?: 'single'
+  value?: string
+  defaultValue?: string
+  onValueChange?: (value: string) => void
+}
+
+export interface AutocompleteMultipleProps extends AutocompleteCommonProps {
+  selectionMode: 'multiple'
+  value?: string[]
+  defaultValue?: string[]
+  onValueChange?: (values: string[]) => void
+}
+
+export type AutocompleteProps = AutocompleteSingleProps | AutocompleteMultipleProps

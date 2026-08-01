@@ -328,6 +328,151 @@ describe('Autocomplete', () => {
     })
   })
 
+  describe('selection mode: multiple', () => {
+    test('keeps the input empty and renders a chip per selected value', () => {
+      render(<Autocomplete selectionMode="multiple" options={fruitOptions} defaultValue={['apple', 'banana']} />)
+      expect((screen.getByRole('combobox') as HTMLInputElement).value).toBe('')
+      expect(screen.getByRole('button', { name: 'Remove Apple' })).toBeDefined()
+      expect(screen.getByRole('button', { name: 'Remove Banana' })).toBeDefined()
+    })
+
+    test('accumulates selected values, keeps the listbox open and clears the typed text', async () => {
+      const onValueChange = vi.fn()
+      render(<Autocomplete selectionMode="multiple" options={fruitOptions} onValueChange={onValueChange} />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      await userEvent.type(input, 'ban')
+      await userEvent.click(screen.getByText('Banana'))
+      expect(onValueChange).toHaveBeenCalledWith(['banana'])
+      expect(input.value).toBe('')
+      expect(screen.getByRole('listbox')).toBeDefined()
+      await userEvent.click(screen.getByText('Date'))
+      expect(onValueChange).toHaveBeenCalledWith(['banana', 'date'])
+    })
+
+    test('deselects an already selected option', async () => {
+      const onValueChange = vi.fn()
+      render(
+        <Autocomplete
+          selectionMode="multiple"
+          options={fruitOptions}
+          defaultValue={['apple', 'banana']}
+          onValueChange={onValueChange}
+        />,
+      )
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(screen.getByRole('option', { name: 'Apple' }))
+      expect(onValueChange).toHaveBeenCalledWith(['banana'])
+    })
+
+    test('removes a value from its chip', async () => {
+      const onValueChange = vi.fn()
+      render(
+        <Autocomplete
+          selectionMode="multiple"
+          options={fruitOptions}
+          defaultValue={['apple', 'banana']}
+          onValueChange={onValueChange}
+        />,
+      )
+      await userEvent.click(screen.getByRole('button', { name: 'Remove Banana' }))
+      expect(onValueChange).toHaveBeenCalledWith(['apple'])
+      expect(screen.queryByRole('button', { name: 'Remove Banana' })).toBeNull()
+    })
+
+    test('labels a chip with the raw value when no option matches it', async () => {
+      const onValueChange = vi.fn()
+      render(
+        <Autocomplete
+          selectionMode="multiple"
+          options={fruitOptions}
+          defaultValue={['apple', 'kiwi']}
+          onValueChange={onValueChange}
+        />,
+      )
+      expect(screen.getByText('kiwi')).toBeDefined()
+      await userEvent.click(screen.getByRole('button', { name: 'Remove kiwi' }))
+      expect(onValueChange).toHaveBeenCalledWith(['apple'])
+    })
+
+    test('removes the last selected value with Backspace on an empty input', async () => {
+      const onValueChange = vi.fn()
+      render(
+        <Autocomplete
+          selectionMode="multiple"
+          options={fruitOptions}
+          defaultValue={['apple', 'banana']}
+          onValueChange={onValueChange}
+        />,
+      )
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.keyboard('{Backspace}')
+      expect(onValueChange).toHaveBeenCalledWith(['apple'])
+    })
+
+    test('does not remove a value with Backspace while text is typed', async () => {
+      const onValueChange = vi.fn()
+      render(
+        <Autocomplete
+          selectionMode="multiple"
+          options={fruitOptions}
+          defaultValue={['apple']}
+          onValueChange={onValueChange}
+        />,
+      )
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      await userEvent.type(input, 'da')
+      await userEvent.keyboard('{Backspace}')
+      expect(onValueChange).not.toHaveBeenCalled()
+      expect(input.value).toBe('d')
+    })
+
+    test('marks the listbox as multi selectable and every selected option as selected', async () => {
+      render(<Autocomplete selectionMode="multiple" options={fruitOptions} defaultValue={['apple', 'banana']} />)
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByRole('listbox').getAttribute('aria-multiselectable')).toBe('true')
+      expect(screen.getByRole('option', { name: 'Apple' }).getAttribute('aria-selected')).toBe('true')
+      expect(screen.getByRole('option', { name: 'Banana' }).getAttribute('aria-selected')).toBe('true')
+      expect(screen.getByRole('option', { name: 'Date' }).getAttribute('aria-selected')).toBe('false')
+    })
+
+    test('controlled values do not change without onValueChange updating them', async () => {
+      render(<Autocomplete selectionMode="multiple" options={fruitOptions} value={['apple']} />)
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(screen.getByRole('option', { name: 'Banana' }))
+      expect(screen.getByRole('button', { name: 'Remove Apple' })).toBeDefined()
+      expect(screen.queryByRole('button', { name: 'Remove Banana' })).toBeNull()
+    })
+
+    test('clears the typed text on blur without touching the selection', async () => {
+      render(<Autocomplete selectionMode="multiple" options={fruitOptions} defaultValue={['apple']} />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      await userEvent.type(input, 'ban')
+      fireEvent.blur(input)
+      expect(input.value).toBe('')
+      expect(screen.getByRole('button', { name: 'Remove Apple' })).toBeDefined()
+    })
+
+    test('shows the required error on blur when no value is selected', () => {
+      render(<Autocomplete selectionMode="multiple" options={fruitOptions} isRequired />)
+      const input = screen.getByRole('combobox')
+      input.focus()
+      fireEvent.blur(input)
+      expect(screen.getByText('This field is required')).toBeDefined()
+    })
+
+    test('announces selection and deselection', async () => {
+      render(<Autocomplete selectionMode="multiple" options={fruitOptions} />)
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(screen.getByText('Apple'))
+      expect(screen.getByRole('status').textContent).toBe('Selected: Apple')
+      await userEvent.click(screen.getByRole('option', { name: 'Apple' }))
+      expect(screen.getByRole('status').textContent).toBe('Deselected: Apple')
+    })
+  })
+
   describe('filtering', () => {
     test('narrows the visible options to a case-insensitive substring match', async () => {
       render(<Autocomplete options={fruitOptions} />)
@@ -525,6 +670,42 @@ describe('Autocomplete', () => {
       const icon = screen.getByTestId('end-icon')
       const label = screen.getByText('Apple')
       expect(label.compareDocumentPosition(icon) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+  })
+
+  describe('selection indicator', () => {
+    test('shows a check icon on the selected option by default', async () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="banana" />)
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByRole('option', { name: 'Banana' }).querySelector('svg')).not.toBeNull()
+      expect(screen.getByRole('option', { name: 'Apple' }).querySelector('svg')).toBeNull()
+    })
+
+    test('shows a check icon on every selected option in multiple mode', async () => {
+      render(<Autocomplete selectionMode="multiple" options={fruitOptions} defaultValue={['apple', 'banana']} />)
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByRole('option', { name: 'Apple' }).querySelector('svg')).not.toBeNull()
+      expect(screen.getByRole('option', { name: 'Banana' }).querySelector('svg')).not.toBeNull()
+      expect(screen.getByRole('option', { name: 'Date' }).querySelector('svg')).toBeNull()
+    })
+
+    test('shows no check icon when selectionIndicator is none', async () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="banana" selectionIndicator="none" />)
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByRole('option', { name: 'Banana' }).querySelector('svg')).toBeNull()
+    })
+
+    test('renders the check icon as the last element of the option', async () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="banana" />)
+      await userEvent.click(screen.getByRole('combobox'))
+      const option = screen.getByRole('option', { name: 'Banana' })
+      expect(option.lastElementChild?.querySelector('svg')).not.toBeNull()
+    })
+
+    test('reserves the indicator space on unselected options', async () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="banana" />)
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByRole('option', { name: 'Apple' }).childElementCount).toBe(2)
     })
   })
 

@@ -18,6 +18,8 @@ export const autocompleteMeta = {
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
     radius: { control: 'select', options: ['none', 'sm', 'md', 'lg', 'full'] },
     arrowPlacement: { control: 'select', options: ['start', 'end'] },
+    selectionMode: { control: 'select', options: ['single', 'multiple'] },
+    selectionIndicator: { control: 'select', options: ['check', 'none'] },
     options: { control: false },
     startContent: { control: false },
     endContent: { control: false },

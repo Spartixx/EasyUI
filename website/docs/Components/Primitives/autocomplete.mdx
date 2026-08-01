@@ -151,6 +151,58 @@ When no option matches the typed text, the listbox shows a customizable "No resu
 />
 ```
 
+## Selection mode
+
+`selectionMode` switches between selecting one value (`'single'`, the default) and several (`'multiple'`). It also switches the type of `value`, `defaultValue` and `onValueChange`:
+
+| `selectionMode` | `value` / `defaultValue` | `onValueChange`               |
+|-----------------|--------------------------|-------------------------------|
+| `'single'`      | `string`                 | `(value: string) => void`     |
+| `'multiple'`    | `string[]`               | `(values: string[]) => void`  |
+
+In multiple mode, the selected values are shown as removable chips inside the field, the input keeps the remaining space, and its text is cleared after each selection so you can chain them without the listbox closing. Clicking an already selected option deselects it, and `Backspace` on an empty input removes the last selected value.
+
+```tsx
+const [values, setValues] = useState<string[]>([])
+
+<Autocomplete selectionMode="multiple" options={fruitOptions} value={values} onValueChange={setValues} />
+```
+
+```jsx live
+<Autocomplete
+  selectionMode="multiple"
+  color="primary"
+  placeholder="Search fruits..."
+  defaultValue={['apple', 'banana']}
+  options={[
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'cherry', label: 'Cherry' },
+    { value: 'date', label: 'Date' },
+  ]}
+/>
+```
+
+## Selection indicator
+
+In the listbox, selected options are marked with a check icon at the very end of the option, after its `endContent` (`selectionIndicator="check"`, the default), in both selection modes. Set `selectionIndicator="none"` to keep only the bolder label as the selected state.
+
+The space for the icon is reserved on the other options so their content stays aligned; since the icon sits on the trailing edge, labels and `startContent` are never shifted.
+
+```jsx live
+<Autocomplete
+  selectionMode="multiple"
+  selectionIndicator="none"
+  placeholder="Search fruits..."
+  defaultValue={['apple']}
+  options={[
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'cherry', label: 'Cherry' },
+  ]}
+/>
+```
+
 ## States
 
 ### Loading
@@ -285,6 +337,10 @@ Customize individual parts via `classNames`:
 | `label`        | The `<label>` element                      |
 | `inputWrapper` | The bordered/tinted box wrapping the input |
 | `input`        | The `<input>` element                      |
+| `chips`        | Wrapper around the chips (multiple mode)   |
+| `chip`         | Each selected value chip                   |
+| `chipLabel`    | The label inside a chip                    |
+| `chipRemoveButton` | The remove control inside a chip       |
 | `startContent` | Wrapper around `startContent`              |
 | `endContent`   | Wrapper around `endContent`                |
 | `arrow`        | Wrapper around the arrow icon              |
@@ -309,9 +365,11 @@ These slots can also be styled globally for every `Autocomplete` in your app, se
 | Prop                    | Type                                                                         | Default              | Description                                           |
 |-------------------------|------------------------------------------------------------------------------|----------------------|-------------------------------------------------------|
 | `options`               | `AutocompleteOption[]`                                                       | -                    | The list of selectable options                        |
-| `value`                 | `string`                                                                     | -                    | Controlled selected value                             |
-| `defaultValue`          | `string`                                                                     | -                    | Initial value for uncontrolled usage                  |
-| `onValueChange`         | `(value: string) => void`                                                    | -                    | Called when an option is selected                     |
+| `selectionMode`         | `'single' \| 'multiple'`                                                     | `'single'`           | Whether one or several options can be selected        |
+| `selectionIndicator`    | `'check' \| 'none'`                                                          | `'check'`            | Check icon at the end of selected options             |
+| `value`                 | `string` (single) \| `string[]` (multiple)                                   | -                    | Controlled selected value                             |
+| `defaultValue`          | `string` (single) \| `string[]` (multiple)                                   | -                    | Initial value for uncontrolled usage                  |
+| `onValueChange`         | `(value: string) => void` \| `(values: string[]) => void`                    | -                    | Called when the selection changes                     |
 | `placeholder`           | `string`                                                                     | -                    | Text shown when the field is empty                    |
 | `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'`         | Visual style                                          |
 | `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`          | Focus color                                           |

@@ -1,8 +1,8 @@
 import type { ButtonProps, ButtonSlots } from '../components'
 import type { InputProps, InputSlots } from '../components'
 import type { InputNumberProps, InputNumberSlots } from '../components'
-import type { SelectorProps, SelectorSlots } from '../components'
-import type { AutocompleteProps, AutocompleteSlots } from '../components'
+import type { SelectorCommonProps, SelectorSlots } from '../components'
+import type { AutocompleteCommonProps, AutocompleteSlots } from '../components'
 import type { FormProps, FormSlots } from '../components'
 import type { InputsGroupProps, InputsGroupSlots } from '../components'
 
@@ -38,15 +38,15 @@ export type InputNumberPresetProps = Partial<
 
 export type SelectorPresetProps = Partial<
   Omit<
-    SelectorProps,
-    'className' | 'classNames' | 'preset' | 'options' | 'validations' | 'isFormControlled' | 'error' | 'onValueChange' | 'onClick' | 'onKeyDown' | 'onBlur'
+    SelectorCommonProps,
+    'className' | 'classNames' | 'preset' | 'options' | 'validations' | 'isFormControlled' | 'error' | 'onClick' | 'onKeyDown' | 'onBlur'
   >
 >
 
 export type AutocompletePresetProps = Partial<
   Omit<
-    AutocompleteProps,
-    'className' | 'classNames' | 'preset' | 'options' | 'validations' | 'isFormControlled' | 'error' | 'onValueChange' | 'onFocus' | 'onKeyDown' | 'onBlur'
+    AutocompleteCommonProps,
+    'className' | 'classNames' | 'preset' | 'options' | 'validations' | 'isFormControlled' | 'error' | 'onFocus' | 'onKeyDown' | 'onBlur'
   >
 >
 
