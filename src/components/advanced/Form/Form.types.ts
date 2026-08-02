@@ -271,6 +271,7 @@ export interface FormActionsConfig {
   cancelLabel?: string
   onCancel?: () => void
   showCancel?: boolean
+  isSubmitButtonHidden?: boolean
   submitProps?: Partial<ButtonProps>
   cancelProps?: Partial<ButtonProps>
 }

@@ -319,6 +319,25 @@ The submit and cancel buttons sit at the bottom right, cancel to the left of sub
 />
 ```
 
+### Submitting from outside the form
+
+`isSubmitButtonHidden` removes the built-in submit button. Use it when the action belongs somewhere else — a modal
+footer, a toolbar. If nothing is left to show, the actions row is not rendered at all, so it adds no spacing.
+
+Give the form an `id` and point your own button at it with the native `form` attribute:
+
+```tsx
+const formId = useId()
+
+<>
+  <Form id={formId} form={form} onSubmit={onSubmit} actions={{ isSubmitButtonHidden: true }} />
+
+  <Button type="submit" form={formId} isLoading={form.isSubmitting}>
+    Save
+  </Button>
+</>
+```
+
 ## Slots
 
 Each field type has its own slot, alongside the container and action slots. Field slots are applied to the rendered component's root.
@@ -347,22 +366,22 @@ These slots can also be set globally via [`EasyUIProvider`](../../Customize/glob
 
 ## Props
 
-| Prop              | Type                                           | Default | Description                                     |
-|-------------------|------------------------------------------------|---------|-------------------------------------------------|
-| `form`            | `FormInstance`                                 | —       | The instance returned by `useForm(fields)`      |
-| `onSubmit`        | `(values, allValues) => void \| Promise<void>` | —       | Applicable fields, then every field (see above) |
-| `title`           | `string`                                       | —       | Optional heading at the top of the form         |
-| `description`     | `string`                                       | —       | Optional text under the title                   |
-| `actions`         | `FormActionsConfig`                            | —       | Submit/cancel labels, `onCancel`, button props  |
-| `variant`         | `FormVariant`                                  | —       | Cascades to every field/button (see below)      |
-| `color`           | `FormColor`                                    | —       | Cascades to every field/button                  |
-| `isDisabled`      | `boolean`                                      | `false` | Disables every field and action                 |
-| `isLoading`       | `boolean`                                      | `false` | The form's resources are loading (see below)    |
-| `loadingMessage`  | `string`                                       | —       | Replaces the description while `isLoading`      |
-| `disabledMessage` | `string`                                       | —       | Replaces the description while `isDisabled`     |
-| `className`       | `string`                                       | —       | Class on the `<form>` root                      |
-| `classNames`      | `Partial<Record<FormSlots, string>>`           | —       | Per-slot classes                                |
-| `preset`          | `string`                                       | —       | Named preset from the global config             |
+| Prop              | Type                                           | Default | Description                                              |
+|-------------------|------------------------------------------------|---------|----------------------------------------------------------|
+| `form`            | `FormInstance`                                 | —       | The instance returned by `useForm(fields)`               |
+| `onSubmit`        | `(values, allValues) => void \| Promise<void>` | —       | Applicable fields, then every field (see above)          |
+| `title`           | `string`                                       | —       | Optional heading at the top of the form                  |
+| `description`     | `string`                                       | —       | Optional text under the title                            |
+| `actions`         | `FormActionsConfig`                            | —       | Labels, `onCancel`, `isSubmitButtonHidden`, button props |
+| `variant`         | `FormVariant`                                  | —       | Cascades to every field/button (see below)               |
+| `color`           | `FormColor`                                    | —       | Cascades to every field/button                           |
+| `isDisabled`      | `boolean`                                      | `false` | Disables every field and action                          |
+| `isLoading`       | `boolean`                                      | `false` | The form's resources are loading (see below)             |
+| `loadingMessage`  | `string`                                       | —       | Replaces the description while `isLoading`               |
+| `disabledMessage` | `string`                                       | —       | Replaces the description while `isDisabled`              |
+| `className`       | `string`                                       | —       | Class on the `<form>` root                               |
+| `classNames`      | `Partial<Record<FormSlots, string>>`           | —       | Per-slot classes                                         |
+| `preset`          | `string`                                       | —       | Named preset from the global config                      |
 
 ### `useForm(fields)` returns
 

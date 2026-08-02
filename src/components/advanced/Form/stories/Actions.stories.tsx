@@ -1,5 +1,7 @@
+import { useId } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useForm, type FormFields } from '../index.ts'
+import { Button } from '../../../primitives'
 import { formMeta } from './meta.ts'
 import { FormWithSubmittedValues } from './submittedValues.tsx'
 
@@ -39,6 +41,27 @@ export const WithCancel: Story = {
           form={form}
           actions={{ submitLabel: 'Save', cancelLabel: 'Discard', onCancel: () => form.reset() }}
         />
+      </div>
+    )
+  },
+}
+
+export const SubmitFromOutside: Story = {
+  render: function SubmitFromOutsideForm() {
+    const form = useDemoForm()
+    const formId = useId()
+    return (
+      <div style={{ width: 340 }} className="flex flex-col gap-3">
+        <FormWithSubmittedValues
+          id={formId}
+          form={form}
+          actions={{ isSubmitButtonHidden: true }}
+        />
+        <div className="flex justify-end">
+          <Button type="submit" form={formId} isLoading={form.isSubmitting}>
+            Save from outside the form
+          </Button>
+        </div>
       </div>
     )
   },

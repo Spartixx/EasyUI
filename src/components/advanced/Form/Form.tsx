@@ -40,6 +40,8 @@ function FormInner<TFields extends FormFields>(rawProps: FormProps<TFields>, ref
 
   const fieldNames = Object.keys(form.config) as Array<keyof TFields & string>
   const showCancel = actions?.showCancel ?? !!actions?.onCancel
+  const showSubmit = !actions?.isSubmitButtonHidden
+  const showActions = showCancel || showSubmit
   const buttonVariant = resolveButtonVariant(variant)
 
   const effectiveDescription = (isLoading && loadingMessage) || (isDisabled && disabledMessage) || description
@@ -97,32 +99,36 @@ function FormInner<TFields extends FormFields>(rawProps: FormProps<TFields>, ref
           ) : null,
         )}
       </div>
-      <div className={cn('flex justify-end gap-2', slotClassName('actions'))}>
-        {showCancel && (
-          <Button
-            type="button"
-            color={color ?? 'default'}
-            variant={buttonVariant ?? 'light'}
-            isDisabled={isDisabled || isLoading || form.isSubmitting}
-            onClick={actions?.onCancel}
-            className={slotClassName('cancelButton')}
-            {...actions?.cancelProps}
-          >
-            {actions?.cancelLabel ?? 'Cancel'}
-          </Button>
-        )}
-        <Button
-          type="submit"
-          color={color ?? 'primary'}
-          variant={buttonVariant ?? 'solid'}
-          isLoading={form.isSubmitting}
-          isDisabled={isDisabled || isLoading}
-          className={slotClassName('submitButton')}
-          {...actions?.submitProps}
-        >
-          {submitLabel}
-        </Button>
-      </div>
+      {showActions && (
+        <div className={cn('flex justify-end gap-2', slotClassName('actions'))}>
+          {showCancel && (
+            <Button
+              type="button"
+              color={color ?? 'default'}
+              variant={buttonVariant ?? 'light'}
+              isDisabled={isDisabled || isLoading || form.isSubmitting}
+              onClick={actions?.onCancel}
+              className={slotClassName('cancelButton')}
+              {...actions?.cancelProps}
+            >
+              {actions?.cancelLabel ?? 'Cancel'}
+            </Button>
+          )}
+          {showSubmit && (
+            <Button
+              type="submit"
+              color={color ?? 'primary'}
+              variant={buttonVariant ?? 'solid'}
+              isLoading={form.isSubmitting}
+              isDisabled={isDisabled || isLoading}
+              className={slotClassName('submitButton')}
+              {...actions?.submitProps}
+            >
+              {submitLabel}
+            </Button>
+          )}
+        </div>
+      )}
     </form>
   )
 }
