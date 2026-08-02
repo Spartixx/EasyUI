@@ -261,6 +261,84 @@ describe('InputsGroup', () => {
     })
   })
 
+  describe('controlled values', () => {
+    test('the values prop drives what each line displays', () => {
+      render(<InputsGroup label="Tags" initialValues={[{ value: 'a' }, { value: 'b' }]} values={['x', 'y']} />)
+      const inputs = screen.getAllByRole('textbox') as HTMLInputElement[]
+      expect(inputs.map((input) => input.value)).toEqual(['x', 'y'])
+    })
+
+    test('typing does not move the UI when the parent ignores the change', async () => {
+      const onValuesChange = vi.fn()
+      render(<InputsGroup label="Tags" values={['a']} onValuesChange={onValuesChange} />)
+      const input = screen.getAllByRole('textbox')[0] as HTMLInputElement
+      await userEvent.type(input, 'bc')
+      expect(onValuesChange).toHaveBeenCalled()
+      expect(input.value).toBe('a')
+    })
+
+    test('a longer array appends removable lines', () => {
+      render(<InputsGroup label="Tags" initialValues={[{ value: 'a' }]} values={['a', 'b', 'c']} />)
+      expect(screen.getAllByRole('textbox')).toHaveLength(3)
+      expect(screen.getAllByRole('button', { name: 'Remove' })).toHaveLength(3)
+    })
+
+    test('a shorter array drops trailing lines', () => {
+      render(
+        <InputsGroup label="Tags" initialValues={[{ value: 'a' }, { value: 'b' }, { value: 'c' }]} values={['x']} />,
+      )
+      const inputs = screen.getAllByRole('textbox') as HTMLInputElement[]
+      expect(inputs.map((input) => input.value)).toEqual(['x'])
+    })
+
+    test('a shorter array never drops a protected line, it empties it instead', () => {
+      render(
+        <InputsGroup
+          label="Tags"
+          initialValues={[{ value: 'a' }, { value: 'b', isRequired: true }, { value: 'c' }]}
+          values={['x']}
+        />,
+      )
+      const inputs = screen.getAllByRole('textbox') as HTMLInputElement[]
+      expect(inputs.map((input) => input.value)).toEqual(['x', ''])
+      expect(screen.getAllByRole('button', { name: 'Remove' })).toHaveLength(1)
+    })
+
+    test('protection stays attached to the line, not to its position', async () => {
+      const onValuesChange = vi.fn()
+      render(
+        <InputsGroup
+          label="Tags"
+          initialValues={[{ value: 'a' }, { value: 'b', isRequired: true }]}
+          onValuesChange={onValuesChange}
+        />,
+      )
+      await userEvent.click(screen.getAllByRole('button', { name: 'Remove' })[0])
+      expect(onValuesChange).toHaveBeenLastCalledWith(['b'])
+      expect(screen.queryAllByRole('button', { name: 'Remove' })).toHaveLength(0)
+    })
+
+    test('an uncontrolled group is unaffected when values is omitted', async () => {
+      render(<InputsGroup label="Tags" initialValues={[{ value: 'a' }]} />)
+      const input = screen.getAllByRole('textbox')[0] as HTMLInputElement
+      await userEvent.type(input, 'bc')
+      expect(input.value).toBe('abc')
+    })
+
+    test('number mode accepts a controlled array holding null', () => {
+      render(
+        <InputsGroup
+          type="number"
+          label="Scores"
+          initialValues={[{ value: 1 }, { value: 2 }]}
+          values={[7, null]}
+        />,
+      )
+      const inputs = screen.getAllByRole('textbox') as HTMLInputElement[]
+      expect(inputs.map((input) => input.value)).toEqual(['7', ''])
+    })
+  })
+
   describe('validation', () => {
     test('shared validations show an error under the row on blur', async () => {
       render(

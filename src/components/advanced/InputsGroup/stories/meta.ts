@@ -9,6 +9,7 @@ export const inputsGroupMeta = {
     removeButtonPlacement: { control: 'select', options: ['left', 'right'] },
     addButtonPlacement: { control: 'select', options: ['left', 'right', 'full-width'] },
     initialValues: { control: false },
+    values: { control: false },
     onValuesChange: { control: false },
     onNonEmptyValuesChange: { control: false },
     validations: { control: false },
