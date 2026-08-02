@@ -46,7 +46,7 @@ The `label` and `description` are rendered as a header above the list (the descr
 
 ## Values in and out
 
-- `initialValues` seeds the list once: `Array<{ isRequired?: boolean; value }>`. Read at mount only so later changes are ignored (uncontrolled).
+- `initialValues` seeds the rows once: `Array<{ isRequired?: boolean; value }>`. Read at mount only, so later changes are ignored — to drive the values afterwards, see [controlled values](#controlled-values).
 - `onValuesChange` reports the **raw** list, keeping empty entries (`''` / `null`).
 - `onNonEmptyValuesChange` reports the **filtered** list: `string[]` without `''`, or `number[]` without `null`.
 
@@ -55,6 +55,32 @@ const [tags, setTags] = useState<string[]>([])
 
 <InputsGroup label="Tags" initialValues={[{ value: '' }]} onNonEmptyValuesChange={setTags} />
 ```
+
+## Controlled values
+
+Pass `values` to drive what each row displays. The group then behaves like any controlled input: it reports every
+change, but only renders what you hand back to it.
+
+```tsx
+const [tags, setTags] = useState<string[]>(['react'])
+
+<InputsGroup label="Tags" initialValues={[{ value: 'react' }]} values={tags} onValuesChange={setTags} />
+```
+
+Pair `values` with `onValuesChange`, not `onNonEmptyValuesChange`: the filtered output drops empty entries, so a row
+the user just added would disappear on the way back.
+
+`values` controls the **values only**. The structure, how many rows exist, which ones are protected, stays owned by
+the group and is seeded from `initialValues`, because a flat array carries neither row identity nor the protected flag.
+The group reconciles an incoming array like this:
+
+| Incoming array | Result                                                                             |
+|----------------|------------------------------------------------------------------------------------|
+| Same length    | Values are updated in place, rows keep their identity and protection               |
+| Longer         | Removable rows are appended                                                        |
+| Shorter        | Trailing rows are dropped, except protected ones, which are emptied instead        |
+
+Omit `values` to keep the group uncontrolled, which is the default.
 
 ## Required and protected rows
 
@@ -141,7 +167,8 @@ See [global config](../../Customize/global-config.md) (`wrappers.inputsGroup`) a
 | Prop                     | Type                                         | Default        | Description                                                  |
 |--------------------------|----------------------------------------------|----------------|--------------------------------------------------------------|
 | `type`                   | `'text' \| 'number'`                         | `'text'`       | Selects the primitive and value shape                        |
-| `initialValues`          | `Array<{ isRequired?: boolean; value }>`     | `[]`           | Seeds the list once (uncontrolled)                           |
+| `initialValues`          | `Array<{ isRequired?: boolean; value }>`     | `[]`           | Seeds the rows once: count, order and protection             |
+| `values`                 | `string[] \| (number \| null)[]`             | —              | Controls the value of each row (structure stays internal)    |
 | `onValuesChange`         | `(values) => void`                           | —              | Raw list, keeps empty entries                                |
 | `onNonEmptyValuesChange` | `(values) => void`                           | —              | Filtered list, without `''` / `null`                         |
 | `validations`            | `Array<(value) => string \| null>`           | —              | Shared validators applied to every row                       |

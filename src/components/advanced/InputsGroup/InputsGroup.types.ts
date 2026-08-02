@@ -52,6 +52,7 @@ export interface InputsGroupTextInitialValue {
 export interface InputsGroupTextProps extends InputsGroupCommonProps {
   type?: 'text'
   initialValues?: InputsGroupTextInitialValue[]
+  values?: string[]
   onValuesChange?: (values: string[]) => void
   onNonEmptyValuesChange?: (values: string[]) => void
   validations?: Array<(value: string) => string | null>
@@ -66,6 +67,7 @@ export interface InputsGroupNumberInitialValue {
 export interface InputsGroupNumberProps extends InputsGroupCommonProps {
   type: 'number'
   initialValues?: InputsGroupNumberInitialValue[]
+  values?: (number | null)[]
   onValuesChange?: (values: (number | null)[]) => void
   onNonEmptyValuesChange?: (values: number[]) => void
   validations?: Array<(value: number | null) => string | null>

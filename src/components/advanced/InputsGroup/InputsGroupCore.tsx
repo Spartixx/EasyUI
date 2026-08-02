@@ -29,6 +29,7 @@ interface InputsGroupCoreProps<TValue, TNonEmpty extends TValue>
   isNonEmpty: (value: TValue) => value is TNonEmpty
   renderInput: (params: RenderInputParams<TValue>) => ReactNode
   initialValues?: Array<{ isRequired?: boolean; value: TValue }>
+  values?: TValue[]
   onValuesChange?: (values: TValue[]) => void
   onNonEmptyValuesChange?: (values: TNonEmpty[]) => void
   validations?: Array<(value: TValue) => string | null>
@@ -52,6 +53,29 @@ interface Line<TValue> {
   isProtected: boolean
 }
 
+function reconcileLines<TValue>(
+  lines: Line<TValue>[],
+  values: TValue[] | undefined,
+  emptyValue: TValue,
+): Line<TValue>[] {
+  if (values === undefined) return lines
+
+  if (values.length >= lines.length) {
+    return values.map((value, index) =>
+      index < lines.length
+        ? { ...lines[index], value }
+        : { id: `controlled-${index}`, value, isProtected: false },
+    )
+  }
+
+  const kept: Line<TValue>[] = []
+  lines.forEach((line, index) => {
+    if (index < values.length) kept.push({ ...line, value: values[index] })
+    else if (line.isProtected) kept.push({ ...line, value: emptyValue })
+  })
+  return kept
+}
+
 export function InputsGroupCore<TValue, TNonEmpty extends TValue>(
   rawProps: InputsGroupCoreProps<TValue, TNonEmpty>,
 ) {
@@ -65,6 +89,7 @@ export function InputsGroupCore<TValue, TNonEmpty extends TValue>(
     isNonEmpty,
     renderInput,
     initialValues,
+    values,
     onValuesChange,
     onNonEmptyValuesChange,
     validations,
@@ -103,6 +128,8 @@ export function InputsGroupCore<TValue, TNonEmpty extends TValue>(
     })),
   )
 
+  const effectiveLines = reconcileLines(lines, values, emptyValue)
+
   const emit = (nextLines: Line<TValue>[]) => {
     const rawValues = nextLines.map((line) => line.value)
     onValuesChange?.(rawValues)
@@ -110,15 +137,15 @@ export function InputsGroupCore<TValue, TNonEmpty extends TValue>(
   }
 
   const setLineValue = (id: string, value: TValue) => {
-    const nextLines = lines.map((line) => (line.id === id ? { ...line, value } : line))
+    const nextLines = effectiveLines.map((line) => (line.id === id ? { ...line, value } : line))
     setLines(nextLines)
     emit(nextLines)
   }
 
   const addLine = () => {
-    if (maxItems !== undefined && lines.length >= maxItems) return
+    if (maxItems !== undefined && effectiveLines.length >= maxItems) return
     const nextLines = [
-      ...lines,
+      ...effectiveLines,
       { id: `added-${addedCounter.current++}`, value: emptyValue, isProtected: false },
     ]
     setLines(nextLines)
@@ -126,15 +153,15 @@ export function InputsGroupCore<TValue, TNonEmpty extends TValue>(
   }
 
   const removeLine = (id: string) => {
-    const nextLines = lines.filter((line) => line.id !== id)
+    const nextLines = effectiveLines.filter((line) => line.id !== id)
     setLines(nextLines)
     emit(nextLines)
   }
 
-  const isAtMax = maxItems !== undefined && lines.length >= maxItems
-  const firstInputId = lines.length > 0 ? `${generatedId}-0` : undefined
-  const isFirstLineRequired = lines[0]?.isProtected ?? false
-  const protectedCount = lines.filter((line) => line.isProtected).length
+  const isAtMax = maxItems !== undefined && effectiveLines.length >= maxItems
+  const firstInputId = effectiveLines.length > 0 ? `${generatedId}-0` : undefined
+  const isFirstLineRequired = effectiveLines[0]?.isProtected ?? false
+  const protectedCount = effectiveLines.filter((line) => line.isProtected).length
   const isFixedList = maxItems !== undefined && protectedCount >= maxItems
   const showAddButton = !isAddButtonHidden && !isFixedList
 
@@ -166,7 +193,7 @@ export function InputsGroupCore<TValue, TNonEmpty extends TValue>(
         </div>
       )}
       <div className={cn('flex flex-col gap-3', slotClassName('items'))}>
-        {lines.map((line, index) => {
+        {effectiveLines.map((line, index) => {
           const removeButton = line.isProtected ? null : renderRemoveButton ? (
             renderRemoveButton({
               onRemove: () => removeLine(line.id),
