@@ -50,9 +50,55 @@ export function FormField<TFields extends FormFields>({
     case 'input':
       return <>{fieldRegistry.input({ ...common, config, value: stringValue, setValue: setStringValue, slotClassName: slotClassName('inputField') })}</>
     case 'selector':
-      return <>{fieldRegistry.selector({ ...common, config, value: stringValue, setValue: setStringValue, slotClassName: slotClassName('selectorField') })}</>
+      return config.selectionMode === 'multiple' ? (
+        <>
+          {fieldRegistry.selectorMultiple({
+            ...common,
+            config,
+            value: fieldState.value as string[],
+            setValue: fieldState.setValue as (value: string[]) => void,
+            slotClassName: slotClassName('selectorField'),
+          })}
+        </>
+      ) : (
+        <>{fieldRegistry.selectorSingle({ ...common, config, value: stringValue, setValue: setStringValue, slotClassName: slotClassName('selectorField') })}</>
+      )
     case 'autocomplete':
-      return <>{fieldRegistry.autocomplete({ ...common, config, value: stringValue, setValue: setStringValue, slotClassName: slotClassName('autocompleteField') })}</>
+      return config.selectionMode === 'multiple' ? (
+        <>
+          {fieldRegistry.autocompleteMultiple({
+            ...common,
+            config,
+            value: fieldState.value as string[],
+            setValue: fieldState.setValue as (value: string[]) => void,
+            slotClassName: slotClassName('autocompleteField'),
+          })}
+        </>
+      ) : (
+        <>{fieldRegistry.autocompleteSingle({ ...common, config, value: stringValue, setValue: setStringValue, slotClassName: slotClassName('autocompleteField') })}</>
+      )
+    case 'inputs-group':
+      return config.itemsType === 'number' ? (
+        <>
+          {fieldRegistry.inputsGroupNumber({
+            ...common,
+            config,
+            value: fieldState.value as (number | null)[],
+            setValue: fieldState.setValue as (value: (number | null)[]) => void,
+            slotClassName: slotClassName('inputsGroupField'),
+          })}
+        </>
+      ) : (
+        <>
+          {fieldRegistry.inputsGroupText({
+            ...common,
+            config,
+            value: fieldState.value as string[],
+            setValue: fieldState.setValue as (value: string[]) => void,
+            slotClassName: slotClassName('inputsGroupField'),
+          })}
+        </>
+      )
     case 'number':
       return (
         <>

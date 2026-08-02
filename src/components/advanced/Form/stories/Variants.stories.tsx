@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Form, useForm, type FormFields, type FormVariant } from '../index.ts'
+import { useForm, type FormFields, type FormVariant } from '../index.ts'
 import { formMeta } from './meta.ts'
+import { FormWithSubmittedValues } from './submittedValues.tsx'
 
 const meta = {
   ...formMeta,
@@ -25,7 +26,7 @@ function VariantForm(props: { variant: FormVariant }) {
   const form = useForm(fields)
   return (
     <div style={{ width: 360 }}>
-      <Form form={form} onSubmit={() => {}} variant={props.variant} />
+      <FormWithSubmittedValues form={form} variant={props.variant} />
     </div>
   )
 }
@@ -45,7 +46,7 @@ export const PerFieldOverride: Story = {
     const form = useForm(overrideFields)
     return (
       <div style={{ width: 360 }}>
-        <Form form={form} onSubmit={() => {}} variant="flat" />
+        <FormWithSubmittedValues form={form} variant="flat" />
       </div>
     )
   },

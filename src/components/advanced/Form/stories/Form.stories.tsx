@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Form, useForm, type FormFields } from '../index.ts'
+import { useForm, type FormFields } from '../index.ts'
 import { formMeta } from './meta.ts'
+import { FormWithSubmittedValues } from './submittedValues.tsx'
 
 const meta = {
   ...formMeta,
@@ -28,11 +29,10 @@ function BasicForm() {
   const form = useForm(fields)
   return (
     <div style={{ width: 360 }}>
-      <Form
+      <FormWithSubmittedValues
         form={form}
         title="Create your profile"
         description="Fill in the fields below to get started."
-        onSubmit={() => {}}
       />
     </div>
   )
@@ -81,7 +81,7 @@ export const Complete: Story = {
     const form = useForm(completeFields)
     return (
       <div style={{ width: 380 }}>
-        <Form
+        <FormWithSubmittedValues
           form={form}
           title="Registration"
           description="Every built-in field type with a custom checkbox field in one form."

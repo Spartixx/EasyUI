@@ -1,9 +1,16 @@
-import { describe, test, expect, vi } from 'vitest'
+import { describe, test, expect, vi, type Mock } from 'vitest'
 import { render, screen, renderHook, act } from '@testing-library/react'
 import { userEvent } from 'vitest/browser'
-import { createRef, type Ref } from 'react'
+import { createRef, useState, type Ref } from 'react'
 import { Form, useForm } from './index'
-import type { FormActionsConfig, FormFields, FormSubmitHandler, ValidateMode } from './Form.types'
+import type {
+  FormActionsConfig,
+  FormFields,
+  FormInstance,
+  FormSubmitHandler,
+  FormValues,
+  ValidateMode,
+} from './Form.types'
 import { EasyUIProvider } from '../../../providers'
 import type { EasyUIConfig } from '../../../config/easyui.config.types'
 
@@ -38,6 +45,33 @@ function renderForm(props: HarnessProps, config?: EasyUIConfig) {
     )
   }
   return render(<TestForm {...props} />)
+}
+
+function FormWithControls({
+  fields,
+  onApply,
+}: {
+  fields: FormFields
+  onApply?: (form: FormInstance) => void
+}) {
+  const form = useForm(fields)
+  return (
+    <>
+      <Form form={form} onSubmit={() => {}} />
+      {onApply && (
+        <button type="button" onClick={() => onApply(form)}>
+          apply
+        </button>
+      )}
+      <button type="button" onClick={() => form.reset()}>
+        reset form
+      </button>
+    </>
+  )
+}
+
+function expectSubmittedWith(onSubmit: Mock, values: FormValues, allValues: FormValues = values) {
+  expect(onSubmit).toHaveBeenCalledWith(values, allValues)
 }
 
 describe('Form', () => {
@@ -195,7 +229,7 @@ describe('Form', () => {
     await userEvent.type(screen.getByLabelText('Name'), 'Ada')
     await userEvent.type(screen.getByLabelText('Role'), 'Dev')
     await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
-    expect(onSubmit).toHaveBeenCalledWith({ name: 'Ada', role: 'Dev' })
+    expectSubmittedWith(onSubmit, { name: 'Ada', role: 'Dev' })
   })
 
   describe('number field', () => {
@@ -204,7 +238,7 @@ describe('Form', () => {
       renderForm({ fields: { age: { type: 'number', label: 'Age' } }, onSubmit })
       await userEvent.type(screen.getByLabelText('Age'), '42')
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
-      expect(onSubmit).toHaveBeenCalledWith({ age: 42 })
+      expectSubmittedWith(onSubmit, { age: 42 })
     })
 
     test('is empty (null) when blank, blocking a required field', async () => {
@@ -220,7 +254,263 @@ describe('Form', () => {
       renderForm({ fields: { qty: { type: 'number', label: 'Qty', isRequired: true } }, onSubmit })
       await userEvent.type(screen.getByRole('spinbutton'), '0')
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
-      expect(onSubmit).toHaveBeenCalledWith({ qty: 0 })
+      expectSubmittedWith(onSubmit, { qty: 0 })
+    })
+
+    test('clearing the field sends the value back to null', async () => {
+      const onSubmit = vi.fn()
+      renderForm({ fields: { age: { type: 'number', label: 'Age' } }, onSubmit })
+      const input = screen.getByRole('spinbutton')
+      await userEvent.type(input, '42')
+      await userEvent.clear(input)
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { age: null })
+    })
+
+    test('non-numeric keystrokes never reach the form, the native input rejects them', async () => {
+      const onSubmit = vi.fn()
+      renderForm({ fields: { age: { type: 'number', label: 'Age' } }, onSubmit })
+      await userEvent.type(screen.getByRole('spinbutton'), 'abc')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { age: null })
+    })
+  })
+
+  describe('multi-selection fields', () => {
+    const fruitOptions = [
+      { value: 'apple', label: 'Apple' },
+      { value: 'banana', label: 'Banana' },
+    ]
+
+    test('a multiple selector collects a list of values', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: { fruits: { type: 'selector', selectionMode: 'multiple', label: 'Fruits', options: fruitOptions } },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(screen.getByText('Apple'))
+      await userEvent.click(screen.getByText('Banana'))
+      await userEvent.keyboard('{Escape}')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { fruits: ['apple', 'banana'] })
+    })
+
+    test('a multiple autocomplete collects a list of values', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: {
+          fruits: { type: 'autocomplete', selectionMode: 'multiple', label: 'Fruits', options: fruitOptions },
+        },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(screen.getByText('Apple'))
+      await userEvent.keyboard('{Escape}')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { fruits: ['apple'] })
+    })
+
+    test('an empty list blocks a required multiple selector', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: {
+          fruits: {
+            type: 'selector',
+            selectionMode: 'multiple',
+            label: 'Fruits',
+            isRequired: true,
+            options: fruitOptions,
+          },
+        },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(onSubmit).not.toHaveBeenCalled()
+      expect(screen.getByText('This field is required')).toBeDefined()
+    })
+
+    test('a single selector still submits a plain string', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: { fruit: { type: 'selector', label: 'Fruit', options: fruitOptions } },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(screen.getByText('Apple'))
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { fruit: 'apple' })
+    })
+  })
+
+  describe('inputs-group field', () => {
+    test('submits the filtered list, while allValues keeps the empty rows', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: {
+          tags: { type: 'inputs-group', label: 'Tags', initialValues: [{ value: 'react' }, { value: '' }] },
+        },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { tags: ['react'] }, { tags: ['react', ''] })
+    })
+
+    test('typing in a row updates the form value', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: { tags: { type: 'inputs-group', label: 'Tags', initialValues: [{ value: '' }] } },
+        onSubmit,
+      })
+      await userEvent.type(screen.getAllByRole('textbox')[0], 'vue')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { tags: ['vue'] })
+    })
+
+    test('adding a row keeps it visible, since the form controls the values', async () => {
+      renderForm({
+        fields: { tags: { type: 'inputs-group', label: 'Tags', initialValues: [{ value: 'react' }] } },
+      })
+      expect(screen.getAllByRole('textbox')).toHaveLength(1)
+      await userEvent.click(screen.getByRole('button', { name: /Add/ }))
+      expect(screen.getAllByRole('textbox')).toHaveLength(2)
+    })
+
+    test('a protected row left empty blocks the submit, even without a field-level isRequired', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: {
+          aliases: {
+            type: 'inputs-group',
+            label: 'Aliases',
+            initialValues: [{ value: '', isRequired: true }, { value: '' }],
+          },
+        },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(onSubmit).not.toHaveBeenCalled()
+      expect(screen.getByText('This field is required')).toBeDefined()
+    })
+
+    test('filling as many rows as there are protected ones unblocks the submit', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: {
+          aliases: {
+            type: 'inputs-group',
+            label: 'Aliases',
+            initialValues: [{ value: '', isRequired: true }, { value: '' }],
+          },
+        },
+        onSubmit,
+      })
+      await userEvent.type(screen.getAllByRole('textbox')[0], 'main')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { aliases: ['main'] }, { aliases: ['main', ''] })
+    })
+
+    test('two protected rows require two filled entries', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: {
+          aliases: {
+            type: 'inputs-group',
+            label: 'Aliases',
+            initialValues: [{ value: '', isRequired: true }, { value: '', isRequired: true }],
+          },
+        },
+        onSubmit,
+      })
+      await userEvent.type(screen.getAllByRole('textbox')[0], 'main')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(onSubmit).not.toHaveBeenCalled()
+
+      await userEvent.type(screen.getAllByRole('textbox')[1], 'second')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { aliases: ['main', 'second'] })
+    })
+
+    test('a list of empty rows blocks a required group', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: {
+          tags: { type: 'inputs-group', label: 'Tags', isRequired: true, initialValues: [{ value: '' }] },
+        },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(onSubmit).not.toHaveBeenCalled()
+      expect(screen.getByText('This field is required')).toBeDefined()
+    })
+
+    test('the number variant submits numbers only, allValues keeping the null rows', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: {
+          amounts: {
+            type: 'inputs-group',
+            itemsType: 'number',
+            label: 'Amounts',
+            initialValues: [{ value: 10 }, { value: null }],
+          },
+        },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { amounts: [10] }, { amounts: [10, null] })
+    })
+
+    test('a group without initialValues starts with no row and still accepts new ones', async () => {
+      const onSubmit = vi.fn()
+      renderForm({ fields: { tags: { type: 'inputs-group', label: 'Tags' } }, onSubmit })
+      expect(screen.queryAllByRole('textbox')).toHaveLength(0)
+
+      await userEvent.click(screen.getByRole('button', { name: /Add/ }))
+      await userEvent.type(screen.getAllByRole('textbox')[0], 'react')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { tags: ['react'] })
+    })
+
+    test('a number group without initialValues submits an empty list', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: { amounts: { type: 'inputs-group', itemsType: 'number', label: 'Amounts' } },
+        onSubmit,
+      })
+      expect(screen.queryAllByRole('textbox')).toHaveLength(0)
+
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { amounts: [] })
+    })
+
+    test('form.setValue moves the rendered rows', async () => {
+      render(
+        <FormWithControls
+          fields={{ tags: { type: 'inputs-group', label: 'Tags', initialValues: [{ value: 'react' }] } }}
+          onApply={(form) => form.setValue('tags', ['a', 'b', 'c'])}
+        />,
+      )
+      expect(screen.getAllByRole('textbox')).toHaveLength(1)
+
+      await userEvent.click(screen.getByRole('button', { name: 'apply' }))
+      const inputs = screen.getAllByRole('textbox') as HTMLInputElement[]
+      expect(inputs.map((input) => input.value)).toEqual(['a', 'b', 'c'])
+    })
+
+    test('form.reset restores the initial rows and values', async () => {
+      render(
+        <FormWithControls
+          fields={{ tags: { type: 'inputs-group', label: 'Tags', initialValues: [{ value: 'react' }] } }}
+          onApply={(form) => form.setValue('tags', ['a', 'b'])}
+        />,
+      )
+      await userEvent.click(screen.getByRole('button', { name: 'apply' }))
+      expect(screen.getAllByRole('textbox')).toHaveLength(2)
+
+      await userEvent.click(screen.getByRole('button', { name: 'reset form' }))
+      const inputs = screen.getAllByRole('textbox') as HTMLInputElement[]
+      expect(inputs.map((input) => input.value)).toEqual(['react'])
     })
   })
 
@@ -247,7 +537,7 @@ describe('Form', () => {
       expect(screen.queryByLabelText('Secret')).toBeNull()
 
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
-      expect(onSubmit).toHaveBeenCalledWith({ trigger: '' })
+      expectSubmittedWith(onSubmit, { trigger: '' }, { trigger: '', secret: '' })
 
       await userEvent.type(screen.getByLabelText('Trigger'), 'show')
       expect((screen.getByLabelText('Secret') as HTMLInputElement).value).toBe('')
@@ -312,7 +602,7 @@ describe('Form', () => {
     expect(custom.textContent).toContain('off')
     await userEvent.click(custom)
     await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
-    expect(onSubmit).toHaveBeenCalledWith({ toggle: 'on' })
+    expectSubmittedWith(onSubmit, { toggle: 'on' })
   })
 
   describe('actions', () => {
@@ -465,6 +755,70 @@ describe('Form', () => {
         { presets: { form: { locked: { props: { isDisabled: true } } } } },
       )
       expect(screen.getByLabelText('Name').hasAttribute('disabled')).toBe(true)
+    })
+  })
+
+  describe('errors of fields that become hidden', () => {
+    const fields: FormFields = {
+      mode: { type: 'input', label: 'Mode' },
+      detail: { type: 'input', label: 'Detail', isRequired: true, isHidden: (values) => values.mode === 'hide' },
+    }
+
+    test('a pending error is cleared when its field is hidden, and does not come back stale', () => {
+      const { result } = renderHook(() => useForm(fields, { validateOn: 'blur' }))
+
+      act(() => result.current.handleBlur('detail'))
+      expect(result.current.fields.detail.error).toBe('This field is required')
+
+      act(() => result.current.setValue('mode', 'hide'))
+      expect(result.current.fields.detail.error).toBeNull()
+
+      act(() => result.current.setValue('mode', 'show'))
+      expect(result.current.fields.detail.error).toBeNull()
+    })
+  })
+
+  describe('submitted payloads', () => {
+    const fields: FormFields = {
+      trigger: { type: 'input', label: 'Trigger' },
+      secret: { type: 'input', label: 'Secret', defaultValue: 'initial', dependsOn: { trigger: 'show' } },
+    }
+
+    test('the first payload omits hidden fields, the second keeps them at their initial value', async () => {
+      const onSubmit = vi.fn()
+      renderForm({ fields, onSubmit })
+      await userEvent.type(screen.getByLabelText('Trigger'), 'nope')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { trigger: 'nope' }, { trigger: 'nope', secret: 'initial' })
+    })
+
+    test('both payloads agree once every field is visible', async () => {
+      const onSubmit = vi.fn()
+      renderForm({ fields, onSubmit })
+      await userEvent.type(screen.getByLabelText('Trigger'), 'show')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { trigger: 'show', secret: 'initial' })
+    })
+  })
+
+  describe('field remounting on reset', () => {
+    function StatefulProbe() {
+      const [isTouched, setIsTouched] = useState(false)
+      return (
+        <button type="button" onClick={() => setIsTouched(true)}>
+          {isTouched ? 'touched' : 'pristine'}
+        </button>
+      )
+    }
+
+    test('reset remounts every field, so a field holding its own state is re-seeded', async () => {
+      render(<FormWithControls fields={{ stateful: { type: 'custom', render: () => <StatefulProbe /> } }} />)
+
+      await userEvent.click(screen.getByRole('button', { name: 'pristine' }))
+      expect(screen.getByRole('button', { name: 'touched' })).toBeDefined()
+
+      await userEvent.click(screen.getByRole('button', { name: 'reset form' }))
+      expect(screen.getByRole('button', { name: 'pristine' })).toBeDefined()
     })
   })
 

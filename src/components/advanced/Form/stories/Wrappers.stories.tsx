@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { ReactNode } from 'react'
-import { Form, useForm, type FormFields } from '../index.ts'
+import { useForm, type FormFields } from '../index.ts'
 import { EasyUIProvider } from '../../../../providers'
 import type { EasyUIConfig } from '../../../../config/easyui.config.types'
 import { formMeta } from './meta.ts'
+import { FormWithSubmittedValues } from './submittedValues.tsx'
 
 const meta = {
   ...formMeta,
@@ -31,7 +32,7 @@ function WrappedForm({ config, children }: { config: EasyUIConfig; children?: Re
   return (
     <EasyUIProvider config={config}>
       <div style={{ width: 360 }}>
-        <Form form={form} onSubmit={() => {}} actions={{ onCancel: () => {} }} />
+        <FormWithSubmittedValues form={form} actions={{ onCancel: () => {} }} />
         {children}
       </div>
     </EasyUIProvider>

@@ -37,6 +37,41 @@ export function Example() {
 
 The form ships with a default bordered, padded style. Override it via `className` / `classNames.base` (or the global `wrappers.form.base`). `title` and `description` are both optional.
 
+## Submitted values
+
+`onSubmit` receives two payloads. It only runs once validation passes.
+
+```tsx
+<Form form={form} onSubmit={(values, allValues) => { /* ... */ }} />
+```
+
+- **`values`** — the fields that applied to this run. A field hidden by [`dependsOn` or `isHidden`](#conditional-fields)
+  is absent. Its key is typed **optional**, so TypeScript makes you handle the absence.
+- **`allValues`** — every key, always present, holding the field's current value. For a hidden field that value is its
+  initial one, which is exactly what `form.values` exposes live.
+
+```tsx
+const fields = {
+  email: { type: 'input', label: 'Email' },
+  company: { type: 'input', label: 'Company', dependsOn: { email: null } },
+} satisfies FormFields
+
+onSubmit={(values, allValues) => {
+  values.email        // string
+  values.company      // string | undefined  → the key may be missing
+  allValues.company   // string              → always there
+}}
+```
+
+Whether a key is optional is decided by the **declaration** of `dependsOn` / `isHidden`, not by the field actually
+being hidden at submit time — which the compiler cannot know. A field whose `isHidden` always returns `false` therefore
+still gets an optional key, and you handle an `undefined` that never happens.
+
+One refinement applies to `values` only: a **required** `number` field is typed `number` rather than `number | null`,
+since validation has already rejected an empty one. `allValues`, `form.values` and `form.fields.x.value` are readable
+before validation, so they keep `number | null`. There is no equivalent for strings or lists — TypeScript cannot
+express "non-empty string" or "non-empty array" without a tuple that is painful to consume.
+
 You can read values or drive fields during completion via the form instance:
 
 ```tsx
@@ -50,13 +85,30 @@ form.reset()
 
 Each field declares a `type` (its category). The `input` type additionally accepts a `kind` mapped to the native `<input type>` (`email`, `tel`, `password`, `url`, ...).
 
-| Type           | Value type       | Notes                              |
-|----------------|------------------|------------------------------------|
-| `input`        | `string`         | `kind` sets the native input type  |
-| `selector`     | `string`         | requires `options`                 |
-| `autocomplete` | `string`         | requires `options`                 |
-| `number`       | `number \| null` | `null` = empty (distinct from `0`) |
-| `custom`       | `string`         | requires a `render` function       |
+| Type           | Value type                        | Notes                                                           |
+|----------------|-----------------------------------|-----------------------------------------------------------------|
+| `input`        | `string`                          | `kind` sets the native input type                               |
+| `selector`     | `string` / `string[]`             | requires `options`; `selectionMode: 'multiple'` makes it a list |
+| `autocomplete` | `string` / `string[]`             | requires `options`; `selectionMode: 'multiple'` makes it a list |
+| `number`       | `number \| null`                  | `null` = empty (distinct from `0`)                              |
+| `inputs-group` | `string[]` / `(number \| null)[]` | a repeatable row; `itemsType: 'number'` switches the shape      |
+| `custom`       | `string`                          | requires a `render` function                                    |
+
+The value type is derived from the field declaration, so `form.values` and the submitted payloads are typed per field.
+This requires `satisfies FormFields` on your declaration, **not** `: FormFields`:
+
+```tsx
+const annotated: FormFields = { email: { type: 'input' } }
+const declared = { email: { type: 'input' } } satisfies FormFields
+
+annotated.anything    // FieldConfig — any key is allowed, every value has the widest type
+declared.email        // the input field, typed as a string field
+```
+
+An annotation does not describe the value, it replaces its type: `typeof annotated` **is**
+`Record<string, FieldConfig>`, so TypeScript no longer knows which keys exist, nor which member of the union each one
+is — `type: 'input'` widens to `FieldType` and the discriminant everything relies on is gone. `satisfies` checks the
+same conformance while keeping the inferred type intact.
 
 Per-component props go under `props`:
 
@@ -65,6 +117,66 @@ const fields = {
   email: { type: 'input', kind: 'email', label: 'Email', props: { variant: 'faded' } },
 } satisfies FormFields
 ```
+
+### Multi-selection
+
+Set `selectionMode: 'multiple'` on a `selector` or an `autocomplete` field. The value becomes a `string[]`, and
+`isRequired` treats an empty list as empty.
+
+```tsx
+const fields = {
+  skills: {
+    type: 'autocomplete',
+    selectionMode: 'multiple',
+    label: 'Skills',
+    isRequired: true,
+    options: [
+      { value: 'ts', label: 'TypeScript' },
+      { value: 'go', label: 'Go' },
+    ],
+  },
+} satisfies FormFields
+```
+
+### Repeatable rows (`inputs-group`)
+
+Renders an [`InputsGroup`](./inputsGroup.mdx) driven by the form. `initialValues` defines the rows — how many, and
+which ones are protected — while the form owns their values.
+
+```tsx
+const fields = {
+  aliases: {
+    type: 'inputs-group',
+    label: 'Aliases',
+    initialValues: [{ value: '', isRequired: true }, { value: '' }],
+  },
+  amounts: {
+    type: 'inputs-group',
+    itemsType: 'number',
+    label: 'Amounts',
+    initialValues: [{ value: null }],
+    props: { inputProps: { prefix: '$' } },
+  },
+} satisfies FormFields
+```
+
+Three things differ from the other field types:
+
+- there is **no `defaultValue`** — the initial value derives from `initialValues`, which already carries both the row
+  structure and the row values, and two competing sources would drift apart;
+- the two submitted payloads differ: `values` holds the list **without its empty rows** (the equivalent of the
+  component's `onNonEmptyValuesChange`), while `allValues` keeps it raw, empty rows included. For a `number` group
+  that also means `values` is typed `number[]` and `allValues` `(number | null)[]`;
+- rows marked `isRequired` in `initialValues` are **counted**: the form requires at least that many non-empty entries
+  before it submits. Two required rows means two filled entries. This is a count, not a per-position rule, because
+  removing an optional row shifts the ones after it — and every row of a group holds the same kind of data anyway.
+
+A field-level `isRequired` composes with that: it simply demands at least one non-empty entry.
+
+Field-level `validators` run on the whole **raw** list, so they see the empty rows; `props.validations` runs on each
+row. Both can be used together. `props.onNonEmptyValuesChange` stays available if you want the filtered list live,
+while typing — the form's own round-trip is driven by the raw one, otherwise a row you just added would vanish as
+soon as it came back.
 
 ## Validation
 
@@ -222,6 +334,7 @@ Each field type has its own slot, alongside the container and action slots. Fiel
 | `selectorField`     | rendered `selector` fields             |
 | `autocompleteField` | rendered `autocomplete` fields         |
 | `numberField`       | rendered `number` fields               |
+| `inputsGroupField`  | rendered `inputs-group` fields         |
 | `actions`           | footer wrapping the buttons            |
 | `submitButton`      | the submit button                      |
 | `cancelButton`      | the cancel button                      |
@@ -234,22 +347,22 @@ These slots can also be set globally via [`EasyUIProvider`](../../Customize/glob
 
 ## Props
 
-| Prop              | Type                                 | Default | Description                                    |
-|-------------------|--------------------------------------|---------|------------------------------------------------|
-| `form`            | `FormInstance`                       | —       | The instance returned by `useForm(fields)`     |
-| `onSubmit`        | `(values) => void \| Promise<void>`  | —       | Called with the visible fields' values         |
-| `title`           | `string`                             | —       | Optional heading at the top of the form        |
-| `description`     | `string`                             | —       | Optional text under the title                  |
-| `actions`         | `FormActionsConfig`                  | —       | Submit/cancel labels, `onCancel`, button props |
-| `variant`         | `FormVariant`                        | —       | Cascades to every field/button (see below)     |
-| `color`           | `FormColor`                          | —       | Cascades to every field/button                 |
-| `isDisabled`      | `boolean`                            | `false` | Disables every field and action                |
-| `isLoading`       | `boolean`                            | `false` | The form's resources are loading (see below)   |
-| `loadingMessage`  | `string`                             | —       | Replaces the description while `isLoading`     |
-| `disabledMessage` | `string`                             | —       | Replaces the description while `isDisabled`    |
-| `className`       | `string`                             | —       | Class on the `<form>` root                     |
-| `classNames`      | `Partial<Record<FormSlots, string>>` | —       | Per-slot classes                               |
-| `preset`          | `string`                             | —       | Named preset from the global config            |
+| Prop              | Type                                           | Default | Description                                     |
+|-------------------|------------------------------------------------|---------|-------------------------------------------------|
+| `form`            | `FormInstance`                                 | —       | The instance returned by `useForm(fields)`      |
+| `onSubmit`        | `(values, allValues) => void \| Promise<void>` | —       | Applicable fields, then every field (see above) |
+| `title`           | `string`                                       | —       | Optional heading at the top of the form         |
+| `description`     | `string`                                       | —       | Optional text under the title                   |
+| `actions`         | `FormActionsConfig`                            | —       | Submit/cancel labels, `onCancel`, button props  |
+| `variant`         | `FormVariant`                                  | —       | Cascades to every field/button (see below)      |
+| `color`           | `FormColor`                                    | —       | Cascades to every field/button                  |
+| `isDisabled`      | `boolean`                                      | `false` | Disables every field and action                 |
+| `isLoading`       | `boolean`                                      | `false` | The form's resources are loading (see below)    |
+| `loadingMessage`  | `string`                                       | —       | Replaces the description while `isLoading`      |
+| `disabledMessage` | `string`                                       | —       | Replaces the description while `isDisabled`     |
+| `className`       | `string`                                       | —       | Class on the `<form>` root                      |
+| `classNames`      | `Partial<Record<FormSlots, string>>`           | —       | Per-slot classes                                |
+| `preset`          | `string`                                       | —       | Named preset from the global config             |
 
 ### `useForm(fields)` returns
 
