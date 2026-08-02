@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Form, useForm, type FormFields } from '../index.ts'
+import { useForm, type FormFields } from '../index.ts'
 import { formMeta } from './meta.ts'
+import { FormWithSubmittedValues } from './submittedValues.tsx'
 
 const meta = {
   ...formMeta,
@@ -44,7 +45,7 @@ function CustomFieldForm() {
   const form = useForm(fields)
   return (
     <div style={{ width: 340 }}>
-      <Form form={form} onSubmit={() => {}} />
+      <FormWithSubmittedValues form={form} />
     </div>
   )
 }

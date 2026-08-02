@@ -50,6 +50,9 @@ The `label` and `description` are rendered as a header above the list (the descr
 - `onValuesChange` reports the **raw** list, keeping empty entries (`''` / `null`).
 - `onNonEmptyValuesChange` reports the **filtered** list: `string[]` without `''`, or `number[]` without `null`.
 
+Both callbacks report *changes*: they fire when a row is edited, added or removed, never at mount. Seed your own state
+from `initialValues` if you need it to be right before the first interaction — the group never emits from an effect.
+
 ```tsx
 const [tags, setTags] = useState<string[]>([])
 

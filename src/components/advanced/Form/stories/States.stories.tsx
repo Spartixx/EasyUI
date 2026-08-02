@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Form, useForm, type FormFields } from '../index.ts'
+import { useForm, type FormFields } from '../index.ts'
 import { formMeta } from './meta.ts'
+import { FormWithSubmittedValues } from './submittedValues.tsx'
 
 const meta = {
   ...formMeta,
@@ -30,9 +31,8 @@ function StateForm(props: { isDisabled?: boolean; isLoading?: boolean }) {
   const form = useForm(fields)
   return (
     <div style={{ width: 360 }}>
-      <Form
+      <FormWithSubmittedValues
         form={form}
-        onSubmit={() => {}}
         title="Team member"
         description="Edit the member details."
         loadingMessage="Loading options…"
@@ -63,7 +63,7 @@ function SubmittingForm() {
   }, [form])
   return (
     <div style={{ width: 360 }}>
-      <Form
+      <FormWithSubmittedValues
         form={form}
         onSubmit={pendingSubmit}
         title="Team member"

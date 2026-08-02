@@ -1,5 +1,5 @@
-/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
+import { coverageConfigDefaults } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite'
 import dts from 'vite-plugin-dts';
@@ -16,7 +16,7 @@ export default defineConfig({
     tailwindcss(),
     dts({
       include: ['src'],
-      exclude: ['src/stories', '**/*.stories.*', '**/stories/**', '**/*.test.*'],
+      exclude: ['src/stories', '**/*.stories.*', '**/stories/**', '**/*.test.*', '**/*.test-d.*'],
       tsconfigPath: 'tsconfig.app.json',
       entryRoot: 'src',
     }),
@@ -35,6 +35,9 @@ export default defineConfig({
     name: 'storybook',
     passWithNoTests: true,
     fileParallelism: false,
+    coverage: {
+      exclude: [...coverageConfigDefaults.exclude, '**/stories/**', '**/*.test-d.*', 'src/test/**'],
+    },
     browser: {
       enabled: true,
       headless: true,

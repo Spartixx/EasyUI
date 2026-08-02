@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { Form, useForm, type FormFields, type ValidateMode } from '../index.ts'
+import { useForm, type FormFields, type ValidateMode } from '../index.ts'
 import { formMeta } from './meta.ts'
+import { FormWithSubmittedValues } from './submittedValues.tsx'
 
 const meta = {
   ...formMeta,
@@ -34,7 +35,7 @@ function ValidationForm(props: { validateOn?: ValidateMode }) {
   const form = useForm(fields, { validateOn: props.validateOn })
   return (
     <div style={{ width: 340 }}>
-      <Form form={form} onSubmit={() => {}} actions={{ submitLabel: 'Create account' }} />
+      <FormWithSubmittedValues form={form} actions={{ submitLabel: 'Create account' }} />
     </div>
   )
 }

@@ -7,21 +7,33 @@ import type {
   FieldState,
   FieldValue,
   FieldValueType,
+  FormAllValues,
   FormFields,
   FormInstance,
   FormSubmitHandler,
   FormValues,
+  FormVisibleValues,
   UseFormOptions,
 } from './Form.types'
 
 function initialValueFor(config: FieldConfig): FieldValueType {
+  if (config.type === 'inputs-group') {
+    // Both branches are identical on purpose: without narrowing on itemsType first, initialValues
+    // stays the union of both row shapes and .map() yields a mixed (string | number | null)[].
+    return config.itemsType === 'number'
+      ? (config.initialValues ?? []).map((entry) => entry.value)
+      : (config.initialValues ?? []).map((entry) => entry.value)
+  }
+
   if (config.defaultValue !== undefined) return config.defaultValue
+
   switch (config.type) {
     case 'input':
-    case 'selector':
-    case 'autocomplete':
     case 'custom':
       return ''
+    case 'selector':
+    case 'autocomplete':
+      return config.selectionMode === 'multiple' ? [] : ''
     case 'number':
       return null
     default:
@@ -39,9 +51,16 @@ function buildInitialValues(fields: FormFields): FormValues {
 
 function isEmpty(value: FieldValueType): boolean {
   if (value === null) return true
-  if (Array.isArray(value)) return value.length === 0
+  if (Array.isArray(value)) return value.every((entry) => isEmpty(entry))
   if (typeof value === 'number') return false
   return value.trim() === ''
+}
+
+function isSameValue(current: FieldValueType, other: FieldValueType): boolean {
+  if (Array.isArray(current) && Array.isArray(other)) {
+    return current.length === other.length && current.every((entry, index) => entry === other[index])
+  }
+  return current === other
 }
 
 function computeVisibility(fields: FormFields, values: FormValues): Record<string, boolean> {
@@ -83,6 +102,38 @@ function computeVisibility(fields: FormFields, values: FormValues): Record<strin
   return visibilityByName
 }
 
+function requiredEntryCount(config: FieldConfig): number {
+  if (config.type !== 'inputs-group') return 0
+  let count = 0
+  for (const entry of config.initialValues ?? []) {
+    if (entry.isRequired) count += 1
+  }
+  return count
+}
+
+function filledEntryCount(value: FieldValueType): number {
+  if (!Array.isArray(value)) return 0
+  let count = 0
+  for (const entry of value) {
+    if (!isEmpty(entry)) count += 1
+  }
+  return count
+}
+
+// Empty rows are dropped from the submitted payload only; the form state stays raw, because it drives
+// a controlled InputsGroup where filtering would make a freshly added row disappear.
+// The casts are guarded by itemsType: TypeScript cannot correlate a discriminant on `config` with the
+// type of a separate `value` argument.
+function submittedValueFor(config: FieldConfig, value: FieldValueType): FieldValueType {
+  if (config.type !== 'inputs-group' || !Array.isArray(value)) return value
+  if (config.itemsType === 'number') {
+    const entries = value as (number | null)[]
+    return entries.filter((entry) => !isEmpty(entry))
+  }
+  const entries = value as string[]
+  return entries.filter((entry) => !isEmpty(entry))
+}
+
 function computeErrors(
   fields: FormFields,
   values: FormValues,
@@ -99,6 +150,9 @@ function computeErrors(
     const value = values[fieldName]
     let error: string | null = null
     if (config.isRequired && isEmpty(value)) {
+      error = config.isRequiredMessage ?? defaultRequiredMessage
+    }
+    if (!error && filledEntryCount(value) < requiredEntryCount(config)) {
       error = config.isRequiredMessage ?? defaultRequiredMessage
     }
     if (!error && config.validators) {
@@ -127,12 +181,12 @@ function resetHiddenFields(fields: FormFields, values: FormValues, initialValues
     let changed = false
     const next = { ...current }
     for (const fieldName of Object.keys(fields)) {
-      if (!visibility[fieldName] && next[fieldName] !== initialValues[fieldName]) {
+      if (!visibility[fieldName] && !isSameValue(next[fieldName], initialValues[fieldName])) {
         next[fieldName] = initialValues[fieldName]
         changed = true
       }
     }
-    if (!changed) return current
+    if (!changed) break
     current = next
   }
   return current
@@ -200,21 +254,26 @@ export function useForm<TFields extends FormFields>(
   }, [fields, values, markTouched, defaultRequiredMessage])
 
   const handleSubmit = useCallback(
-    async (onSubmit: FormSubmitHandler) => {
+    async (onSubmit: FormSubmitHandler<TFields>) => {
       const nextErrors = computeErrors(fields, values, defaultRequiredMessage)
       setErrors(nextErrors)
       markTouched(Object.keys(nextErrors))
       if (!isFormValid(nextErrors)) return
 
       const currentVisibility = computeVisibility(fields, values)
-      const payload: FormValues = {}
+      const visiblePayload: FormValues = {}
       for (const fieldName of Object.keys(fields)) {
-        if (currentVisibility[fieldName]) payload[fieldName] = values[fieldName]
+        if (currentVisibility[fieldName]) {
+          visiblePayload[fieldName] = submittedValueFor(fields[fieldName], values[fieldName])
+        }
       }
 
       try {
         setIsSubmitting(true)
-        await onSubmit(payload)
+        await onSubmit(
+          visiblePayload as FormVisibleValues<TFields>,
+          values as FormAllValues<TFields>,
+        )
       } finally {
         setIsSubmitting(false)
       }
@@ -250,7 +309,7 @@ export function useForm<TFields extends FormFields>(
   )
 
   const isDirty = useMemo(
-    () => Object.keys(fields).some((fieldName) => values[fieldName] !== initialValues[fieldName]),
+    () => Object.keys(fields).some((fieldName) => !isSameValue(values[fieldName], initialValues[fieldName])),
     [fields, values, initialValues],
   )
   const isValid = useMemo(
