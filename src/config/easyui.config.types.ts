@@ -1,3 +1,4 @@
+import type { AlertProps, AlertSlots } from '../components'
 import type { ButtonProps, ButtonSlots } from '../components'
 import type { InputProps, InputSlots } from '../components'
 import type { InputNumberProps, InputNumberSlots } from '../components'
@@ -9,6 +10,7 @@ import type { InputsGroupProps, InputsGroupSlots } from '../components'
 export type SlotClassNames<TSlots extends string> = Partial<Record<TSlots, string>>
 
 export interface EasyUIWrappersConfig {
+  alert?: SlotClassNames<AlertSlots>
   button?: SlotClassNames<ButtonSlots>
   input?: SlotClassNames<InputSlots>
   inputNumber?: SlotClassNames<InputNumberSlots>
@@ -23,6 +25,10 @@ export interface EasyUIPreset<TProps, TSlots extends string> {
   className?: string
   classNames?: SlotClassNames<TSlots>
 }
+
+export type AlertPresetProps = Partial<
+  Omit<AlertProps, 'title' | 'description' | 'className' | 'classNames' | 'preset' | 'onClose'>
+>
 
 export type ButtonPresetProps = Partial<
   Omit<ButtonProps, 'children' | 'className' | 'classNames' | 'preset'>
@@ -68,6 +74,7 @@ export type InputsGroupPresetProps = Partial<
 >
 
 export interface EasyUIPresetsConfig {
+  alert?: Record<string, EasyUIPreset<AlertPresetProps, AlertSlots>>
   button?: Record<string, EasyUIPreset<ButtonPresetProps, ButtonSlots>>
   input?: Record<string, EasyUIPreset<InputPresetProps, InputSlots>>
   inputNumber?: Record<string, EasyUIPreset<InputNumberPresetProps, InputNumberSlots>>
@@ -79,6 +86,9 @@ export interface EasyUIPresetsConfig {
 
 export interface EasyUIDefaultsConfig {
   requiredMessage?: string
+  alert?: {
+    closeButtonLabel?: string
+  }
   autocomplete?: {
     noResultsMessage?: string
   }

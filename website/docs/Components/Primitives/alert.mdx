@@ -1,0 +1,223 @@
+# Alert
+
+A notification banner with a status icon, a title, an optional description and an optional close button.
+
+## Usage
+
+```tsx
+import { Alert } from '@easy-ui-react/easy-ui-react'
+
+export function Example() {
+  return (
+    <Alert
+      color="primary"
+      title="Update available"
+      description="A new version of the application is ready to install."
+    />
+  )
+}
+```
+
+```jsx live
+<Alert color="primary" title="Update available" description="A new version of the application is ready to install." />
+```
+
+The `title` is required, the `description` is optional. The status icon, the title and the close button share a single vertically centered row; the description sits on a second row, aligned under the title, and wraps there.
+
+```jsx live
+<Alert
+  className={"max-w-md"}
+  isClosable
+  color="primary"
+  title="Update available"
+  description="The update includes performance improvements, a redesigned settings panel and several bug fixes reported by the community over the last few weeks."
+/>
+```
+
+The `description` is not limited to a string: it accepts any node, so you can pass a list, a `<div>` or a whole component. It is rendered inside a `<div>`, so block content is valid there.
+
+```jsx live
+<Alert
+  color="error"
+  title="Some fields need your attention"
+  description={
+    <ul className={"list-disc ps-5"}>
+      <li>The email address is already taken</li>
+      <li>The password must be at least 12 characters long</li>
+    </ul>
+  }
+/>
+```
+
+The alert takes the full width of its container, so set the width on the parent, or pass a width class through `className`.
+
+```jsx live
+<Alert className={"max-w-sm"} color="primary" title="Constrained width" description="This alert is capped at max-w-sm." />
+```
+
+## Variants
+
+| Variant    | Description                                          |
+|------------|------------------------------------------------------|
+| `flat`     | Tinted background with a darker text (default)       |
+| `faded`    | Tinted background plus a colored border              |
+| `solid`    | Filled background with a contrasting foreground text |
+| `outlined` | Colored border, transparent background               |
+
+On the `solid` variant the circle around the status icon is dropped automatically: a ring has too little contrast over a filled background.
+
+```jsx live
+<div className={"flex flex-col gap-2"} >
+    <Alert variant="flat" color="primary" title="Flat" description="Tinted background." />
+    <Alert variant="solid" color="primary" title="Solid" description="Filled background." />
+    <Alert variant="outlined" color="primary" title="Outlined" description="Colored border." />
+    <Alert variant="faded" color="primary" title="Faded" description="Tinted background and colored border." />
+</div>
+```
+
+## Colors
+
+`default`, `primary`, `secondary`, `success`, `warning` and `error`. The color drives both the surface and the default status icon. Every color maps to a [theme token](../../Customize/theming.md).
+
+```jsx live
+<div className={"flex flex-col gap-2"} >
+    <Alert color="default" title="Default" />
+    <Alert color="primary" title="Primary" />
+    <Alert color="secondary" title="Secondary" />
+    <Alert color="success" title="Success" />
+    <Alert color="warning" title="Warning" />
+    <Alert color="error" title="Error" />
+</div>
+```
+
+## Sizes
+
+`sm`, `md` (default) and `lg`. The size drives the padding, the text sizes and the icon size.
+
+```jsx live
+<div className={"flex flex-col gap-2"} >
+    <Alert size="sm" color="primary" title="Small" description="A new version is ready." />
+    <Alert size="md" color="primary" title="Medium" description="A new version is ready." />
+    <Alert size="lg" color="primary" title="Large" description="A new version is ready." />
+</div>
+```
+
+## Radius
+
+`none`, `sm`, `md` (default), `lg` and `full`, mapped to the [radius tokens](../../Customize/theming.md).
+
+```jsx live
+<div className={"flex flex-col gap-2"} >
+    <Alert radius="none" color="primary" title="None" />
+    <Alert radius="md" color="primary" title="Medium" />
+    <Alert radius="full" color="primary" title="Full" />
+</div>
+```
+
+## Icon
+
+Each color comes with its own status icon, drawn as a filled shape whose glyph is cut out, so the surface of the alert shows through it.
+
+| Color                             | Shape                             |
+|-----------------------------------|-----------------------------------|
+| `default`, `primary`, `secondary` | Filled circle with a cut-out `i`  |
+| `success`                         | Filled circle with a cut-out `✓`  |
+| `warning`                         | Filled shield with a cut-out `!`  |
+| `error`                           | Filled hexagon with a cut-out `!` |
+
+Pass `icon` to replace it with your own node:
+
+```jsx live
+<Alert color="primary" icon={<Search className={"size-full"} />} title="Custom icon" description="Any node can replace the default shape." />
+```
+
+The icon sits inside a soft bordered circle, tinted with the alert color. Use `isIconWrapperHidden` to drop that circle, or `isIconHidden` to remove the icon altogether. The `solid` variant never renders the circle.
+
+```jsx live
+<div className={"flex flex-col gap-2"} >
+    <Alert color="success" title="With the wrapper" description="Default." />
+    <Alert isIconWrapperHidden color="success" title="Without the wrapper" description="isIconWrapperHidden." />
+    <Alert isIconHidden color="success" title="Without any icon" description="isIconHidden." />
+</div>
+```
+
+## Closable
+
+Set `isClosable` to render a close button. The alert removes itself when the button is clicked, and `onClose` is called so you can react to it.
+
+```jsx live
+<Alert isClosable color="warning" title="Dismiss me" description="This alert disappears when you close it." />
+```
+
+Use `closeIcon` to replace the cross, and `closeButtonLabel` to change the accessible label of the button (`Close` by default). That label can also be set once for the whole app through `defaults.alert.closeButtonLabel`, see the [global configuration guide](../../Customize/global-config.md).
+
+```jsx live
+<Alert isClosable closeIcon={<ArrowRight className={"size-full"} />} closeButtonLabel="Dismiss notification" color="warning" title="Custom close button" />
+```
+
+## Content
+
+`endContent` renders on the title row, right before the close button. There is no `startContent`: that position belongs to the status icon.
+
+```jsx live
+<Alert
+  color="primary"
+  title="Update available"
+  description="A new version is ready to install."
+  endContent={<Button size="sm" variant="outlined" color="primary">Install</Button>}
+  isClosable
+/>
+```
+
+## Slots
+
+Customize individual parts via `classNames`:
+
+| Slot          | Description                                       |
+|---------------|---------------------------------------------------|
+| `base`        | The root element                                  |
+| `iconWrapper` | The bordered circle around the status icon        |
+| `icon`        | The box holding the status icon                   |
+| `title`       | The title element                                 |
+| `description` | The description element                           |
+| `endContent`  | The wrapper around `endContent`                   |
+| `closeButton` | The close button                                  |
+
+```jsx live
+<Alert
+  color="primary"
+  title="Update available"
+  description="A new version is ready."
+  classNames={{ base: 'shadow-md', title: 'tracking-wide', description: 'italic' }}
+/>
+```
+
+These slots can also be styled globally for every `Alert` in your app, see the [global configuration guide](../../Customize/global-config.md).
+
+## Props
+
+| Prop                  | Type                                                                         | Default     | Description                                        |
+|-----------------------|------------------------------------------------------------------------------|-------------|----------------------------------------------------|
+| `title`               | `string`                                                                     | -           | Required. The main message                         |
+| `description`         | `ReactNode`                                                                  | -           | Secondary content rendered below the title         |
+| `variant`             | `'solid' \| 'outlined' \| 'flat' \| 'faded'`                                 | `'flat'`    | Visual style                                       |
+| `color`               | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'` | Surface color and default status icon              |
+| `size`                | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`      | Padding, text and icon size                        |
+| `radius`              | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`      | Corner radius                                      |
+| `isClosable`          | `boolean`                                                                    | `false`     | Renders a close button                             |
+| `onClose`             | `() => void`                                                                 | -           | Called after the alert has been closed             |
+| `icon`                | `ReactNode`                                                                  | -           | Replaces the default status icon                   |
+| `isIconHidden`        | `boolean`                                                                    | `false`     | Removes the status icon and its wrapper            |
+| `isIconWrapperHidden` | `boolean`                                                                    | `false`     | Removes the circle around the icon (always removed on `solid`) |
+| `closeIcon`           | `ReactNode`                                                                  | -           | Replaces the cross of the close button             |
+| `closeButtonLabel`    | `string`                                                                     | `'Close'`   | Accessible label of the close button               |
+| `endContent`          | `ReactNode`                                                                  | -           | Content rendered before the close button           |
+| `className`           | `string`                                                                     | -           | Class applied to the root element                  |
+| `classNames`          | `Partial<Record<AlertSlots, string>>`                                        | -           | Per-slot class overrides                           |
+| `preset`              | `string`                                                                     | -           | Name of a configured preset                        |
+
+`Alert` also accepts every native `<div>` attribute (including `role`, which defaults to `alert` and can be set to `status` for non-urgent messages) and forwards `ref` to the underlying `<div>` element.
+
+## Storybook
+
+[Open in Storybook →](pathname:///storybook/?path=/story/primitives-alert--default) and see more combinations.
