@@ -9,6 +9,7 @@ export type {
   FormAllValues,
   FormVisibleValues,
   FormSubmitHandler,
+  SubmitErrorMessages,
   FormActionsConfig,
   FormVariant,
   FormColor,

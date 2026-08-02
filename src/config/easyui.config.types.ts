@@ -4,7 +4,7 @@ import type { InputProps, InputSlots } from '../components'
 import type { InputNumberProps, InputNumberSlots } from '../components'
 import type { SelectorCommonProps, SelectorSlots } from '../components'
 import type { AutocompleteCommonProps, AutocompleteSlots } from '../components'
-import type { FormProps, FormSlots } from '../components'
+import type { FormProps, FormSlots, SubmitErrorMessages } from '../components'
 import type { InputsGroupProps, InputsGroupSlots } from '../components'
 
 export type SlotClassNames<TSlots extends string> = Partial<Record<TSlots, string>>
@@ -86,6 +86,12 @@ export interface EasyUIPresetsConfig {
 
 export interface EasyUIDefaultsConfig {
   requiredMessage?: string
+  form?: {
+    loadingMessage?: string
+    disabledMessage?: string
+    submitErrorMessages?: SubmitErrorMessages
+    getSubmitErrorStatus?: (error: Error) => string | null
+  }
   alert?: {
     closeButtonLabel?: string
   }

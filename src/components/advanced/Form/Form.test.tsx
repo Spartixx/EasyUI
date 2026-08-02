@@ -28,6 +28,10 @@ interface HarnessProps {
   isLoading?: boolean
   className?: string
   classNames?: Record<string, string>
+  error?: string
+  submitErrorMessages?: Record<string | number, string>
+  getSubmitErrorStatus?: (error: Error) => string | null
+  onUnhandledSubmitError?: (error: Error) => void
   id?: string
   formRef?: Ref<HTMLFormElement>
 }
@@ -604,6 +608,222 @@ describe('Form', () => {
     await userEvent.click(custom)
     await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
     expectSubmittedWith(onSubmit, { toggle: 'on' })
+  })
+
+  describe('loading and disabled messages from the global config', () => {
+    const fields: FormFields = { name: { type: 'input', label: 'Name' } }
+    const config: EasyUIConfig = {
+      defaults: { form: { loadingMessage: 'Loading resources…', disabledMessage: 'Editing is locked' } },
+    }
+
+    test('the global loadingMessage replaces the description while loading', () => {
+      renderForm({ fields, description: 'Helper text', isLoading: true }, config)
+      expect(screen.getByText('Loading resources…')).toBeDefined()
+      expect(screen.queryByText('Helper text')).toBeNull()
+    })
+
+    test('the global disabledMessage replaces the description while disabled', () => {
+      renderForm({ fields, description: 'Helper text', isDisabled: true }, config)
+      expect(screen.getByText('Editing is locked')).toBeDefined()
+    })
+
+    test('an instance message wins over the global one', () => {
+      renderForm({ fields, isLoading: true, loadingMessage: 'Fetching options…' }, config)
+      expect(screen.getByText('Fetching options…')).toBeDefined()
+      expect(screen.queryByText('Loading resources…')).toBeNull()
+    })
+
+    test('the description is untouched when neither state applies', () => {
+      renderForm({ fields, description: 'Helper text' }, config)
+      expect(screen.getByText('Helper text')).toBeDefined()
+    })
+  })
+
+  describe('submission errors', () => {
+    const fields: FormFields = { name: { type: 'input', label: 'Name' } }
+
+    class HttpError extends Error {
+      response: { status: number }
+      constructor(status: number) {
+        super(`HTTP ${status}`)
+        this.response = { status }
+      }
+    }
+
+    const readHttpStatus = (error: Error) =>
+      error instanceof HttpError ? String(error.response.status) : null
+
+    test('renders no alert when there is no error', () => {
+      renderForm({ fields })
+      expect(screen.queryByRole('alert')).toBeNull()
+    })
+
+    test('the error prop is displayed in an alert', () => {
+      renderForm({ fields, error: 'The server is unreachable' })
+      expect(screen.getByText('The server is unreachable')).toBeDefined()
+    })
+
+    test('a rejected submit whose status is mapped shows the mapped message', async () => {
+      renderForm({
+        fields,
+        onSubmit: () => Promise.reject(new HttpError(409)),
+        getSubmitErrorStatus: readHttpStatus,
+        submitErrorMessages: { 409: 'This resource already exists' },
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.getByText('This resource already exists')).toBeDefined()
+    })
+
+    test('an unmapped status shows nothing, the error is left to the caller', async () => {
+      const swallow = (event: PromiseRejectionEvent) => event.preventDefault()
+      window.addEventListener('unhandledrejection', swallow)
+      renderForm({
+        fields,
+        onSubmit: () => Promise.reject(new HttpError(503)),
+        getSubmitErrorStatus: readHttpStatus,
+        submitErrorMessages: { 409: 'This resource already exists' },
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.queryByRole('alert')).toBeNull()
+      window.removeEventListener('unhandledrejection', swallow)
+    })
+
+    test('an extractor that blows up on an unexpected error shape is neutralised', async () => {
+      const swallow = (event: PromiseRejectionEvent) => event.preventDefault()
+      window.addEventListener('unhandledrejection', swallow)
+      renderForm({
+        fields,
+        onSubmit: () => Promise.reject(new Error('plain error')),
+        getSubmitErrorStatus: (error) => (error as HttpError).response.status.toString(),
+        submitErrorMessages: { 409: 'This resource already exists' },
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.queryByRole('alert')).toBeNull()
+      window.removeEventListener('unhandledrejection', swallow)
+    })
+
+    test('onUnhandledSubmitError receives the errors the mapping did not cover', async () => {
+      const onUnhandledSubmitError = vi.fn()
+      const unmapped = new HttpError(503)
+      renderForm({
+        fields,
+        onSubmit: () => Promise.reject(unmapped),
+        getSubmitErrorStatus: readHttpStatus,
+        submitErrorMessages: { 409: 'This resource already exists' },
+        onUnhandledSubmitError,
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(onUnhandledSubmitError).toHaveBeenCalledWith(unmapped)
+      expect(screen.queryByRole('alert')).toBeNull()
+    })
+
+    test('onUnhandledSubmitError is not called for a mapped error', async () => {
+      const onUnhandledSubmitError = vi.fn()
+      renderForm({
+        fields,
+        onSubmit: () => Promise.reject(new HttpError(409)),
+        getSubmitErrorStatus: readHttpStatus,
+        submitErrorMessages: { 409: 'This resource already exists' },
+        onUnhandledSubmitError,
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(onUnhandledSubmitError).not.toHaveBeenCalled()
+      expect(screen.getByText('This resource already exists')).toBeDefined()
+    })
+
+    test('onUnhandledSubmitError alone receives every failure, without any mapping', async () => {
+      const onUnhandledSubmitError = vi.fn()
+      const failure = new Error('network down')
+      renderForm({ fields, onSubmit: () => Promise.reject(failure), onUnhandledSubmitError })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(onUnhandledSubmitError).toHaveBeenCalledWith(failure)
+    })
+
+    test('the error prop wins over a mapped submission error', async () => {
+      renderForm({
+        fields,
+        error: 'Controlled message',
+        onSubmit: () => Promise.reject(new HttpError(409)),
+        getSubmitErrorStatus: readHttpStatus,
+        submitErrorMessages: { 409: 'Mapped message' },
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.getByText('Controlled message')).toBeDefined()
+      expect(screen.queryByText('Mapped message')).toBeNull()
+    })
+
+    test('a mapped error is cleared when the form is submitted again', async () => {
+      let shouldFail = true
+      renderForm({
+        fields,
+        onSubmit: () => (shouldFail ? Promise.reject(new HttpError(409)) : Promise.resolve()),
+        getSubmitErrorStatus: readHttpStatus,
+        submitErrorMessages: { 409: 'This resource already exists' },
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.getByText('This resource already exists')).toBeDefined()
+
+      shouldFail = false
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.queryByText('This resource already exists')).toBeNull()
+    })
+
+    test('the global config provides both the extractor and the messages', async () => {
+      renderForm(
+        { fields, onSubmit: () => Promise.reject(new HttpError(500)) },
+        {
+          defaults: {
+            form: {
+              getSubmitErrorStatus: readHttpStatus,
+              submitErrorMessages: { 500: 'Server error, please retry' },
+            },
+          },
+        },
+      )
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.getByText('Server error, please retry')).toBeDefined()
+    })
+
+    test('instance messages merge with the global ones, key by key', async () => {
+      renderForm(
+        {
+          fields,
+          onSubmit: () => Promise.reject(new HttpError(500)),
+          submitErrorMessages: { 409: 'Overridden conflict' },
+        },
+        {
+          defaults: {
+            form: {
+              getSubmitErrorStatus: readHttpStatus,
+              submitErrorMessages: { 409: 'Global conflict', 500: 'Global server error' },
+            },
+          },
+        },
+      )
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.getByText('Global server error')).toBeDefined()
+    })
+
+    test('an instance message overrides the global one for the same status', async () => {
+      renderForm(
+        {
+          fields,
+          onSubmit: () => Promise.reject(new HttpError(409)),
+          submitErrorMessages: { 409: 'Overridden conflict' },
+        },
+        {
+          defaults: {
+            form: {
+              getSubmitErrorStatus: readHttpStatus,
+              submitErrorMessages: { 409: 'Global conflict' },
+            },
+          },
+        },
+      )
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(screen.getByText('Overridden conflict')).toBeDefined()
+      expect(screen.queryByText('Global conflict')).toBeNull()
+    })
   })
 
   describe('hiding the submit button', () => {

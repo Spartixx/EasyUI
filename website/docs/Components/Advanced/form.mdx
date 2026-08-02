@@ -81,6 +81,89 @@ form.fields.email.error      // current error (or null)
 form.reset()
 ```
 
+## Submission errors
+
+When your `onSubmit` fails, the form displays the reason in an [`Alert`](../Primitives/alert.mdx) under the title.
+
+### Mapping status codes to messages
+
+You can map a message to a status code to make error handling easier.
+Define how to read the status code from the error — only you can know that — and the form displays the matching
+message whenever a submission fails with a status you declared.
+Error handling then becomes pure configuration.
+
+```tsx
+<Form
+  form={form}
+  onSubmit={(values) => createAccount(values)}
+  getSubmitErrorStatus={(error: AxiosError) => error.response?.status.toString() ?? null}
+  submitErrorMessages={{
+    409: 'This email address is already taken',
+    500: 'Server error, please try again',
+  }}
+/>
+```
+
+- `getSubmitErrorStatus` returns the status read from the error — only you know where it lives;
+- `submitErrorMessages` maps that status to a message. Keys accept strings as well as numbers.
+
+### Errors the mapping does not cover
+
+`onUnhandledSubmitError` receives them, and only them: an error already turned into a message never reaches it.
+Use it to handle everything the mapping does not cover.
+
+```tsx
+const [error, setError] = useState<string | undefined>(undefined)
+
+<Form
+  form={form}
+  error={error}
+  onSubmit={(values) => createAccount(values)}
+  getSubmitErrorStatus={(error: AxiosError) => error.response?.status.toString() ?? null}
+  submitErrorMessages={{ 409: 'This email address is already taken' }}
+  onUnhandledSubmitError={(submitError) =>
+    setError(`Your account could not be created (${submitError.message}).`)
+  }
+/>
+```
+
+A 409 shows the mapped message; anything else lands in the callback, which receives the error itself so you can build
+the message from it and display it through the `error` prop. Note that `submitError` needs no annotation here: the
+type comes from the one written on `getSubmitErrorStatus` just above.
+
+With no mapping at all, every failed submission goes to it.
+
+Without this callback the error is rethrown, so you can catch it inside your own `onSubmit` as usual.
+
+Three more rules govern the result:
+
+- **`error` always wins** over a mapped message, like the `error` prop of every field primitive;
+- a mapped error is **cleared at the start of the next submit**, so a fixed problem stops being reported;
+- if `getSubmitErrorStatus` itself throws on an error it did not expect, its own failure is discarded rather than
+  replacing the real error, which is then treated as unmapped.
+
+### Declaring it once for the whole app
+
+`getSubmitErrorStatus` depends on the shape of your errors, not on your forms — an HTTP client, an internal service
+raising its own errors, whatever your `onSubmit` calls. The same function therefore usually fits every form, so
+declare it once in [`defaults.form`](../../Customize/defaults.md), with a set of generic messages beside it. A form
+then declares only what is specific to it: its `submitErrorMessages` are merged with the global ones key by key.
+
+There, the parameter is a plain `Error`: the form calls it with whatever was thrown, so it cannot promise a more
+precise type. Narrow it yourself, with a type guard rather than a cast:
+
+```ts
+// global config
+getSubmitErrorStatus: (error) => (axios.isAxiosError(error) ? String(error.response?.status) : null)
+
+// or with your own error class
+getSubmitErrorStatus: (error) => (error instanceof ApiError ? error.code : null)
+```
+
+A guard returns `null` for an error of another shape, which is then simply treated as unmapped. A cast would let the
+function crash on a missing property. On a form declaring its own, annotate the parameter and the type is
+inferred.
+
 ## Field types
 
 Each field declares a `type` (its category). The `input` type additionally accepts a `kind` mapped to the native `<input type>` (`email`, `tel`, `password`, `url`, ...).
@@ -348,6 +431,7 @@ Each field type has its own slot, alongside the container and action slots. Fiel
 | `header`            | wrapper around title + description     |
 | `title`             | the title heading                      |
 | `description`       | the description text                   |
+| `errorAlert`        | the submission error alert             |
 | `fieldsWrapper`     | container of all fields                |
 | `inputField`        | rendered `input` fields                |
 | `selectorField`     | rendered `selector` fields             |
@@ -366,22 +450,26 @@ These slots can also be set globally via [`EasyUIProvider`](../../Customize/glob
 
 ## Props
 
-| Prop              | Type                                           | Default | Description                                              |
-|-------------------|------------------------------------------------|---------|----------------------------------------------------------|
-| `form`            | `FormInstance`                                 | —       | The instance returned by `useForm(fields)`               |
-| `onSubmit`        | `(values, allValues) => void \| Promise<void>` | —       | Applicable fields, then every field (see above)          |
-| `title`           | `string`                                       | —       | Optional heading at the top of the form                  |
-| `description`     | `string`                                       | —       | Optional text under the title                            |
-| `actions`         | `FormActionsConfig`                            | —       | Labels, `onCancel`, `isSubmitButtonHidden`, button props |
-| `variant`         | `FormVariant`                                  | —       | Cascades to every field/button (see below)               |
-| `color`           | `FormColor`                                    | —       | Cascades to every field/button                           |
-| `isDisabled`      | `boolean`                                      | `false` | Disables every field and action                          |
-| `isLoading`       | `boolean`                                      | `false` | The form's resources are loading (see below)             |
-| `loadingMessage`  | `string`                                       | —       | Replaces the description while `isLoading`               |
-| `disabledMessage` | `string`                                       | —       | Replaces the description while `isDisabled`              |
-| `className`       | `string`                                       | —       | Class on the `<form>` root                               |
-| `classNames`      | `Partial<Record<FormSlots, string>>`           | —       | Per-slot classes                                         |
-| `preset`          | `string`                                       | —       | Named preset from the global config                      |
+| Prop                     | Type                                           | Default | Description                                              |
+|--------------------------|------------------------------------------------|---------|----------------------------------------------------------|
+| `form`                   | `FormInstance`                                 | —       | The instance returned by `useForm(fields)`               |
+| `onSubmit`               | `(values, allValues) => void \| Promise<void>` | —       | Applicable fields, then every field (see above)          |
+| `title`                  | `string`                                       | —       | Optional heading at the top of the form                  |
+| `description`            | `string`                                       | —       | Optional text under the title                            |
+| `actions`                | `FormActionsConfig`                            | —       | Labels, `onCancel`, `isSubmitButtonHidden`, button props |
+| `error`                  | `string`                                       | —       | Submission error, rendered in an alert under the title   |
+| `submitErrorMessages`    | `Record<string \| number, string>`                       | —       | Status code → message, merged with the global defaults   |
+| `getSubmitErrorStatus`   | `(error) => string \| null`                    | —       | Reads the status out of a rejected `onSubmit`            |
+| `onUnhandledSubmitError` | `(error) => void`                              | —       | Called only for errors the mapping did not cover         |
+| `variant`                | `FormVariant`                                  | —       | Cascades to every field/button (see below)               |
+| `color`                  | `FormColor`                                    | —       | Cascades to every field/button                           |
+| `isDisabled`             | `boolean`                                      | `false` | Disables every field and action                          |
+| `isLoading`              | `boolean`                                      | `false` | The form's resources are loading (see below)             |
+| `loadingMessage`         | `string`                                       | —       | Replaces the description while `isLoading`               |
+| `disabledMessage`        | `string`                                       | —       | Replaces the description while `isDisabled`              |
+| `className`              | `string`                                       | —       | Class on the `<form>` root                               |
+| `classNames`             | `Partial<Record<FormSlots, string>>`           | —       | Per-slot classes                                         |
+| `preset`                 | `string`                                       | —       | Named preset from the global config                      |
 
 ### `useForm(fields)` returns
 

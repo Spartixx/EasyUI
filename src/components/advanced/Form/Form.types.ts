@@ -27,6 +27,7 @@ export type FormSlots =
   | 'header'
   | 'title'
   | 'description'
+  | 'errorAlert'
   | 'fieldsWrapper'
   | 'inputField'
   | 'selectorField'
@@ -276,10 +277,16 @@ export interface FormActionsConfig {
   cancelProps?: Partial<ButtonProps>
 }
 
-export interface FormProps<TFields extends FormFields = FormFields>
+export type SubmitErrorMessages = Record<string | number, string>
+
+export interface FormProps<TFields extends FormFields = FormFields, TSubmitError = Error>
   extends Omit<ComponentPropsWithoutRef<'form'>, 'onSubmit' | 'children'> {
   form: FormInstance<TFields>
   onSubmit: FormSubmitHandler<TFields>
+  error?: string
+  submitErrorMessages?: SubmitErrorMessages
+  getSubmitErrorStatus?: (error: TSubmitError) => string | null
+  onUnhandledSubmitError?: (error: TSubmitError) => void
   title?: string
   description?: string
   loadingMessage?: string

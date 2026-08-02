@@ -45,10 +45,10 @@ function SubmittedValuesPanel<TFields extends FormFields>({
   )
 }
 
-export function FormWithSubmittedValues<TFields extends FormFields>({
+export function FormWithSubmittedValues<TFields extends FormFields, TSubmitError = Error>({
   onSubmit,
   ...formProps
-}: Omit<FormProps<TFields>, 'onSubmit'> & { onSubmit?: FormSubmitHandler<TFields> }) {
+}: Omit<FormProps<TFields, TSubmitError>, 'onSubmit'> & { onSubmit?: FormSubmitHandler<TFields> }) {
   const [submitted, setSubmitted] = useState<SubmittedPayloads<TFields> | null>(null)
 
   const handleSubmit: FormSubmitHandler<TFields> = async (values, allValues) => {
