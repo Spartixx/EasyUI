@@ -28,6 +28,7 @@ interface HarnessProps {
   isLoading?: boolean
   className?: string
   classNames?: Record<string, string>
+  id?: string
   formRef?: Ref<HTMLFormElement>
 }
 
@@ -603,6 +604,73 @@ describe('Form', () => {
     await userEvent.click(custom)
     await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
     expectSubmittedWith(onSubmit, { toggle: 'on' })
+  })
+
+  describe('hiding the submit button', () => {
+    test('isSubmitButtonHidden removes the submit button', () => {
+      renderForm({
+        fields: { name: { type: 'input', label: 'Name' } },
+        actions: { isSubmitButtonHidden: true },
+      })
+      expect(screen.queryByRole('button', { name: 'Submit' })).toBeNull()
+    })
+
+    test('the cancel button survives on its own', () => {
+      renderForm({
+        fields: { name: { type: 'input', label: 'Name' } },
+        actions: { isSubmitButtonHidden: true, onCancel: () => {} },
+      })
+      expect(screen.queryByRole('button', { name: 'Submit' })).toBeNull()
+      expect(screen.getByRole('button', { name: 'Cancel' })).toBeDefined()
+    })
+
+    test('the actions row is not rendered at all when it would be empty', () => {
+      const { container } = renderForm({
+        fields: { name: { type: 'input', label: 'Name' } },
+        actions: { isSubmitButtonHidden: true },
+      })
+      expect(container.querySelector('form > .justify-end')).toBeNull()
+    })
+
+    test('a submit button outside the form still submits it through the native form attribute', async () => {
+      const onSubmit = vi.fn()
+      render(
+        <>
+          <TestForm
+            fields={{ name: { type: 'input', label: 'Name' } }}
+            onSubmit={onSubmit}
+            actions={{ isSubmitButtonHidden: true }}
+            id="external-form"
+          />
+          <button type="submit" form="external-form">
+            Save from outside
+          </button>
+        </>,
+      )
+      await userEvent.type(screen.getByLabelText('Name'), 'Ada')
+      await userEvent.click(screen.getByRole('button', { name: 'Save from outside' }))
+      expectSubmittedWith(onSubmit, { name: 'Ada' })
+    })
+
+    test('validation still blocks a submit triggered from outside the form', async () => {
+      const onSubmit = vi.fn()
+      render(
+        <>
+          <TestForm
+            fields={{ name: { type: 'input', label: 'Name', isRequired: true } }}
+            onSubmit={onSubmit}
+            actions={{ isSubmitButtonHidden: true }}
+            id="guarded-form"
+          />
+          <button type="submit" form="guarded-form">
+            Save from outside
+          </button>
+        </>,
+      )
+      await userEvent.click(screen.getByRole('button', { name: 'Save from outside' }))
+      expect(onSubmit).not.toHaveBeenCalled()
+      expect(screen.getByText('This field is required')).toBeDefined()
+    })
   })
 
   describe('actions', () => {
