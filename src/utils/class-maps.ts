@@ -20,6 +20,44 @@ export const ARROW_SIZE_CLASSES: Record<NonNullable<EasyUIBaseProps['size']>, st
   lg: 'size-6',
 }
 
+export const SURFACE_VARIANT_COLOR_CLASSES: Record<
+  NonNullable<WithVariantProps['variant']>,
+  Record<NonNullable<WithVariantProps['color']>, string>
+> = {
+  solid: {
+    default: 'bg-(--easyui-color-default) text-(--easyui-color-default-foreground)',
+    primary: 'bg-(--easyui-color-primary) text-(--easyui-color-primary-foreground)',
+    secondary: 'bg-(--easyui-color-secondary) text-(--easyui-color-secondary-foreground)',
+    success: 'bg-(--easyui-color-success) text-(--easyui-color-success-foreground)',
+    warning: 'bg-(--easyui-color-warning) text-(--easyui-color-warning-foreground)',
+    error: 'bg-(--easyui-color-error) text-(--easyui-color-error-foreground)',
+  },
+  outlined: {
+    default: 'border-solid border-[length:var(--easyui-border-width-md)] border-(--easyui-color-default) text-(--easyui-color-default-foreground)',
+    primary: 'border-solid border-[length:var(--easyui-border-width-md)] border-(--easyui-color-primary) text-(--easyui-color-primary)',
+    secondary: 'border-solid border-[length:var(--easyui-border-width-md)] border-(--easyui-color-secondary) text-(--easyui-color-secondary)',
+    success: 'border-solid border-[length:var(--easyui-border-width-md)] border-(--easyui-color-success) text-(--easyui-color-success)',
+    warning: 'border-solid border-[length:var(--easyui-border-width-md)] border-(--easyui-color-warning) text-(--easyui-color-warning)',
+    error: 'border-solid border-[length:var(--easyui-border-width-md)] border-(--easyui-color-error) text-(--easyui-color-error)',
+  },
+  flat: {
+    default: 'bg-(--easyui-color-default)/40 text-(--easyui-color-default-foreground)',
+    primary: 'bg-(--easyui-color-primary)/20 text-(--easyui-color-primary-dark)',
+    secondary: 'bg-(--easyui-color-secondary)/20 text-(--easyui-color-secondary-dark)',
+    success: 'bg-(--easyui-color-success)/20 text-(--easyui-color-success-dark)',
+    warning: 'bg-(--easyui-color-warning)/20 text-(--easyui-color-warning-dark)',
+    error: 'bg-(--easyui-color-error)/20 text-(--easyui-color-error-dark)',
+  },
+  light: {
+    default: 'text-(--easyui-color-default-foreground)',
+    primary: 'text-(--easyui-color-primary)',
+    secondary: 'text-(--easyui-color-secondary)',
+    success: 'text-(--easyui-color-success)',
+    warning: 'text-(--easyui-color-warning)',
+    error: 'text-(--easyui-color-error)',
+  },
+}
+
 export const LABEL_COLOR_CLASSES: Record<NonNullable<WithVariantProps['color']>, string> = {
   default: 'text-(--easyui-color-default-foreground)',
   primary: 'text-(--easyui-color-primary-dark)',

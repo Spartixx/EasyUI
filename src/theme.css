@@ -15,6 +15,10 @@
   --easyui-color-warning-foreground: #ffffff;
   --easyui-color-error: #d61515;
   --easyui-color-error-foreground: #ffffff;
+  --easyui-color-default-dark: light-dark(
+    color-mix(in srgb, var(--easyui-color-default) 70%, black),
+    color-mix(in srgb, var(--easyui-color-default) 70%, white)
+  );
   --easyui-color-primary-dark: light-dark(
     color-mix(in srgb, var(--easyui-color-primary) 70%, black),
     color-mix(in srgb, var(--easyui-color-primary) 70%, white)

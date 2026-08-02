@@ -1,10 +1,11 @@
 import React from 'react';
-import { Button, Spinner, Input, InputNumber, Selector, Autocomplete } from '../../../../src';
+import { Alert, Button, Spinner, Input, InputNumber, Selector, Autocomplete } from '../../../../src';
 import { ArrowLeft, ArrowRight, Search, Mail, Apple } from 'lucide-react';
 
 const ReactLiveScope: unknown = {
   React,
   ...React,
+  Alert,
   Button,
   Spinner,
   Input,

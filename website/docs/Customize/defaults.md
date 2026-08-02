@@ -28,6 +28,9 @@ export default defineConfig({
     inputsGroup: {
       addLabel: 'Add another',
     },
+    alert: {
+      closeButtonLabel: 'Dismiss',
+    },
   },
 })
 ```
@@ -51,6 +54,7 @@ Without a provider (or with the key left unset), each component falls back to it
 | `autocomplete.noResultsMessage`| `string` | `Autocomplete`                                 | `'No results found'`      |
 | `selector.noResultsMessage`    | `string` | `Selector`                                     | `'No results found'`      |
 | `inputsGroup.addLabel`         | `string` | `InputsGroup`                                  | `'Add'`                   |
+| `alert.closeButtonLabel`       | `string` | `Alert`                                        | `'Close'`                 |
 
 ## `requiredMessage`
 
@@ -100,6 +104,22 @@ The label of the [`InputsGroup`](../Components/Advanced/inputsGroup.mdx) add but
 ```tsx
 <EasyUIProvider config={{ defaults: { inputsGroup: { addLabel: 'Add another' } } }}>
   <InputsGroup label="Tags" initialValues={[{ value: '' }]} />
+</EasyUIProvider>
+```
+
+## `alert.closeButtonLabel`
+
+The accessible label of the [`Alert`](../Components/Primitives/alert.mdx) close button, rendered when `isClosable`
+is set. The button shows an icon only, so this label is what screen readers announce. The instance
+`closeButtonLabel` prop overrides it.
+
+```tsx
+<EasyUIProvider config={{ defaults: { alert: { closeButtonLabel: 'Dismiss' } } }}>
+  {/* the close button is announced as "Dismiss" */}
+  <Alert isClosable title="Update available" />
+
+  {/* overrides the default for this instance only */}
+  <Alert isClosable closeButtonLabel="Hide this notice" title="Maintenance tonight" />
 </EasyUIProvider>
 ```
 
