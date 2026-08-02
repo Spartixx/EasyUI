@@ -31,6 +31,15 @@ export default defineConfig({
     alert: {
       closeButtonLabel: 'Dismiss',
     },
+    form: {
+      loadingMessage: 'Loading the form…',
+      disabledMessage: 'This form is currently locked',
+      getSubmitErrorStatus: (error) => (axios.isAxiosError(error) ? String(error.response?.status) : null),
+      submitErrorMessages: {
+        409: 'This resource already exists',
+        500: 'Server error, please try again',
+      },
+    },
   },
 })
 ```
@@ -55,6 +64,10 @@ Without a provider (or with the key left unset), each component falls back to it
 | `selector.noResultsMessage`    | `string` | `Selector`                                     | `'No results found'`      |
 | `inputsGroup.addLabel`         | `string` | `InputsGroup`                                  | `'Add'`                   |
 | `alert.closeButtonLabel`       | `string` | `Alert`                                        | `'Close'`                 |
+| `form.loadingMessage`          | `string` | `Form`                                         | —                         |
+| `form.disabledMessage`         | `string` | `Form`                                         | —                         |
+| `form.getSubmitErrorStatus`    | `(error: Error) => string \| null` | `Form`                | —                         |
+| `form.submitErrorMessages`     | `Record<string \| number, string>` | `Form`                       | —                         |
 
 ## `requiredMessage`
 
@@ -122,6 +135,57 @@ is set. The button shows an icon only, so this label is what screen readers anno
   <Alert isClosable closeButtonLabel="Hide this notice" title="Maintenance tonight" />
 </EasyUIProvider>
 ```
+
+## `form.loadingMessage` and `form.disabledMessage`
+
+Both replace the form **description** while it is loading its resources (`isLoading`) or disabled (`isDisabled`),
+loading winning if both apply. The instance props of the same name override them.
+
+```tsx
+<EasyUIProvider config={{ defaults: { form: { loadingMessage: 'Loading the form…' } } }}>
+  {/* shows "Loading the form…" instead of its description */}
+  <Form form={form} onSubmit={onSubmit} description="Fill in your details" isLoading />
+</EasyUIProvider>
+```
+
+## `form.getSubmitErrorStatus` and `form.submitErrorMessages`
+
+Together they turn a failed submission into a message, so no form needs its own `try/catch`.
+`getSubmitErrorStatus` reads a status code out of the error your `onSubmit` threw, and `submitErrorMessages` maps that
+code to the text shown in the form's alert. The instance props of the same name override them — see
+[submission errors](../Components/Advanced/form.mdx#mapping-status-codes-to-messages) for the full behaviour.
+
+Reading the status belongs here rather than on each form: it depends on the shape of your errors, which rarely varies
+across an application.
+
+```tsx
+<EasyUIProvider
+  config={{
+    defaults: {
+      form: {
+        getSubmitErrorStatus: (error) => (axios.isAxiosError(error) ? String(error.response?.status) : null),
+        submitErrorMessages: {
+          409: 'This resource already exists',
+          500: 'Server error, please try again',
+        },
+      },
+    },
+  }}
+>
+  {/* uses both generic messages */}
+  <Form form={form} onSubmit={onSubmit} />
+
+  {/* says something more precise about 500, and still inherits the global 409 */}
+  <Form form={form} onSubmit={onSubmit} submitErrorMessages={{ 500: 'Your invoice could not be issued' }} />
+</EasyUIProvider>
+```
+
+`submitErrorMessages` is the only key on this page that is **merged** with its instance counterpart rather than
+replaced: a form overrides the codes it cares about and inherits the rest.
+
+Here `getSubmitErrorStatus` receives a plain `Error`, because the form calls it with whatever was thrown and cannot
+promise anything more precise. Narrow it inside the function with a type guard rather than a cast, as above: an error
+of another shape then returns `null` and is treated as unmapped, instead of crashing on a missing property.
 
 ## Extensibility
 
