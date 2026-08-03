@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ChangeEvent, FocusEvent, KeyboardEvent, RefObject } from 'react'
+import type { ChangeEvent, FocusEvent, KeyboardEvent, MouseEvent, RefObject } from 'react'
 import type {
   AutocompleteOption as AutocompleteOptionData,
   AutocompleteCommonProps,
@@ -85,12 +85,14 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
     startContentPlacement = 'inside',
     endContentPlacement = 'inside',
     noResultsMessage,
+    isInputClearedOnFocus,
     arrow,
     arrowPlacement = 'end',
     isArrowHidden = false,
     onKeyDown,
     onFocus,
     onBlur,
+    onClick,
     validations,
     ...nativeProps
   } = { ...presetConfig?.props, ...rest }
@@ -145,6 +147,8 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
   const slotClassName = useSlotClassNames('autocomplete', classNames, presetClassNames, presetConfig?.className)
 
   const resolvedNoResultsMessage = noResultsMessage ?? defaults?.autocomplete?.noResultsMessage
+  const resolvedIsInputClearedOnFocus =
+    isInputClearedOnFocus ?? defaults?.autocomplete?.isInputClearedOnFocus ?? false
 
   const isAutocompleteDisabled = isDisabled || isLoading
 
@@ -159,6 +163,11 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
   const revertInputText = () => {
     setIsUserTyping(false)
     if (isMultiple) setTypedText('')
+  }
+
+  const clearInputText = () => {
+    setTypedText('')
+    setIsUserTyping(true)
   }
 
   const { isOpen, activeIndex, setActiveIndex, enabledIndexes, openListbox, closeListbox, handleArrowKey } =
@@ -240,7 +249,17 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
 
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
     onFocus?.(e)
-    if (!isAutocompleteDisabled) openListbox()
+    if (isAutocompleteDisabled) return
+    if (resolvedIsInputClearedOnFocus) clearInputText()
+    openListbox()
+  }
+
+  const handleClick = (e: MouseEvent<HTMLInputElement>) => {
+    onClick?.(e)
+    if (isAutocompleteDisabled || !resolvedIsInputClearedOnFocus) return
+    if (isOpen) return
+    clearInputText()
+    openListbox()
   }
 
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
@@ -325,6 +344,7 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
         onChange={handleInputChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        onClick={handleClick}
         onKeyDown={handleKeyDown}
         className={cn(
           'flex-1 bg-transparent outline-none min-w-0',

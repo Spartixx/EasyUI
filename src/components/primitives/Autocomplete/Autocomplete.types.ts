@@ -51,6 +51,7 @@ export interface AutocompleteCommonProps
   isRequired?: boolean
   validations?: Array<(option: AutocompleteOption) => string | null>
   noResultsMessage?: string
+  isInputClearedOnFocus?: boolean
   arrow?: ReactNode
   arrowPlacement?: 'start' | 'end'
   isArrowHidden?: boolean

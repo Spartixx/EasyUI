@@ -21,6 +21,7 @@ export default defineConfig({
     requiredMessage: 'This field is mandatory',
     autocomplete: {
       noResultsMessage: 'Nothing found',
+      isInputClearedOnFocus: true,
     },
     selector: {
       noResultsMessage: 'No option available',
@@ -57,17 +58,18 @@ Without a provider (or with the key left unset), each component falls back to it
 
 ## Shape
 
-| Key                            | Type     | Applies to                                     | Built-in fallback         |
-|--------------------------------|----------|------------------------------------------------|---------------------------|
-| `requiredMessage`              | `string` | Every field (`Input`, `InputNumber`, `Selector`, `Autocomplete`, `Form`) | `'This field is required'` |
-| `autocomplete.noResultsMessage`| `string` | `Autocomplete`                                 | `'No results found'`      |
-| `selector.noResultsMessage`    | `string` | `Selector`                                     | `'No results found'`      |
-| `inputsGroup.addLabel`         | `string` | `InputsGroup`                                  | `'Add'`                   |
-| `alert.closeButtonLabel`       | `string` | `Alert`                                        | `'Close'`                 |
-| `form.loadingMessage`          | `string` | `Form`                                         | —                         |
-| `form.disabledMessage`         | `string` | `Form`                                         | —                         |
-| `form.getSubmitErrorStatus`    | `(error: Error) => string \| null` | `Form`                | —                         |
-| `form.submitErrorMessages`     | `Record<string \| number, string>` | `Form`                       | —                         |
+| Key                                  | Type                               | Applies to                                                               | Built-in fallback          |
+|--------------------------------------|------------------------------------|--------------------------------------------------------------------------|----------------------------|
+| `requiredMessage`                    | `string`                           | Every field (`Input`, `InputNumber`, `Selector`, `Autocomplete`, `Form`) | `'This field is required'` |
+| `autocomplete.noResultsMessage`      | `string`                           | `Autocomplete`                                                           | `'No results found'`       |
+| `autocomplete.isInputClearedOnFocus` | `boolean`                          | `Autocomplete`                                                           | `false`                    |
+| `selector.noResultsMessage`          | `string`                           | `Selector`                                                               | `'No results found'`       |
+| `inputsGroup.addLabel`               | `string`                           | `InputsGroup`                                                            | `'Add'`                    |
+| `alert.closeButtonLabel`             | `string`                           | `Alert`                                                                  | `'Close'`                  |
+| `form.loadingMessage`                | `string`                           | `Form`                                                                   | —                          |
+| `form.disabledMessage`               | `string`                           | `Form`                                                                   | —                          |
+| `form.getSubmitErrorStatus`          | `(error: Error) => string \| null` | `Form`                                                                   | —                          |
+| `form.submitErrorMessages`           | `Record<string \| number, string>` | `Form`                                                                   | —                          |
 
 ## `requiredMessage`
 
@@ -97,6 +99,19 @@ The message the `Autocomplete` listbox shows when no option matches the typed te
   <Autocomplete options={options} />
 </EasyUIProvider>
 ```
+
+## `autocomplete.isInputClearedOnFocus`
+
+Whether focusing an `Autocomplete` empties its input so the user can type a new search immediately.
+
+```tsx
+<EasyUIProvider config={{ defaults: { autocomplete: { isInputClearedOnFocus: true } } }}>
+  <Autocomplete options={options} defaultValue="apple" />
+  <Autocomplete options={options} defaultValue="apple" isInputClearedOnFocus={false} />
+</EasyUIProvider>
+```
+
+See [Clear on focus](../Components/Primitives/autocomplete.mdx#clear-on-focus) for the full behaviour.
 
 ## `selector.noResultsMessage`
 
