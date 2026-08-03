@@ -402,6 +402,31 @@ The submit and cancel buttons sit at the bottom right, cancel to the left of sub
 />
 ```
 
+### Resetting
+
+The form clears itself back to its initial values in two situations, both on by default:
+
+- **`isResetOnSubmit`** — after a submit that actually went through. A failed validation never reaches `onSubmit`,
+  and a rejected `onSubmit` leaves everything in place, so the user never loses what they typed because of an error.
+- **`isResetOnCancel`** — when the cancel button is pressed, before your own `onCancel` runs.
+
+Set either to `false` to keep the values, which is what you want when the user should be able to pick up where they
+left off.
+
+```tsx
+{/* the values survive both the submit and the cancel */}
+<Form
+  form={form}
+  onSubmit={onSubmit}
+  isResetOnSubmit={false}
+  isResetOnCancel={false}
+  actions={{ onCancel: closePanel }}
+/>
+```
+
+Resetting also clears the validation errors and remounts the fields, so no stale entry is left behind. You can
+still trigger it yourself at any time with `form.reset()`.
+
 ### Submitting from outside the form
 
 `isSubmitButtonHidden` removes the built-in submit button. Use it when the action belongs somewhere else — a modal
@@ -458,7 +483,7 @@ These slots can also be set globally via [`EasyUIProvider`](../../Customize/glob
 | `description`            | `string`                                       | —       | Optional text under the title                            |
 | `actions`                | `FormActionsConfig`                            | —       | Labels, `onCancel`, `isSubmitButtonHidden`, button props |
 | `error`                  | `string`                                       | —       | Submission error, rendered in an alert under the title   |
-| `submitErrorMessages`    | `Record<string \| number, string>`                       | —       | Status code → message, merged with the global defaults   |
+| `submitErrorMessages`    | `Record<string \| number, string>`             | —       | Status code → message, merged with the global defaults   |
 | `getSubmitErrorStatus`   | `(error) => string \| null`                    | —       | Reads the status out of a rejected `onSubmit`            |
 | `onUnhandledSubmitError` | `(error) => void`                              | —       | Called only for errors the mapping did not cover         |
 | `variant`                | `FormVariant`                                  | —       | Cascades to every field/button (see below)               |
@@ -467,24 +492,26 @@ These slots can also be set globally via [`EasyUIProvider`](../../Customize/glob
 | `isLoading`              | `boolean`                                      | `false` | The form's resources are loading (see below)             |
 | `loadingMessage`         | `string`                                       | —       | Replaces the description while `isLoading`               |
 | `disabledMessage`        | `string`                                       | —       | Replaces the description while `isDisabled`              |
+| `isResetOnSubmit`        | `boolean`                                      | `true`  | Resets the form after a submit that went through         |
+| `isResetOnCancel`        | `boolean`                                      | `true`  | Resets the form when the cancel button is pressed        |
 | `className`              | `string`                                       | —       | Class on the `<form>` root                               |
 | `classNames`             | `Partial<Record<FormSlots, string>>`           | —       | Per-slot classes                                         |
 | `preset`                 | `string`                                       | —       | Named preset from the global config                      |
 
 ### `useForm(fields)` returns
 
-| Member          | Description                                        |
-|-----------------|----------------------------------------------------|
-| `fields[name]`  | `{ value, setValue, error, isVisible, isTouched }` |
-| `values`        | current values of every field                      |
-| `setValue`      | `(name, value) => void`                            |
-| `getFieldState` | `(name) => fields[name]`                           |
-| `validate`      | validate all visible fields, returns `boolean`     |
-| `handleSubmit`  | validate then call the submit handler              |
-| `reset`         | reset all fields to their initial values           |
-| `isValid`       | whether the form currently passes validation       |
-| `isSubmitting`  | `true` while an async `onSubmit` is running        |
-| `isDirty`       | whether any value differs from its initial value   |
+| Member          | Description                                                                                        |
+|-----------------|----------------------------------------------------------------------------------------------------|
+| `fields[name]`  | `{ value, setValue, error, isVisible, isTouched }`                                                 |
+| `values`        | current values of every field                                                                      |
+| `setValue`      | `(name, value) => void`                                                                            |
+| `getFieldState` | `(name) => fields[name]`                                                                           |
+| `validate`      | validate all visible fields, returns `boolean`                                                     |
+| `handleSubmit`  | validate, then call the submit handler: resolves to `false` if validation failed, `true` otherwise |
+| `reset`         | reset all fields to their initial values                                                           |
+| `isValid`       | whether the form currently passes validation                                                       |
+| `isSubmitting`  | `true` while an async `onSubmit` is running                                                        |
+| `isDirty`       | whether any value differs from its initial value                                                   |
 
 ## Storybook
 

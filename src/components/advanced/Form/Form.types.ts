@@ -1,6 +1,8 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import type { WithVariantProps } from '../../../types/base'
 import type { FormFieldVariant } from '../../../utils/class-maps'
+import type { ActionsConfig, ButtonVariant } from '../../internal/actions'
+import type { SubmitErrorMessages } from '../../internal/submit'
 import type {
   InputProps,
   SelectorSingleProps,
@@ -9,7 +11,6 @@ import type {
   AutocompleteSingleProps,
   AutocompleteMultipleProps,
   AutocompleteOption,
-  ButtonProps,
 } from '../../primitives'
 import type {
   InputsGroupTextProps,
@@ -18,7 +19,7 @@ import type {
   InputsGroupNumberInitialValue,
 } from '../InputsGroup'
 
-export type ButtonVariant = NonNullable<WithVariantProps['variant']>
+export type { ButtonVariant }
 export type FormVariant = FormFieldVariant | ButtonVariant
 export type FormColor = NonNullable<WithVariantProps['color']>
 
@@ -252,7 +253,7 @@ export interface FormInstance<TFields extends FormFields = FormFields> {
   getFieldState: <FieldName extends keyof TFields>(name: FieldName) => FieldState<FieldValue<TFields[FieldName]>>
   handleBlur: (name: keyof TFields & string) => void
   validate: () => boolean
-  handleSubmit: (onSubmit: FormSubmitHandler<TFields>) => void | Promise<void>
+  handleSubmit: (onSubmit: FormSubmitHandler<TFields>) => Promise<boolean>
   reset: () => void
   resetToken: number
   isValid: boolean
@@ -265,19 +266,9 @@ export type FormSubmitHandler<TFields extends FormFields = FormFields> = (
   allValues: FormAllValues<TFields>,
 ) => void | Promise<void>
 
-export interface FormActionsConfig {
-  submitLabel?: string
-  loadingLabel?: string
-  submittingLabel?: string
-  cancelLabel?: string
-  onCancel?: () => void
-  showCancel?: boolean
-  isSubmitButtonHidden?: boolean
-  submitProps?: Partial<ButtonProps>
-  cancelProps?: Partial<ButtonProps>
-}
+export type FormActionsConfig = ActionsConfig
 
-export type SubmitErrorMessages = Record<string | number, string>
+export type { SubmitErrorMessages }
 
 export interface FormProps<TFields extends FormFields = FormFields, TSubmitError = Error>
   extends Omit<ComponentPropsWithoutRef<'form'>, 'onSubmit' | 'children'> {
@@ -289,6 +280,7 @@ export interface FormProps<TFields extends FormFields = FormFields, TSubmitError
   onUnhandledSubmitError?: (error: TSubmitError) => void
   title?: string
   description?: string
+  isHeaderHidden?: boolean
   loadingMessage?: string
   disabledMessage?: string
   actions?: FormActionsConfig
@@ -296,6 +288,8 @@ export interface FormProps<TFields extends FormFields = FormFields, TSubmitError
   color?: FormColor
   isDisabled?: boolean
   isLoading?: boolean
+  isResetOnCancel?: boolean
+  isResetOnSubmit?: boolean
   className?: string
   classNames?: Partial<Record<FormSlots, string>>
   preset?: string

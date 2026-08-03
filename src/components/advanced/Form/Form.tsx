@@ -1,31 +1,13 @@
-import { forwardRef, useState } from 'react'
+import { forwardRef } from 'react'
 import type { ReactElement, Ref } from 'react'
-import type { ButtonVariant, FormFields, FormProps, FormVariant } from './Form.types'
+import type { FormFields, FormProps } from './Form.types'
 import { cn } from '../../../utils/cn'
 import { useSlotClassNames, usePreset } from '../../../hooks'
 import { useEasyUIConfig } from '../../../providers/EasyUIContext'
-import { Alert, Button } from '../../primitives'
+import { Alert } from '../../primitives'
+import { ActionsFooter, resolveButtonVariant } from '../../internal/actions'
+import { useSubmitErrorMapping } from '../../internal/submit'
 import { FormField } from './FormField'
-
-const BUTTON_VARIANTS: ButtonVariant[] = ['solid', 'outlined', 'flat', 'light']
-
-function resolveButtonVariant(formVariant: FormVariant | undefined): ButtonVariant | undefined {
-  return formVariant && (BUTTON_VARIANTS as string[]).includes(formVariant)
-    ? (formVariant as ButtonVariant)
-    : undefined
-}
-
-function readSubmitErrorStatus<TSubmitError>(
-  getStatus: ((error: TSubmitError) => string | null) | undefined,
-  error: TSubmitError,
-): string | null {
-  if (!getStatus) return null
-  try {
-    return getStatus(error)
-  } catch {
-    return null
-  }
-}
 
 function FormInner<TFields extends FormFields, TSubmitError>(
   rawProps: FormProps<TFields, TSubmitError>,
@@ -43,6 +25,7 @@ function FormInner<TFields extends FormFields, TSubmitError>(
     onUnhandledSubmitError,
     title,
     description,
+    isHeaderHidden = false,
     loadingMessage,
     disabledMessage,
     actions,
@@ -50,6 +33,8 @@ function FormInner<TFields extends FormFields, TSubmitError>(
     color,
     isDisabled = false,
     isLoading = false,
+    isResetOnCancel = true,
+    isResetOnSubmit = true,
     className,
     classNames,
     ...nativeProps
@@ -59,29 +44,29 @@ function FormInner<TFields extends FormFields, TSubmitError>(
   const slotClassName = useSlotClassNames('form', classNames, presetClassNames, presetConfig?.className)
 
   const { defaults } = useEasyUIConfig()
-  const [mappedSubmitError, setMappedSubmitError] = useState<string | null>(null)
 
-  const resolveSubmitErrorStatus =
-    getSubmitErrorStatus ?? (defaults?.form?.getSubmitErrorStatus as typeof getSubmitErrorStatus)
-  const errorMessages = { ...defaults?.form?.submitErrorMessages, ...submitErrorMessages }
+  const { mappedError, runAndMapError } = useSubmitErrorMapping<TSubmitError>({
+    submitErrorMessages,
+    getSubmitErrorStatus,
+    onUnhandledSubmitError,
+    defaultSubmitErrorMessages: defaults?.form?.submitErrorMessages,
+    defaultGetSubmitErrorStatus: defaults?.form?.getSubmitErrorStatus as typeof getSubmitErrorStatus,
+  })
 
   const submitAndMapError = async () => {
-    setMappedSubmitError(null)
-    try {
-      await form.handleSubmit(onSubmit)
-    } catch (submitError) {
-      const status = readSubmitErrorStatus(resolveSubmitErrorStatus, submitError as TSubmitError)
-      const message = status === null ? undefined : errorMessages[status]
-      if (message !== undefined) {
-        setMappedSubmitError(message)
-        return
-      }
-      if (!onUnhandledSubmitError) throw submitError
-      onUnhandledSubmitError(submitError as TSubmitError)
-    }
+    let hasSubmitted = false
+    await runAndMapError(async () => {
+      hasSubmitted = await form.handleSubmit(onSubmit)
+    })
+    if (hasSubmitted && isResetOnSubmit) form.reset()
   }
 
-  const displayedError = error ?? mappedSubmitError
+  const handleCancel = () => {
+    if (isResetOnCancel) form.reset()
+    actions?.onCancel?.()
+  }
+
+  const displayedError = error ?? mappedError
   const fieldNames = Object.keys(form.config) as Array<keyof TFields & string>
   const showCancel = actions?.showCancel ?? !!actions?.onCancel
   const showSubmit = !actions?.isSubmitButtonHidden
@@ -94,12 +79,7 @@ function FormInner<TFields extends FormFields, TSubmitError>(
     (isLoading && resolvedLoadingMessage) || (isDisabled && resolvedDisabledMessage) || description
 
   const fieldsLoading = isLoading || form.isSubmitting
-
-  const submitLabel =
-    (form.isSubmitting && actions?.submittingLabel) ||
-    (isLoading && actions?.loadingLabel) ||
-    actions?.submitLabel ||
-    'Submit'
+  const showHeader = !isHeaderHidden && (title || effectiveDescription)
 
   return (
     <form
@@ -116,7 +96,7 @@ function FormInner<TFields extends FormFields, TSubmitError>(
       }}
       {...nativeProps}
     >
-      {(title || effectiveDescription) && (
+      {showHeader && (
         <div className={cn('flex flex-col gap-1', slotClassName('header'))}>
           {title && (
             <h2 className={cn('text-lg font-semibold text-(--easyui-color-foreground)', slotClassName('title'))}>
@@ -155,34 +135,20 @@ function FormInner<TFields extends FormFields, TSubmitError>(
         )}
       </div>
       {showActions && (
-        <div className={cn('flex justify-end gap-2', slotClassName('actions'))}>
-          {showCancel && (
-            <Button
-              type="button"
-              color={color ?? 'default'}
-              variant={buttonVariant ?? 'light'}
-              isDisabled={isDisabled || isLoading || form.isSubmitting}
-              onClick={actions?.onCancel}
-              className={slotClassName('cancelButton')}
-              {...actions?.cancelProps}
-            >
-              {actions?.cancelLabel ?? 'Cancel'}
-            </Button>
-          )}
-          {showSubmit && (
-            <Button
-              type="submit"
-              color={color ?? 'primary'}
-              variant={buttonVariant ?? 'solid'}
-              isLoading={form.isSubmitting}
-              isDisabled={isDisabled || isLoading}
-              className={slotClassName('submitButton')}
-              {...actions?.submitProps}
-            >
-              {submitLabel}
-            </Button>
-          )}
-        </div>
+        <ActionsFooter
+          actions={{ ...actions, onCancel: handleCancel }}
+          showSubmit={showSubmit}
+          showCancel={showCancel}
+          submitType="submit"
+          color={color}
+          buttonVariant={buttonVariant}
+          isDisabled={isDisabled}
+          isLoading={isLoading}
+          isSubmitting={form.isSubmitting}
+          className={slotClassName('actions')}
+          submitClassName={slotClassName('submitButton')}
+          cancelClassName={slotClassName('cancelButton')}
+        />
       )}
     </form>
   )

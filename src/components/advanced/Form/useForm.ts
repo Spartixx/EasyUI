@@ -258,7 +258,7 @@ export function useForm<TFields extends FormFields>(
       const nextErrors = computeErrors(fields, values, defaultRequiredMessage)
       setErrors(nextErrors)
       markTouched(Object.keys(nextErrors))
-      if (!isFormValid(nextErrors)) return
+      if (!isFormValid(nextErrors)) return false
 
       const currentVisibility = computeVisibility(fields, values)
       const visiblePayload: FormValues = {}
@@ -277,6 +277,7 @@ export function useForm<TFields extends FormFields>(
       } finally {
         setIsSubmitting(false)
       }
+      return true
     },
     [fields, values, markTouched, defaultRequiredMessage],
   )

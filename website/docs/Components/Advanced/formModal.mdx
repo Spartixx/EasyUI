@@ -1,0 +1,126 @@
+# FormModal
+
+A [Modal](./modal.mdx) whose body is a [Form](./form.mdx), with the form's submit button moved into the modal footer.
+
+## Usage
+
+```tsx
+import { FormModal, useForm, type FormFields } from '@easy-ui-react/easy-ui-react'
+import { useState } from 'react'
+
+const fields = {
+  name: { type: 'input', label: 'Full name', isRequired: true },
+  email: { type: 'input', kind: 'email', label: 'Email', isRequired: true },
+} satisfies FormFields
+
+export function Example() {
+  const [isOpen, setIsOpen] = useState(false)
+  const form = useForm(fields)
+
+  return (
+    <>
+      <button onClick={() => setIsOpen(true)}>New user</button>
+      <FormModal
+        form={form}
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+        title="New user"
+        description="Fill in the details to create the account."
+        formProps={{ onSubmit: (values) => api.createUser(values) }}
+      />
+    </>
+  )
+}
+```
+
+## How the props are split
+
+The modal owns the chrome, the form owns the data. Two props draw the line:
+
+- **`form`** — the instance returned by `useForm`.
+- **`formProps`** — everything the inner `<Form>` needs: `onSubmit`, validation, submit-error mapping, its own
+  `classNames`…
+
+`title`, `description`, `variant`, `color`, `isLoading` and `isDisabled` sit at the top level instead, because they
+concern both halves. The title and description are rendered by the **modal header**, and the inner form renders no
+header of its own; `variant`, `color`, `isLoading` and `isDisabled` cascade to the fields and to the footer buttons.
+
+Everything submit-related lives in `formProps`, since it is the form that submits:
+
+```tsx
+<FormModal
+  form={form}
+  isOpen={isOpen}
+  onOpenChange={setIsOpen}
+  title="New user"
+  formProps={{
+    onSubmit: (values) => api.createUser(values),
+    getSubmitErrorStatus: (error) => (axios.isAxiosError(error) ? String(error.response?.status) : null),
+    submitErrorMessages: { 409: 'This email is already taken' },
+  }}
+/>
+```
+
+See the [Form](./form.mdx) page for the full list of what `formProps` accepts.
+
+## Submitting
+
+The footer submit button submits the form natively, so the whole `Form` pipeline runs: validation first, then
+`onSubmit`, then the submit-error mapping if it rejects.
+
+That gives three outcomes:
+
+- **validation fails** — the errors show under the fields, `onSubmit` is never called, the modal stays open;
+- **submit rejects** — the mapped message shows in the form's alert, the modal stays open;
+- **submit succeeds** — the modal closes, unless `isClosedOnSubmit={false}`.
+
+The cancel button closes the modal without submitting anything.
+
+## Resetting on close
+
+The `useForm` instance lives in **your** component, so it outlives the modal: closing it unmounts the form but not
+its state. `isResetOnClose` bridges that gap, and is `true` by default — closing the modal calls `form.reset()`,
+so reopening it starts from the initial values, with no leftover entries and no leftover validation errors.
+
+It applies to every way of closing: the cancel button, the close icon, `Escape`, the backdrop, and the automatic
+close after a successful submit.
+
+```tsx
+{/* keeps what was typed, so the user can resume where they left off */}
+<FormModal form={form} isResetOnClose={false} formProps={{ onSubmit }} />
+```
+
+## Slots
+
+`classNames` targets the [modal slots](./modal.mdx#slots). The form's own slots are reachable through
+`formProps.classNames`.
+
+```tsx
+<FormModal
+  classNames={{ base: 'max-w-3xl' }}
+  formProps={{ classNames: { fieldsWrapper: 'gap-6' }, onSubmit }}
+/>
+```
+
+## Props
+
+| Prop             | Type                       | Description                                               |
+|------------------|----------------------------|-----------------------------------------------------------|
+| `form`           | `FormInstance`             | The instance returned by `useForm`                        |
+| `formProps`      | `FormModalFormProps`       | Props forwarded to the inner `Form`, including `onSubmit` |
+| `isResetOnClose` | `boolean` (default `true`) | Resets the form every time the modal closes               |
+| `title`          | `string`                   | Modal header title                                        |
+| `description`    | `string`                   | Modal header description                                  |
+| `variant`        | `FormVariant`              | Cascades to the fields and the footer buttons             |
+| `color`          | `FormColor`                | Cascades to the fields and the footer buttons             |
+| `isLoading`      | `boolean`                  | Fields in loading state, footer buttons disabled          |
+| `isDisabled`     | `boolean`                  | Disables the fields and the footer buttons                |
+
+Every other [Modal prop](./modal.mdx#props) is accepted, except those the form owns: `children`, `onSubmit`,
+`error`, `submitErrorMessages`, `getSubmitErrorStatus` and `onUnhandledSubmitError`.
+
+`FormModal` forwards `ref` to the dialog panel.
+
+## Storybook
+
+See it live in [Storybook](pathname:///storybook/?path=/story/advanced-formmodal--default).

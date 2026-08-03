@@ -6,6 +6,7 @@ import type { SelectorCommonProps, SelectorSlots } from '../components'
 import type { AutocompleteCommonProps, AutocompleteSlots } from '../components'
 import type { FormProps, FormSlots, SubmitErrorMessages } from '../components'
 import type { InputsGroupProps, InputsGroupSlots } from '../components'
+import type { ModalProps, ModalSlots } from '../components'
 
 export type SlotClassNames<TSlots extends string> = Partial<Record<TSlots, string>>
 
@@ -18,6 +19,7 @@ export interface EasyUIWrappersConfig {
   autocomplete?: SlotClassNames<AutocompleteSlots>
   form?: SlotClassNames<FormSlots>
   inputsGroup?: SlotClassNames<InputsGroupSlots>
+  modal?: SlotClassNames<ModalSlots>
 }
 
 export interface EasyUIPreset<TProps, TSlots extends string> {
@@ -73,6 +75,10 @@ export type InputsGroupPresetProps = Partial<
   >
 >
 
+export type ModalPresetProps = Partial<
+  Pick<ModalProps, 'actions' | 'size' | 'variant' | 'color' | 'isDisabled' | 'isClosedOnSubmit' | 'isCloseIconHidden' | 'isClosedOnBackdropClick' | 'isClosedOnEscape'>
+>
+
 export interface EasyUIPresetsConfig {
   alert?: Record<string, EasyUIPreset<AlertPresetProps, AlertSlots>>
   button?: Record<string, EasyUIPreset<ButtonPresetProps, ButtonSlots>>
@@ -82,6 +88,7 @@ export interface EasyUIPresetsConfig {
   autocomplete?: Record<string, EasyUIPreset<AutocompletePresetProps, AutocompleteSlots>>
   form?: Record<string, EasyUIPreset<FormPresetProps, FormSlots>>
   inputsGroup?: Record<string, EasyUIPreset<InputsGroupPresetProps, InputsGroupSlots>>
+  modal?: Record<string, EasyUIPreset<ModalPresetProps, ModalSlots>>
 }
 
 export interface EasyUIDefaultsConfig {
@@ -94,6 +101,11 @@ export interface EasyUIDefaultsConfig {
   }
   alert?: {
     closeButtonLabel?: string
+  }
+  modal?: {
+    closeIconButtonLabel?: string
+    submitErrorMessages?: SubmitErrorMessages
+    getSubmitErrorStatus?: (error: Error) => string | null
   }
   autocomplete?: {
     noResultsMessage?: string
