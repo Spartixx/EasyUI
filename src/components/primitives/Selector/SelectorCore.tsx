@@ -141,7 +141,7 @@ export function SelectorCore<TValue>(rawProps: SelectorCoreProps<TValue>) {
   const { defaults } = useEasyUIConfig()
   const resolvedNoResultsMessage = noResultsMessage ?? defaults?.selector?.noResultsMessage
 
-  const { fieldId: triggerId, listboxId, descriptionId, errorId, optionId } = useFieldIds(idProp)
+  const { fieldId: triggerId, labelId, listboxId, descriptionId, errorId, optionId } = useFieldIds(idProp)
 
   const [currentValue, setValue] = useControllableValue<TValue>(value, defaultValue)
   const selectedValues = behavior.toSelectedValues(currentValue)
@@ -350,6 +350,7 @@ export function SelectorCore<TValue>(rawProps: SelectorCoreProps<TValue>) {
       id={triggerId}
       disabled={isSelectorDisabled}
       role="combobox"
+      aria-labelledby={label ? labelId : undefined}
       aria-haspopup="listbox"
       aria-expanded={isOpen}
       aria-controls={isOpen ? listboxId : undefined}
@@ -426,7 +427,7 @@ export function SelectorCore<TValue>(rawProps: SelectorCoreProps<TValue>) {
       baseClassName={slotClassName('base')}
       isFullWidth={isFullWidth}
       label={label}
-      labelHtmlFor={triggerId}
+      labelAssociation={{ id: labelId }}
       labelClassName={cn(effectiveLabelColor, slotClassName('label'))}
       isRequired={isRequired}
       description={description}

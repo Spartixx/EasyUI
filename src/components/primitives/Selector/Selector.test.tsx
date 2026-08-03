@@ -731,11 +731,21 @@ describe('Selector', () => {
     expect(screen.getByText('Fruit')).toBeDefined()
   })
 
-  test('links label to trigger via htmlFor', () => {
+  test('links label to trigger via aria-labelledby', () => {
     render(<Selector options={fruitOptions} label="Fruit" />)
     const label = screen.getByText('Fruit')
     const trigger = screen.getByRole('combobox')
-    expect(label.getAttribute('for')).toBe(trigger.getAttribute('id'))
+    expect(trigger.getAttribute('aria-labelledby')).toBe(label.getAttribute('id'))
+  })
+
+  test('names the trigger with the label', () => {
+    render(<Selector options={fruitOptions} label="Fruit" />)
+    expect(screen.getByLabelText('Fruit')).toBe(screen.getByRole('combobox'))
+  })
+
+  test('omits aria-labelledby when there is no label', () => {
+    render(<Selector options={fruitOptions} />)
+    expect(screen.getByRole('combobox').getAttribute('aria-labelledby')).toBeNull()
   })
 
   test('shows asterisk in label when isRequired', () => {
@@ -769,6 +779,33 @@ describe('Selector', () => {
     const trigger = screen.getByRole('combobox')
     const error = screen.getByText('Required')
     expect(trigger.getAttribute('aria-describedby')).toBe(error.id)
+  })
+
+  describe('clickable zone', () => {
+    test('does not open the listbox when clicking the label', async () => {
+      render(<Selector options={fruitOptions} label="Fruit" />)
+      await userEvent.click(screen.getByText('Fruit'))
+      expect(screen.queryByRole('listbox')).toBeNull()
+    })
+
+    test('does not open the listbox when clicking the description', async () => {
+      render(<Selector options={fruitOptions} label="Fruit" description="Pick your favorite." />)
+      await userEvent.click(screen.getByText('Pick your favorite.'))
+      expect(screen.queryByRole('listbox')).toBeNull()
+    })
+
+    test('does not render the label as a labelling element', () => {
+      render(<Selector options={fruitOptions} label="Fruit" />)
+      const label = screen.getByText('Fruit')
+      expect(label.tagName).toBe('SPAN')
+      expect(label.getAttribute('for')).toBeNull()
+    })
+
+    test('opens the listbox when clicking the trigger', async () => {
+      render(<Selector options={fruitOptions} label="Fruit" />)
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByRole('listbox')).toBeDefined()
+    })
   })
 
   describe('arrow', () => {
