@@ -256,7 +256,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
       baseClassName={slotClassName('base')}
       isFullWidth={isFullWidth}
       label={labelPlacement === 'outside' ? label : undefined}
-      labelHtmlFor={inputId}
+      labelAssociation={{ htmlFor: inputId }}
       labelClassName={cn(effectiveLabelColor, slotClassName('label'))}
       isRequired={isRequired}
       description={description}

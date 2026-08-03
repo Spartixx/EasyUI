@@ -1,12 +1,14 @@
 import type { ReactNode } from 'react'
 import { cn } from '../../../utils/cn'
+import { FieldLabel } from './FieldLabel'
+import type { FieldLabelAssociation } from './FieldLabel'
 
 interface FieldLayoutProps {
   className?: string
   baseClassName?: string
   isFullWidth?: boolean
   label?: ReactNode
-  labelHtmlFor: string
+  labelAssociation: FieldLabelAssociation
   labelClassName?: string
   isRequired?: boolean
   description?: ReactNode
@@ -25,7 +27,7 @@ export function FieldLayout({
   baseClassName,
   isFullWidth,
   label,
-  labelHtmlFor,
+  labelAssociation,
   labelClassName,
   isRequired,
   description,
@@ -47,14 +49,9 @@ export function FieldLayout({
   return (
     <div className={cn('flex flex-col gap-1', isFullWidth ? 'w-full' : 'w-80', baseClassName, className)}>
       {label && (
-        <label htmlFor={labelHtmlFor} className={cn('text-sm font-medium', labelClassName)}>
+        <FieldLabel association={labelAssociation} isRequired={isRequired} className={labelClassName}>
           {label}
-          {isRequired && (
-            <span aria-hidden="true" className="text-(--easyui-color-error) ml-0.5">
-              *
-            </span>
-          )}
-        </label>
+        </FieldLabel>
       )}
       {descriptionPlacement === 'label' && descriptionElement}
       {children}

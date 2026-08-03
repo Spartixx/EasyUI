@@ -97,7 +97,7 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
 
   const isMultiple = selectionMode === 'multiple'
 
-  const { fieldId: inputId, listboxId, descriptionId, errorId, optionId } = useFieldIds(idProp)
+  const { fieldId: inputId, labelId, listboxId, descriptionId, errorId, optionId } = useFieldIds(idProp)
 
   const [currentValue, setValue] = useControllableValue<TValue>(value, defaultValue)
   const selectedValues = behavior.toSelectedValues(currentValue)
@@ -312,6 +312,7 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
         placeholder={hasChips ? undefined : placeholder}
         autoComplete="off"
         role="combobox"
+        aria-labelledby={label ? labelId : undefined}
         aria-autocomplete="list"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
@@ -414,7 +415,7 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
       baseClassName={slotClassName('base')}
       isFullWidth={isFullWidth}
       label={label}
-      labelHtmlFor={inputId}
+      labelAssociation={{ id: labelId }}
       labelClassName={cn(effectiveLabelColor, slotClassName('label'))}
       isRequired={isRequired}
       description={description}

@@ -379,7 +379,7 @@ export const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>((rawPr
       baseClassName={slotClassName('base')}
       isFullWidth={isFullWidth}
       label={labelPlacement === 'outside' ? label : undefined}
-      labelHtmlFor={inputId}
+      labelAssociation={{ htmlFor: inputId }}
       labelClassName={cn(effectiveLabelColor, slotClassName('label'))}
       isRequired={isRequired}
       description={description}
