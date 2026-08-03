@@ -97,6 +97,7 @@ export interface EasyUIDefaultsConfig {
   }
   autocomplete?: {
     noResultsMessage?: string
+    isInputClearedOnFocus?: boolean
   }
   selector?: {
     noResultsMessage?: string

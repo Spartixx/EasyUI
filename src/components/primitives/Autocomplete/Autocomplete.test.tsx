@@ -642,6 +642,142 @@ describe('Autocomplete', () => {
     })
   })
 
+  describe('clearing the input on focus', () => {
+    test('clears the displayed text when focusing the input', async () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="apple" isInputClearedOnFocus />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      expect(input.value).toBe('Apple')
+      await userEvent.click(input)
+      expect(input.value).toBe('')
+    })
+
+    test('keeps the committed label on focus by default', async () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="apple" />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      expect(input.value).toBe('Apple')
+    })
+
+    test('keeps every option visible once the input is cleared', async () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="apple" isInputClearedOnFocus />)
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getAllByRole('option')).toHaveLength(fruitOptions.length)
+    })
+
+    test('does not change the committed value when focusing', async () => {
+      const onValueChange = vi.fn()
+      render(
+        <Autocomplete options={fruitOptions} defaultValue="apple" onValueChange={onValueChange} isInputClearedOnFocus />,
+      )
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(onValueChange).not.toHaveBeenCalled()
+    })
+
+    test('restores the committed label on blur without selection', async () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="apple" isInputClearedOnFocus />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      fireEvent.blur(input)
+      expect(input.value).toBe('Apple')
+    })
+
+    test('restores the committed label on Escape', async () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="apple" isInputClearedOnFocus />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      await userEvent.keyboard('{Escape}')
+      expect(input.value).toBe('Apple')
+    })
+
+    test('commits a newly selected option', async () => {
+      const onValueChange = vi.fn()
+      render(
+        <Autocomplete options={fruitOptions} defaultValue="apple" onValueChange={onValueChange} isInputClearedOnFocus />,
+      )
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      await userEvent.click(screen.getByText('Banana'))
+      expect(onValueChange).toHaveBeenCalledWith('banana')
+      expect(input.value).toBe('Banana')
+    })
+
+    test('leaves a controlled value untouched when focusing', async () => {
+      const onValueChange = vi.fn()
+      render(<Autocomplete options={fruitOptions} value="apple" onValueChange={onValueChange} isInputClearedOnFocus />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      expect(input.value).toBe('')
+      expect(onValueChange).not.toHaveBeenCalled()
+      fireEvent.blur(input)
+      expect(input.value).toBe('Apple')
+    })
+
+    test('clears and reopens when clicking the input again after a selection', async () => {
+      render(<Autocomplete options={fruitOptions} isInputClearedOnFocus />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      await userEvent.click(screen.getByText('Banana'))
+      expect(input.value).toBe('Banana')
+      expect(screen.queryByRole('listbox')).toBeNull()
+      await userEvent.click(input)
+      expect(input.value).toBe('')
+      expect(screen.getByRole('listbox')).toBeDefined()
+    })
+
+    test('does not wipe the typed text when clicking the already open input', async () => {
+      render(<Autocomplete options={fruitOptions} isInputClearedOnFocus />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      await userEvent.type(input, 'ban')
+      await userEvent.click(input)
+      expect(input.value).toBe('ban')
+    })
+
+    test('does not clear when isDisabled', () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="apple" isDisabled isInputClearedOnFocus />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      fireEvent.focus(input)
+      expect(input.value).toBe('Apple')
+    })
+
+    test('isInputClearedOnFocus from defaults config is used as global fallback', async () => {
+      render(
+        <EasyUIProvider config={{ defaults: { autocomplete: { isInputClearedOnFocus: true } } }}>
+          <Autocomplete options={fruitOptions} defaultValue="apple" />
+        </EasyUIProvider>,
+      )
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      expect(input.value).toBe('')
+    })
+
+    test('instance isInputClearedOnFocus wins over defaults config', async () => {
+      render(
+        <EasyUIProvider config={{ defaults: { autocomplete: { isInputClearedOnFocus: true } } }}>
+          <Autocomplete options={fruitOptions} defaultValue="apple" isInputClearedOnFocus={false} />
+        </EasyUIProvider>,
+      )
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      expect(input.value).toBe('Apple')
+    })
+
+    test('leaves the selection untouched in multiple selection mode', async () => {
+      render(
+        <Autocomplete
+          selectionMode="multiple"
+          options={fruitOptions}
+          defaultValue={['apple']}
+          isInputClearedOnFocus
+        />,
+      )
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      expect(input.value).toBe('')
+      expect(screen.getByRole('button', { name: 'Remove Apple' })).toBeDefined()
+    })
+  })
+
   describe('option content', () => {
     test('renders option description', async () => {
       const options: AutocompleteOption[] = [{ value: 'apple', label: 'Apple', description: 'A crisp fruit' }]

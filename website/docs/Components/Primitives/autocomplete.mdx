@@ -151,6 +151,37 @@ When no option matches the typed text, the listbox shows a customizable "No resu
 />
 ```
 
+## Clear on focus
+
+By default, focusing a field that already has a value shows the committed option's label, so the first keystroke
+appends to it. Set `isInputClearedOnFocus` to empty the input instead, letting the user type a new search and refreshing the options.
+
+Only the displayed text is cleared, the committed value is untouched:
+
+- selecting another option commits it, as usual.
+- leaving the field (blur, `Escape`, or a click outside) without selecting anything brings the previous value back.
+
+This behavior also applies if the Autocomplete input is focused
+
+```jsx live
+<Autocomplete
+  label="Fruit"
+  defaultValue="apple"
+  isInputClearedOnFocus
+  placeholder="Search a fruit..."
+  options={[
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'mango', label: 'Mango' },
+  ]}
+/>
+```
+
+The prop has no visible effect with `selectionMode="multiple"`, where the input is already emptied after each
+selection and the values are carried by the chips.
+
+Set it once for the whole app with [`defaults.autocomplete.isInputClearedOnFocus`](../../Customize/defaults.md).
+
 ## Selection mode
 
 `selectionMode` switches between selecting one value (`'single'`, the default) and several (`'multiple'`). It also switches the type of `value`, `defaultValue` and `onValueChange`:
@@ -390,6 +421,7 @@ These slots can also be styled globally for every `Autocomplete` in your app, se
 | `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `startContent` is rendered                      |
 | `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `endContent` is rendered                        |
 | `noResultsMessage`      | `string`                                                                     | `'No results found'` | Message shown when no option matches the typed text   |
+| `isInputClearedOnFocus` | `boolean`                                                                    | `false`              | Empties the input on focus so a new search can be typed; the committed value is kept |
 | `arrow`                 | `ReactNode`                                                                  | -                    | Custom node replacing the default chevron icon        |
 | `arrowPlacement`        | `'start' \| 'end'`                                                           | `'end'`              | Where the arrow is rendered                           |
 | `isArrowHidden`         | `boolean`                                                                    | `false`              | Hides the arrow                                       |
