@@ -32,6 +32,13 @@ export default defineConfig({
     alert: {
       closeButtonLabel: 'Dismiss',
     },
+    modal: {
+      closeIconButtonLabel: 'Fermer',
+      getSubmitErrorStatus: (error) => (axios.isAxiosError(error) ? String(error.response?.status) : null),
+      submitErrorMessages: {
+        409: 'This resource already exists',
+      },
+    },
     form: {
       loadingMessage: 'Loading the form…',
       disabledMessage: 'This form is currently locked',
@@ -66,6 +73,9 @@ Without a provider (or with the key left unset), each component falls back to it
 | `selector.noResultsMessage`          | `string`                           | `Selector`                                                               | `'No results found'`       |
 | `inputsGroup.addLabel`               | `string`                           | `InputsGroup`                                                            | `'Add'`                    |
 | `alert.closeButtonLabel`             | `string`                           | `Alert`                                                                  | `'Close'`                  |
+| `modal.closeIconButtonLabel`         | `string`                           | `Modal`, `FormModal`                                                     | `'Close'`                  |
+| `modal.getSubmitErrorStatus`         | `(error: Error) => string \| null` | `Modal`                                                                  | —                          |
+| `modal.submitErrorMessages`          | `Record<string \| number, string>` | `Modal`                                                                  | —                          |
 | `form.loadingMessage`                | `string`                           | `Form`                                                                   | —                          |
 | `form.disabledMessage`               | `string`                           | `Form`                                                                   | —                          |
 | `form.getSubmitErrorStatus`          | `(error: Error) => string \| null` | `Form`                                                                   | —                          |
@@ -148,6 +158,46 @@ is set. The button shows an icon only, so this label is what screen readers anno
 
   {/* overrides the default for this instance only */}
   <Alert isClosable closeButtonLabel="Hide this notice" title="Maintenance tonight" />
+</EasyUIProvider>
+```
+
+## `modal.closeIconButtonLabel`
+
+The accessible label of the close icon in the top-right corner of a [`Modal`](../Components/Advanced/modal.mdx).
+The button shows an icon only, so this label is what screen readers announce. The instance
+`closeIconButtonLabel` prop overrides it.
+
+```tsx
+<EasyUIProvider config={{ defaults: { modal: { closeIconButtonLabel: 'Fermer' } } }}>
+  {/* the close icon is announced as "Fermer" */}
+  <Modal isOpen={isOpen} onOpenChange={setIsOpen} title="Confirm" />
+
+  {/* overrides the default for this instance only */}
+  <Modal isOpen={isOpen} onOpenChange={setIsOpen} title="Confirm" closeIconButtonLabel="Dismiss" />
+</EasyUIProvider>
+```
+
+## `modal.getSubmitErrorStatus` and `modal.submitErrorMessages`
+
+The `Modal` counterpart of the `form.*` keys of the same name: together they turn a rejected `onSubmit` into a
+message shown in an alert inside the modal, so no modal needs its own `try/catch`. `getSubmitErrorStatus` turns
+the error into a key, `submitErrorMessages` maps that key to a message. The instance props of the same name
+override them, and a modal keeps its `onUnhandledSubmitError` for whatever the mapping does not cover.
+
+The two groups are kept separate because a `Modal` and a `Form` do not necessarily submit through the same client.
+
+```tsx
+<EasyUIProvider
+  config={{
+    defaults: {
+      modal: {
+        getSubmitErrorStatus: (error) => (axios.isAxiosError(error) ? String(error.response?.status) : null),
+        submitErrorMessages: { 409: 'This resource already exists' },
+      },
+    },
+  }}
+>
+  <Modal isOpen={isOpen} onOpenChange={setIsOpen} title="Confirm" onSubmit={() => api.remove(id)} />
 </EasyUIProvider>
 ```
 

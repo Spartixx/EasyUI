@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, type Mock } from 'vitest'
-import { render, screen, renderHook, act } from '@testing-library/react'
+import { render, screen, renderHook, act, waitFor } from '@testing-library/react'
 import { userEvent } from 'vitest/browser'
 import { createRef, useState, type Ref } from 'react'
 import { Form, useForm } from './index'
@@ -26,6 +26,9 @@ interface HarnessProps {
   disabledMessage?: string
   isDisabled?: boolean
   isLoading?: boolean
+  isHeaderHidden?: boolean
+  isResetOnCancel?: boolean
+  isResetOnSubmit?: boolean
   className?: string
   classNames?: Record<string, string>
   error?: string
@@ -109,6 +112,25 @@ describe('Form', () => {
   test('omits the header when neither title nor description is set', () => {
     renderForm({ fields: { name: { type: 'input', label: 'Name' } } })
     expect(screen.queryByRole('heading')).toBeNull()
+  })
+
+  test('isHeaderHidden removes the header even when a title and a description are set', () => {
+    renderForm({
+      fields: { name: { type: 'input', label: 'Name' } },
+      title: 'My form',
+      description: 'A short description.',
+      isHeaderHidden: true,
+    })
+    expect(screen.queryByRole('heading')).toBeNull()
+    expect(screen.queryByText('A short description.')).toBeNull()
+  })
+
+  test('isHeaderHidden also removes the header the loading message would have brought back', () => {
+    renderForm(
+      { fields: { name: { type: 'input', label: 'Name' } }, isLoading: true, isHeaderHidden: true },
+      { defaults: { form: { loadingMessage: 'Loading the form…' } } },
+    )
+    expect(screen.queryByText('Loading the form…')).toBeNull()
   })
 
   test('maps input `kind` to the native input type', () => {
@@ -1026,6 +1048,83 @@ describe('Form', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Reset' }))
     const after = screen.getByLabelText('Amount')
     expect(after).not.toBe(before)
+  })
+
+  describe('resetting after cancel and submit', () => {
+    const nameField = { name: { type: 'input', label: 'Name', defaultValue: 'Ada' } } satisfies FormFields
+
+    async function typeGrace() {
+      const input = screen.getByLabelText('Name') as HTMLInputElement
+      await userEvent.clear(input)
+      await userEvent.type(input, 'Grace')
+      return input
+    }
+
+    function readName() {
+      return (screen.getByLabelText('Name') as HTMLInputElement).value
+    }
+
+    test('cancelling restores the initial values', async () => {
+      renderForm({ fields: nameField, actions: { onCancel: () => {} } })
+      await typeGrace()
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+      expect(readName()).toBe('Ada')
+    })
+
+    test('cancelling still calls onCancel', async () => {
+      const onCancel = vi.fn()
+      renderForm({ fields: nameField, actions: { onCancel } })
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+      expect(onCancel).toHaveBeenCalled()
+    })
+
+    test('isResetOnCancel false keeps what was typed', async () => {
+      renderForm({ fields: nameField, isResetOnCancel: false, actions: { onCancel: () => {} } })
+      await typeGrace()
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+      expect(readName()).toBe('Grace')
+    })
+
+    test('a successful submit restores the initial values', async () => {
+      const onSubmit = vi.fn()
+      renderForm({ fields: nameField, onSubmit })
+      await typeGrace()
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expectSubmittedWith(onSubmit, { name: 'Grace' })
+      expect(readName()).toBe('Ada')
+    })
+
+    test('isResetOnSubmit false keeps the submitted values in place', async () => {
+      renderForm({ fields: nameField, isResetOnSubmit: false })
+      await typeGrace()
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(readName()).toBe('Grace')
+    })
+
+    test('a failed validation does not reset anything', async () => {
+      renderForm({
+        fields: { name: { type: 'input', label: 'Name', isRequired: true, defaultValue: 'Ada' } },
+      })
+      const input = screen.getByRole('textbox') as HTMLInputElement
+      await userEvent.clear(input)
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(await screen.findByText('This field is required')).toBeDefined()
+      expect(input.value).toBe('')
+    })
+
+    test('a rejected submit does not reset anything', async () => {
+      const swallow = (event: PromiseRejectionEvent) => event.preventDefault()
+      window.addEventListener('unhandledrejection', swallow)
+      renderForm({
+        fields: nameField,
+        onSubmit: () => Promise.reject(new Error('boom')),
+        onUnhandledSubmitError: () => {},
+      })
+      await typeGrace()
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      await waitFor(() => expect(readName()).toBe('Grace'))
+      window.removeEventListener('unhandledrejection', swallow)
+    })
   })
 
   describe('presets config', () => {

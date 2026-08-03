@@ -1,0 +1,214 @@
+# Modal
+
+An accessible dialog rendered in a portal, with an optional header, a free body, and a two-button footer.
+
+## Usage
+
+```tsx
+import { Modal } from '@easy-ui-react/easy-ui-react'
+import { useState } from 'react'
+
+export function Example() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <button onClick={() => setIsOpen(true)}>Delete the project</button>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+        title="Delete this project?"
+        description="This action cannot be undone."
+        color="error"
+        actions={{ submitLabel: 'Delete', cancelLabel: 'Keep it' }}
+        onSubmit={() => api.deleteProject(projectId)}
+      >
+        <p>Every task attached to this project will be removed as well.</p>
+      </Modal>
+    </>
+  )
+}
+```
+
+The modal is **controlled**: it renders nothing while `isOpen` is `false`, and it never changes its own state —
+every way of closing it, including the automatic close after a successful submit, goes through `onOpenChange(false)`.
+See [Closing](#closing) and [Submitting](#submitting) for the full list.
+
+## Body
+
+The body is the `children` of the modal. Anything goes: text, a list, your own components.
+
+The panel keeps its natural height and **nothing inside it clips**: when the content is taller than the viewport,
+the backdrop scrolls, not the body. That is what lets a `Selector` or an `Autocomplete` open its listbox over the
+modal instead of being trapped in a scrolling box.
+
+```tsx
+<Modal isOpen={isOpen} onOpenChange={setIsOpen} title="Invite a teammate">
+  <div className="flex flex-col gap-4">
+    <Input label="Email" isFullWidth />
+    <Selector label="Role" options={roleOptions} isFullWidth />
+  </div>
+</Modal>
+```
+
+## Closing
+
+Four interactions close the modal, all of them calling `onOpenChange(false)` — a successful submit is a fifth
+way, covered in [Submitting](#submitting):
+
+- the close icon in the top-right corner — remove it with `isCloseIconHidden`;
+- the cancel button in the footer;
+- the `Escape` key — disable it with `isClosedOnEscape={false}`;
+- a click on the backdrop — disable it with `isClosedOnBackdropClick={false}`.
+
+Setting `actions.onCancel` replaces the cancel button's default behaviour: the modal no longer closes on its own,
+your handler decides.
+
+## Submitting
+
+`onSubmit` is optional and may be asynchronous. While it runs, the submit button shows a spinner.
+
+By default the modal closes once the submit **succeeds** (`isClosedOnSubmit`, `true` by default). A failed submit
+never closes it, so the error message stays visible.
+
+```tsx
+<Modal isOpen={isOpen} onOpenChange={setIsOpen} title="Confirm" onSubmit={() => api.save(draft)} />
+```
+
+A read-only modal needs no handler at all: with no `onSubmit`, the submit button simply closes the modal.
+
+## Submit errors
+
+Same mechanism as the [Form](./form.mdx): map the failures you know about, and let the rest bubble up.
+
+```tsx
+<Modal
+  isOpen={isOpen}
+  onOpenChange={setIsOpen}
+  title="Delete this project?"
+  onSubmit={() => api.deleteProject(projectId)}
+  getSubmitErrorStatus={(error) => (axios.isAxiosError(error) ? String(error.response?.status) : null)}
+  submitErrorMessages={{ 409: 'This project still has open tasks', 500: 'Server error, please try again' }}
+  onUnhandledSubmitError={(error) => reportToSentry(error)}
+/>
+```
+
+- `getSubmitErrorStatus` turns your client's error into a key.
+- `submitErrorMessages` maps that key to a message, displayed in an `Alert` inside the modal.
+- `onUnhandledSubmitError` receives whatever the mapping did not cover. **Without it, an unmapped error is
+  re-thrown**, so it reaches your own error boundary rather than being silently swallowed.
+- `error` displays a message you control yourself, and always wins over a mapped one.
+
+Both `getSubmitErrorStatus` and `submitErrorMessages` can be set once for the whole app through
+[`defaults.modal`](../../Customize/defaults.md).
+
+## Footer
+
+The footer holds a cancel button and a submit button, aligned to the right. `actions` configures both — it is the
+same object as the [Form's `actions`](./form.mdx):
+
+| Key                    | Description                                      |
+|------------------------|--------------------------------------------------|
+| `submitLabel`          | Label of the submit button (default `'Submit'`)  |
+| `submittingLabel`      | Replaces it while the submit is running          |
+| `loadingLabel`         | Replaces it while `isLoading` is set             |
+| `cancelLabel`          | Label of the cancel button (default `'Cancel'`)  |
+| `onCancel`             | Replaces the default "close the modal" behaviour |
+| `showCancel`           | Hides the cancel button when `false`             |
+| `isSubmitButtonHidden` | Hides the submit button                          |
+| `submitProps`          | Any `Button` prop, applied last                  |
+| `cancelProps`          | Any `Button` prop, applied last                  |
+
+Customize footer and action buttons using modal slots:
+
+```tsx
+{/* one button on each edge */}
+<Modal classNames={{ footer: 'justify-between' }} />
+
+{/* stacked and full width, for narrow screens */}
+<Modal
+  classNames={{
+    footer: 'flex-col-reverse items-stretch',
+    submitButton: 'w-full',
+    cancelButton: 'w-full',
+  }}
+/>
+```
+
+Pass a `footer` node to replace the whole thing. `actions` is then ignored — the buttons are yours to render.
+
+```tsx
+<Modal footer={<p>Contact support to undo this later.</p>} />
+```
+
+## Sizes
+
+`size` caps the width of the panel.
+
+- `sm`
+- `md` (default)
+- `lg`
+
+## Accessibility
+
+The modal follows the dialog pattern: `role="dialog"` and `aria-modal="true"`, labelled by its `title` and
+described by its `description`. On open, the focus moves inside the panel and stays trapped there while `Tab`
+cycles; on close, it returns to the element that had it before. The page behind is prevented from scrolling.
+
+The close icon is announced as "Close" — change it with `closeIconButtonLabel`, or once for the whole app with
+[`defaults.modal.closeIconButtonLabel`](../../Customize/defaults.md).
+
+## Slots
+
+| Slot              | Element                                     |
+|-------------------|---------------------------------------------|
+| `backdrop`        | The full-screen overlay behind the panel    |
+| `base`            | The dialog panel                            |
+| `header`          | The header row (texts + close icon)         |
+| `title`           | The `<h2>` title                            |
+| `description`     | The description paragraph                   |
+| `closeIconButton` | The close icon in the top-right corner      |
+| `errorAlert`      | The `Alert` shown for a submit error        |
+| `body`            | The wrapper around `children`               |
+| `footer`          | The actions row                             |
+| `submitButton`    | The submit button                           |
+| `cancelButton`    | The cancel button                           |
+
+```tsx
+<Modal classNames={{ base: 'max-w-3xl', title: 'text-xl' }} />
+```
+
+## Props
+
+| Prop                      | Type                                                                         | Default   | Description                                             |
+|---------------------------|------------------------------------------------------------------------------|-----------|---------------------------------------------------------|
+| `isOpen`                  | `boolean`                                                                    | -         | Whether the modal is displayed                          |
+| `onOpenChange`            | `(isOpen: boolean) => void`                                                  | -         | Called with `false` every time the modal wants to close |
+| `title`                   | `string`                                                                     | -         | Header title, also the accessible name                  |
+| `description`             | `string`                                                                     | -         | Header description                                      |
+| `children`                | `ReactNode`                                                                  | -         | The body                                                |
+| `footer`                  | `ReactNode`                                                                  | -         | Replaces the whole footer                               |
+| `size`                    | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`    | Maximum width of the panel                              |
+| `actions`                 | `ModalActionsConfig`                                                         | -         | Footer buttons configuration                            |
+| `onSubmit`                | `() => void \| Promise<void>`                                                | -         | Runs when the submit button is pressed                  |
+| `isClosedOnSubmit`        | `boolean`                                                                    | `true`    | Closes the modal after a **successful** submit          |
+| `isCloseIconHidden`       | `boolean`                                                                    | `false`   | Removes the close icon                                  |
+| `closeIconButtonLabel`    | `string`                                                                     | `'Close'` | Accessible label of the close icon                      |
+| `isClosedOnBackdropClick` | `boolean`                                                                    | `true`    | Closes when the backdrop is clicked                     |
+| `isClosedOnEscape`        | `boolean`                                                                    | `true`    | Closes on `Escape`                                      |
+| `variant`                 | `'solid' \| 'outlined' \| 'flat' \| 'light'`                                 | -         | Variant of the footer buttons                           |
+| `color`                   | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | -         | Color of the footer buttons                             |
+| `isLoading`               | `boolean`                                                                    | `false`   | Disables the footer buttons                             |
+| `isDisabled`              | `boolean`                                                                    | `false`   | Disables the footer buttons                             |
+| `error`                   | `string`                                                                     | -         | Error message you control, wins over a mapped one       |
+| `submitErrorMessages`     | `Record<string \| number, string>`                                           | -         | Status → message mapping                                |
+| `getSubmitErrorStatus`    | `(error) => string \| null`                                                  | -         | Extracts a status from a rejected submit                |
+| `onUnhandledSubmitError`  | `(error) => void`                                                            | -         | Receives the errors the mapping did not cover           |
+| `className`               | `string`                                                                     | -         | Class applied to the panel                              |
+| `classNames`              | `Partial<Record<ModalSlots, string>>`                                        | -         | Per-slot class overrides                                |
+
+`Modal` forwards `ref` to the dialog panel.
+
+## Storybook
+
+See it live in [Storybook](pathname:///storybook/?path=/story/advanced-modal--default).

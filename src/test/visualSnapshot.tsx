@@ -6,7 +6,14 @@ import type { ComponentType } from 'react'
 
 export type StoriesModule = Parameters<typeof composeStories>[0]
 
-export function visualSnapshots(modules: Record<string, StoriesModule>) {
+interface VisualSnapshotsOptions {
+  isRenderedInPortal?: boolean
+}
+
+export function visualSnapshots(
+  modules: Record<string, StoriesModule>,
+  { isRenderedInPortal = false }: VisualSnapshotsOptions = {},
+) {
   for (const mod of Object.values(modules)) {
     const stories = composeStories(mod) as Record<string, ComponentType>
     const title = mod.default.title ?? 'Untitled'
@@ -15,7 +22,7 @@ export function visualSnapshots(modules: Record<string, StoriesModule>) {
       for (const [name, Story] of Object.entries(stories)) {
         test(name, async () => {
           const { container } = render(
-            <div style={{ display: 'inline-block' }}>
+            <div style={isRenderedInPortal ? { position: 'fixed', inset: 0 } : { display: 'inline-block' }}>
               <Story />
             </div>,
           )
