@@ -1,5 +1,5 @@
 export function mergePresetProps<TProps extends object>(
-  presetProps: Partial<TProps> | undefined,
+  presetProps: Partial<NoInfer<TProps>> | undefined,
   props: TProps,
 ): TProps {
   if (!presetProps) return props
