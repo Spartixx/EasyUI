@@ -46,6 +46,8 @@
   --easyui-border-width-sm: 1px;
   --easyui-border-width-md: 2px;
   --easyui-border-width-lg: 3px;
+  --easyui-outline-width: 2px;
+  --easyui-outline-offset: 2px;
 }
 
 body {

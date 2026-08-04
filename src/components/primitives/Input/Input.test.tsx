@@ -166,6 +166,22 @@ describe('Input', () => {
       expect(screen.getByRole('textbox').classList.contains('text-(--easyui-color-primary-dark)')).toBe(false)
     })
 
+    test.each(['bordered', 'faded', 'underlined'] as const)(
+      '%s variant: the focus border uses the focus ring, not the color prop',
+      (variant) => {
+        render(<Input variant={variant} color="primary" />)
+        const wrapper = screen.getByRole('textbox').parentElement!
+        expect(wrapper.classList.contains('focus-within:border-(--easyui-color-focus-ring)')).toBe(true)
+        expect(wrapper.classList.contains('focus-within:border-(--easyui-color-primary)')).toBe(false)
+      },
+    )
+
+    test('flat variant: the wrapper draws the outline at focus', () => {
+      render(<Input variant="flat" color="primary" />)
+      const wrapper = screen.getByRole('textbox').parentElement!
+      expect(wrapper.classList.contains('focus-within:outline-(--easyui-color-focus-ring)')).toBe(true)
+    })
+
     test('flat variant: wrapper background reflects color prop', () => {
       render(<Input variant="flat" color="primary" />)
       const wrapper = screen.getByRole('textbox').parentElement!

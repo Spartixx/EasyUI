@@ -99,13 +99,20 @@ You may want to add themes beyond light and dark. To do this, redeclare the vari
 
 ### Focus ring
 
-Color of the `focus-visible` outline on interactive elements. Defaults to `--easyui-color-primary`.
+The single color used to signal focus across the whole library. Defaults to `--easyui-color-primary`.
 
 ```css
 :root {
   --easyui-color-focus-ring: var(--easyui-color-primary);
 }
 ```
+
+It applies to:
+
+- the outline of interactive elements, such as `Button`, the close buttons of `Alert` and `Modal`, and every
+  field in the `flat` variant;
+- the border color taken at focus by `Input`, `InputNumber`, `Autocomplete` and `Selector` in the `bordered`,
+  `faded` and `underlined` variants — that color no longer follows the `color` prop of the field.
 
 ## Radius
 
@@ -128,6 +135,18 @@ Used by the `radius` prop's `sm` / `md` / `lg` values (`none` and `full` always 
   --easyui-border-width-sm: 1px;
   --easyui-border-width-md: 2px;
   --easyui-border-width-lg: 3px;
+}
+```
+
+## Outline
+
+Thickness and offset of the `focus-visible` outline drawn on interactive elements. Its color comes from
+[`--easyui-color-focus-ring`](#focus-ring).
+
+```css
+:root {
+  --easyui-outline-width: 2px;
+  --easyui-outline-offset: 2px;
 }
 ```
 

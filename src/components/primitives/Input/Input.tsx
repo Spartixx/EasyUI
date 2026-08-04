@@ -10,6 +10,7 @@ import {
   TEXT_FIELD_ERROR_TEXT_COLOR,
   TEXT_FIELD_WRAPPER_VARIANT_COLOR_CLASSES,
   TEXT_FIELD_ERROR_WRAPPER_CLASSES,
+  FOCUS_WITHIN_OUTLINE_CLASSES,
 } from '../../../utils/class-maps'
 import { useSlotClassNames } from '../../../hooks'
 import { usePreset } from '../../../hooks'
@@ -209,6 +210,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
           : cn('items-center', TEXT_FIELD_WRAPPER_SIZE_CLASSES[size]),
         variant !== 'underlined' && RADIUS_CLASSES[radius],
         TEXT_FIELD_WRAPPER_VARIANT_COLOR_CLASSES[variant][color],
+        variant === 'flat' && FOCUS_WITHIN_OUTLINE_CLASSES,
         hasError && TEXT_FIELD_ERROR_WRAPPER_CLASSES[variant],
         isInputDisabled && 'opacity-50 cursor-not-allowed',
         !hasOutsideContent && isFullWidth && 'w-full',
