@@ -98,6 +98,17 @@ For each prop, the first of these that is defined wins:
 </EasyUIProvider>
 ```
 
+### Action buttons of `Form` and `Modal`
+
+The submit and cancel buttons have their own default color and variant, which sit **below** a `button` preset
+set through `actions.submitProps` / `actions.cancelProps`. For those two props only, the order from highest to
+lowest priority is:
+
+1. `actions.submitProps` / `actions.cancelProps`.
+2. The `variant` / `color` of the `Form` or `Modal`.
+3. The `button` preset named by `actions.submitProps.preset` / `actions.cancelProps.preset`.
+4. The default of the footer: `primary` / `solid` for submit, `default` / `light` for cancel.
+
 ### classNames
 
 When `preset` resolves to a configured entry, its `className` / `classNames` **entirely replace**

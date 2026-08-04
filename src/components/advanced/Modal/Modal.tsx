@@ -3,6 +3,7 @@ import type { MouseEvent, ReactElement, Ref } from 'react'
 import { createPortal } from 'react-dom'
 import type { ModalProps, ModalSize } from './Modal.types'
 import { cn } from '../../../utils/cn'
+import { mergePresetProps } from '../../../utils/mergePresetProps'
 import { useSlotClassNames, usePreset } from '../../../hooks'
 import { useEasyUIConfig } from '../../../providers/EasyUIContext'
 import { Alert } from '../../primitives'
@@ -47,7 +48,7 @@ function ModalInner<TSubmitError>(rawProps: ModalProps<TSubmitError>, ref: Ref<H
     className,
     classNames,
     ...nativeProps
-  } = { ...presetConfig?.props, ...rest }
+  } = mergePresetProps(presetConfig?.props, rest)
 
   const presetClassNames = presetConfig ? (presetConfig.classNames ?? {}) : undefined
   const slotClassName = useSlotClassNames('modal', classNames, presetClassNames, presetConfig?.className)

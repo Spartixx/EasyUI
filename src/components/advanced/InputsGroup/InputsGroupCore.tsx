@@ -1,6 +1,7 @@
 import { useId, useRef, useState } from 'react'
 import type { ReactNode, Ref } from 'react'
 import { cn } from '../../../utils/cn'
+import { mergePresetProps } from '../../../utils/mergePresetProps'
 import { useSlotClassNames, usePreset } from '../../../hooks'
 import { useEasyUIConfig } from '../../../providers/EasyUIContext'
 import { Button } from '../../primitives'
@@ -81,7 +82,7 @@ export function InputsGroupCore<TValue, TNonEmpty extends TValue>(
 ) {
   const { preset, ...restProps } = rawProps
   const presetConfig = usePreset('inputsGroup', preset)
-  const merged = { ...presetConfig?.props, ...restProps } as InputsGroupCoreProps<TValue, TNonEmpty>
+  const merged = mergePresetProps(presetConfig?.props, restProps) as InputsGroupCoreProps<TValue, TNonEmpty>
 
   const {
     containerRef,

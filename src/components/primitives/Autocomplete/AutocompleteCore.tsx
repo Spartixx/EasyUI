@@ -6,6 +6,7 @@ import type {
   AutocompleteProps,
 } from './Autocomplete.types'
 import { cn } from '../../../utils/cn'
+import { mergePresetProps } from '../../../utils/mergePresetProps'
 import {
   RADIUS_CLASSES,
   TEXT_FIELD_WRAPPER_SIZE_CLASSES,
@@ -95,7 +96,7 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
     onClick,
     validations,
     ...nativeProps
-  } = { ...presetConfig?.props, ...rest }
+  } = mergePresetProps(presetConfig?.props, rest)
 
   const isMultiple = selectionMode === 'multiple'
 

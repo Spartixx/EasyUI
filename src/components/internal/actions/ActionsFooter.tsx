@@ -1,4 +1,5 @@
 import { cn } from '../../../utils/cn'
+import { usePreset } from '../../../hooks'
 import { Button } from '../../primitives/Button'
 import type { ActionsConfig } from './actions.types'
 import type { ButtonVariant } from './resolveButtonVariant'
@@ -35,6 +36,9 @@ export function ActionsFooter({
   submitClassName,
   cancelClassName,
 }: ActionsFooterProps) {
+  const submitPreset = usePreset('button', actions?.submitProps?.preset)
+  const cancelPreset = usePreset('button', actions?.cancelProps?.preset)
+
   const submitLabel =
     (isSubmitting && actions?.submittingLabel) ||
     (isLoading && actions?.loadingLabel) ||
@@ -46,8 +50,8 @@ export function ActionsFooter({
       {showCancel && (
         <Button
           type="button"
-          color={color ?? 'default'}
-          variant={buttonVariant ?? 'light'}
+          color={color ?? cancelPreset?.props?.color ?? 'default'}
+          variant={buttonVariant ?? cancelPreset?.props?.variant ?? 'light'}
           isDisabled={isDisabled || isLoading || isSubmitting}
           onClick={actions?.onCancel}
           className={cancelClassName}
@@ -59,8 +63,8 @@ export function ActionsFooter({
       {showSubmit && (
         <Button
           type={submitType}
-          color={color ?? 'primary'}
-          variant={buttonVariant ?? 'solid'}
+          color={color ?? submitPreset?.props?.color ?? 'primary'}
+          variant={buttonVariant ?? submitPreset?.props?.variant ?? 'solid'}
           isLoading={isSubmitting}
           isDisabled={isDisabled || isLoading}
           onClick={onSubmitClick}

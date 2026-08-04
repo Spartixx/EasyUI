@@ -1,6 +1,7 @@
 import { forwardRef, useState } from 'react'
 import type { AlertProps, AlertVariant } from './Alert.types'
 import { cn } from '../../../utils/cn'
+import { mergePresetProps } from '../../../utils/mergePresetProps'
 import { RADIUS_CLASSES, SURFACE_VARIANT_COLOR_CLASSES } from '../../../utils/class-maps'
 import { useSlotClassNames } from '../../../hooks/useSlotClassNames'
 import { usePreset } from '../../../hooks/usePreset'
@@ -124,7 +125,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>((rawProps, ref) => {
     isIconWrapperHidden = false,
     endContent,
     ...nativeProps
-  } = { ...presetConfig?.props, ...rest }
+  } = mergePresetProps(presetConfig?.props, rest)
 
   const presetClassNames = presetConfig ? (presetConfig.classNames ?? {}) : undefined
   const slotClassName = useSlotClassNames('alert', classNames, presetClassNames, presetConfig?.className)

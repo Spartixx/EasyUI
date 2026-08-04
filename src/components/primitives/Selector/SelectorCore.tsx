@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { FocusEvent, KeyboardEvent, MouseEvent, RefObject } from 'react'
 import type { SelectorOption as SelectorOptionData, SelectorCommonProps, SelectorProps } from './Selector.types'
 import { cn } from '../../../utils/cn'
+import { mergePresetProps } from '../../../utils/mergePresetProps'
 import { RADIUS_CLASSES, LABEL_COLOR_CLASSES } from '../../../utils/class-maps'
 import { useSlotClassNames, usePreset } from '../../../hooks'
 import { useEasyUIConfig } from '../../../providers/EasyUIContext'
@@ -134,7 +135,7 @@ export function SelectorCore<TValue>(rawProps: SelectorCoreProps<TValue>) {
     validations,
     noResultsMessage,
     ...nativeProps
-  } = { ...presetConfig?.props, ...rest }
+  } = mergePresetProps(presetConfig?.props, rest)
 
   const isMultiple = selectionMode === 'multiple'
 
