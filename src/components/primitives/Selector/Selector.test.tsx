@@ -64,6 +64,31 @@ describe('Selector', () => {
     expect(screen.getByRole('combobox').classList.contains('custom-trigger')).toBe(true)
   })
 
+  test('suppresses the native outline of the trigger on the variants that signal focus by their border', () => {
+    const { rerender } = render(<Selector options={fruitOptions} variant="faded" />)
+    expect(screen.getByRole('combobox').classList.contains('outline-none')).toBe(true)
+
+    rerender(<Selector options={fruitOptions} variant="bordered" />)
+    expect(screen.getByRole('combobox').classList.contains('outline-none')).toBe(true)
+  })
+
+  test('flat variant: the trigger draws the outline instead of suppressing it', () => {
+    render(<Selector options={fruitOptions} variant="flat" />)
+    const trigger = screen.getByRole('combobox')
+    expect(trigger.classList.contains('focus-visible:outline-(--easyui-color-focus-ring)')).toBe(true)
+    expect(trigger.classList.contains('outline-none')).toBe(false)
+  })
+
+  test.each(['bordered', 'faded', 'underlined'] as const)(
+    '%s variant: the focus border uses the focus ring, not the color prop',
+    (variant) => {
+      render(<Selector options={fruitOptions} variant={variant} color="primary" />)
+      const trigger = screen.getByRole('combobox')
+      expect(trigger.classList.contains('focus-visible:border-(--easyui-color-focus-ring)')).toBe(true)
+      expect(trigger.classList.contains('focus-visible:border-(--easyui-color-primary)')).toBe(false)
+    },
+  )
+
   test('forwards ref to the trigger button', () => {
     const ref = createRef<HTMLButtonElement>()
     render(<Selector options={fruitOptions} ref={ref} />)

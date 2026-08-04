@@ -2,7 +2,12 @@ import { forwardRef } from 'react'
 import type { ButtonProps } from './Button.types'
 import { cn } from '../../../utils/cn'
 import { mergePresetProps } from '../../../utils/mergePresetProps'
-import { SIZE_CLASSES, RADIUS_CLASSES, SURFACE_VARIANT_COLOR_CLASSES } from '../../../utils/class-maps'
+import {
+  SIZE_CLASSES,
+  RADIUS_CLASSES,
+  SURFACE_VARIANT_COLOR_CLASSES,
+  FOCUS_OUTLINE_CLASSES,
+} from '../../../utils/class-maps'
 import { useSlotClassNames } from '../../../hooks/useSlotClassNames'
 import { usePreset } from '../../../hooks/usePreset'
 import { Spinner } from '../spinners/Spinner'
@@ -89,7 +94,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((rawProps, ref)
         'inline-flex items-center justify-center gap-2',
         'font-normal cursor-pointer select-none',
         'transition-[filter,background-color] duration-150',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--easyui-color-focus-ring)',
+        FOCUS_OUTLINE_CLASSES,
         'disabled:opacity-50 disabled:cursor-not-allowed',
         SIZE_CLASSES[size],
         RADIUS_CLASSES[radius],

@@ -3,7 +3,7 @@ import type { FocusEvent, KeyboardEvent, MouseEvent, RefObject } from 'react'
 import type { SelectorOption as SelectorOptionData, SelectorCommonProps, SelectorProps } from './Selector.types'
 import { cn } from '../../../utils/cn'
 import { mergePresetProps } from '../../../utils/mergePresetProps'
-import { RADIUS_CLASSES, LABEL_COLOR_CLASSES } from '../../../utils/class-maps'
+import { RADIUS_CLASSES, LABEL_COLOR_CLASSES, FOCUS_OUTLINE_CLASSES } from '../../../utils/class-maps'
 import { useSlotClassNames, usePreset } from '../../../hooks'
 import { useEasyUIConfig } from '../../../providers/EasyUIContext'
 import { Spinner } from '../spinners/Spinner'
@@ -38,20 +38,20 @@ const TRIGGER_VARIANT_COLOR_CLASSES: Record<
   Record<NonNullable<SelectorProps['color']>, string>
 > = {
   bordered: {
-    default: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-default)',
-    primary: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-primary)',
-    secondary: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-secondary)',
-    success: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-success)',
-    warning: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-warning)',
-    error: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-error)',
+    default: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-focus-ring)',
+    primary: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-focus-ring)',
+    secondary: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-focus-ring)',
+    success: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-focus-ring)',
+    warning: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-focus-ring)',
+    error: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-focus-ring)',
   },
   faded: {
-    default: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) bg-(--easyui-color-default)/40 focus-visible:border-(--easyui-color-default)',
-    primary: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-primary) bg-(--easyui-color-primary)/30 focus-visible:border-(--easyui-color-primary)',
-    secondary: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-secondary) bg-(--easyui-color-secondary)/30 focus-visible:border-(--easyui-color-secondary)',
-    success: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-success) bg-(--easyui-color-success)/30 focus-visible:border-(--easyui-color-success)',
-    warning: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-warning) bg-(--easyui-color-warning)/30 focus-visible:border-(--easyui-color-warning)',
-    error: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-error) bg-(--easyui-color-error)/30 focus-visible:border-(--easyui-color-error)',
+    default: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) bg-(--easyui-color-default)/40 focus-visible:border-(--easyui-color-focus-ring)',
+    primary: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-primary) bg-(--easyui-color-primary)/30 focus-visible:border-(--easyui-color-focus-ring)',
+    secondary: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-secondary) bg-(--easyui-color-secondary)/30 focus-visible:border-(--easyui-color-focus-ring)',
+    success: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-success) bg-(--easyui-color-success)/30 focus-visible:border-(--easyui-color-focus-ring)',
+    warning: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-warning) bg-(--easyui-color-warning)/30 focus-visible:border-(--easyui-color-focus-ring)',
+    error: 'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-error) bg-(--easyui-color-error)/30 focus-visible:border-(--easyui-color-focus-ring)',
   },
   flat: {
     default: 'bg-(--easyui-color-default)/40 focus-visible:bg-(--easyui-color-default)/50',
@@ -62,12 +62,12 @@ const TRIGGER_VARIANT_COLOR_CLASSES: Record<
     error: 'bg-(--easyui-color-error)/30 focus-visible:bg-(--easyui-color-error)/20',
   },
   underlined: {
-    default: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-default)',
-    primary: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-primary) focus-visible:border-(--easyui-color-primary)',
-    secondary: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-secondary) focus-visible:border-(--easyui-color-secondary)',
-    success: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-success) focus-visible:border-(--easyui-color-success)',
-    warning: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-warning) focus-visible:border-(--easyui-color-warning)',
-    error: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-error) focus-visible:border-(--easyui-color-error)',
+    default: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-visible:border-(--easyui-color-focus-ring)',
+    primary: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-primary) focus-visible:border-(--easyui-color-focus-ring)',
+    secondary: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-secondary) focus-visible:border-(--easyui-color-focus-ring)',
+    success: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-success) focus-visible:border-(--easyui-color-focus-ring)',
+    warning: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-warning) focus-visible:border-(--easyui-color-focus-ring)',
+    error: 'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-error) focus-visible:border-(--easyui-color-focus-ring)',
   },
 }
 
@@ -364,6 +364,7 @@ export function SelectorCore<TValue>(rawProps: SelectorCoreProps<TValue>) {
       onBlur={handleBlur}
       className={cn(
         'flex w-full items-center text-left cursor-pointer transition-[border-color,background-color,box-shadow] duration-150',
+        variant === 'flat' ? FOCUS_OUTLINE_CLASSES : 'outline-none',
         isMultiple ? MULTIPLE_TRIGGER_SIZE_CLASSES[size] : TRIGGER_SIZE_CLASSES[size],
         variant !== 'underlined' && RADIUS_CLASSES[radius],
         TRIGGER_VARIANT_COLOR_CLASSES[variant][color],

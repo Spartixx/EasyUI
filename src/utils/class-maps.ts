@@ -14,6 +14,12 @@ export const RADIUS_CLASSES: Record<NonNullable<WithVariantProps['radius']>, str
   full: 'rounded-full',
 }
 
+export const FOCUS_OUTLINE_CLASSES =
+  'focus-visible:outline-(length:--easyui-outline-width) focus-visible:outline-offset-(--easyui-outline-offset) focus-visible:outline-(--easyui-color-focus-ring)'
+
+export const FOCUS_WITHIN_OUTLINE_CLASSES =
+  'focus-within:outline-(length:--easyui-outline-width) focus-within:outline-offset-(--easyui-outline-offset) focus-within:outline-(--easyui-color-focus-ring)'
+
 export const ARROW_SIZE_CLASSES: Record<NonNullable<EasyUIBaseProps['size']>, string> = {
   sm: 'size-3',
   md: 'size-4',
@@ -121,31 +127,31 @@ export const TEXT_FIELD_WRAPPER_VARIANT_COLOR_CLASSES: Record<
 > = {
   bordered: {
     default:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-default)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-focus-ring)',
     primary:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-primary)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-focus-ring)',
     secondary:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-secondary)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-focus-ring)',
     success:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-success)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-focus-ring)',
     warning:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-warning)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-focus-ring)',
     error:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-error)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-focus-ring)',
   },
   faded: {
     default:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) bg-(--easyui-color-default)/40 focus-within:border-(--easyui-color-default)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) bg-(--easyui-color-default)/40 focus-within:border-(--easyui-color-focus-ring)',
     primary:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-primary) bg-(--easyui-color-primary)/30 focus-within:border-(--easyui-color-primary)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-primary) bg-(--easyui-color-primary)/30 focus-within:border-(--easyui-color-focus-ring)',
     secondary:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-secondary) bg-(--easyui-color-secondary)/30 focus-within:border-(--easyui-color-secondary)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-secondary) bg-(--easyui-color-secondary)/30 focus-within:border-(--easyui-color-focus-ring)',
     success:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-success) bg-(--easyui-color-success)/30 focus-within:border-(--easyui-color-success)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-success) bg-(--easyui-color-success)/30 focus-within:border-(--easyui-color-focus-ring)',
     warning:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-warning) bg-(--easyui-color-warning)/30 focus-within:border-(--easyui-color-warning)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-warning) bg-(--easyui-color-warning)/30 focus-within:border-(--easyui-color-focus-ring)',
     error:
-      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-error) bg-(--easyui-color-error)/30 focus-within:border-(--easyui-color-error)',
+      'border-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-error) bg-(--easyui-color-error)/30 focus-within:border-(--easyui-color-focus-ring)',
   },
   flat: {
     default: 'bg-(--easyui-color-default)/40 focus-within:bg-(--easyui-color-default)/50',
@@ -157,17 +163,17 @@ export const TEXT_FIELD_WRAPPER_VARIANT_COLOR_CLASSES: Record<
   },
   underlined: {
     default:
-      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-default)',
+      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-default) focus-within:border-(--easyui-color-focus-ring)',
     primary:
-      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-primary) focus-within:border-(--easyui-color-primary)',
+      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-primary) focus-within:border-(--easyui-color-focus-ring)',
     secondary:
-      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-secondary) focus-within:border-(--easyui-color-secondary)',
+      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-secondary) focus-within:border-(--easyui-color-focus-ring)',
     success:
-      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-success) focus-within:border-(--easyui-color-success)',
+      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-success) focus-within:border-(--easyui-color-focus-ring)',
     warning:
-      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-warning) focus-within:border-(--easyui-color-warning)',
+      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-warning) focus-within:border-(--easyui-color-focus-ring)',
     error:
-      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-error) focus-within:border-(--easyui-color-error)',
+      'border-b-[length:var(--easyui-border-width-md)] border-solid border-(--easyui-color-error) focus-within:border-(--easyui-color-focus-ring)',
   },
 }
 
