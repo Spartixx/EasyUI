@@ -1,6 +1,7 @@
 import { forwardRef } from 'react'
 import type { ButtonProps } from './Button.types'
 import { cn } from '../../../utils/cn'
+import { mergePresetProps } from '../../../utils/mergePresetProps'
 import { SIZE_CLASSES, RADIUS_CLASSES, SURFACE_VARIANT_COLOR_CLASSES } from '../../../utils/class-maps'
 import { useSlotClassNames } from '../../../hooks/useSlotClassNames'
 import { usePreset } from '../../../hooks/usePreset'
@@ -68,7 +69,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((rawProps, ref)
     startContentPlacement = 'inside',
     endContentPlacement = 'inside',
     ...nativeProps
-  } = { ...presetConfig?.props, ...rest }
+  } = mergePresetProps(presetConfig?.props, rest)
 
   const presetClassNames = presetConfig ? (presetConfig.classNames ?? {}) : undefined
   const slotClassName = useSlotClassNames('button', classNames, presetClassNames, presetConfig?.className)

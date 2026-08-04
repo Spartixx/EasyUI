@@ -587,6 +587,23 @@ describe('Input', () => {
       expect(screen.getByRole('textbox').hasAttribute('disabled')).toBe(false)
     })
 
+    test('a prop passed as undefined does not erase the preset value', () => {
+      render(
+        <EasyUIProvider
+          config={{
+            presets: {
+              input: { email: { props: { variant: 'faded', isDisabled: true } } },
+            },
+          }}
+        >
+          <Input preset="email" variant={undefined} isDisabled={undefined} />
+        </EasyUIProvider>,
+      )
+      const input = screen.getByRole('textbox')
+      expect(input.hasAttribute('disabled')).toBe(true)
+      expect(input.parentElement?.classList.contains('bg-(--easyui-color-default)/40')).toBe(true)
+    })
+
     test('preset classNames replace the global wrapper', () => {
       render(
         <EasyUIProvider

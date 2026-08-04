@@ -5,6 +5,7 @@ import { createRef, useState, type Ref } from 'react'
 import { Form, useForm } from './index'
 import type {
   FormActionsConfig,
+  FormColor,
   FormFields,
   FormInstance,
   FormSubmitHandler,
@@ -19,6 +20,7 @@ interface HarnessProps {
   onSubmit?: FormSubmitHandler
   validateOn?: ValidateMode
   actions?: FormActionsConfig
+  color?: FormColor
   preset?: string
   title?: string
   description?: string
@@ -1142,6 +1144,47 @@ describe('Form', () => {
         { presets: { form: { locked: { props: { isDisabled: true } } } } },
       )
       expect(screen.getByLabelText('Name').hasAttribute('disabled')).toBe(true)
+    })
+
+    test('a button preset on an action wins over the default color of the footer', () => {
+      renderForm(
+        {
+          fields: { name: { type: 'input', label: 'Name' } },
+          actions: { submitProps: { preset: 'cta' } },
+        },
+        { presets: { button: { cta: { props: { color: 'secondary' } } } } },
+      )
+      const submitButton = screen.getByRole('button', { name: 'Submit' })
+      expect(submitButton.classList.contains('bg-(--easyui-color-secondary)')).toBe(true)
+      expect(submitButton.classList.contains('bg-(--easyui-color-primary)')).toBe(false)
+    })
+
+    test('the color of the form wins over a button preset on an action', () => {
+      renderForm(
+        {
+          fields: { name: { type: 'input', label: 'Name' } },
+          actions: { submitProps: { preset: 'cta' } },
+          color: 'warning',
+        },
+        { presets: { button: { cta: { props: { color: 'secondary' } } } } },
+      )
+      expect(
+        screen.getByRole('button', { name: 'Submit' }).classList.contains('bg-(--easyui-color-warning)'),
+      ).toBe(true)
+    })
+
+    test('a field preset applies its props even when the form sets no variant nor color', () => {
+      renderForm(
+        {
+          fields: {
+            name: { type: 'input', label: 'Name', props: { preset: 'base', autoComplete: 'off' } },
+          },
+        },
+        { presets: { input: { base: { props: { variant: 'faded', color: 'success' } } } } },
+      )
+      const input = screen.getByLabelText('Name')
+      expect(input.getAttribute('autocomplete')).toBe('off')
+      expect(input.parentElement?.classList.contains('bg-(--easyui-color-success)/30')).toBe(true)
     })
   })
 

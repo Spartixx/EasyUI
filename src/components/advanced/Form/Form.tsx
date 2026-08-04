@@ -2,6 +2,7 @@ import { forwardRef } from 'react'
 import type { ReactElement, Ref } from 'react'
 import type { FormFields, FormProps } from './Form.types'
 import { cn } from '../../../utils/cn'
+import { mergePresetProps } from '../../../utils/mergePresetProps'
 import { useSlotClassNames, usePreset } from '../../../hooks'
 import { useEasyUIConfig } from '../../../providers/EasyUIContext'
 import { Alert } from '../../primitives'
@@ -38,7 +39,7 @@ function FormInner<TFields extends FormFields, TSubmitError>(
     className,
     classNames,
     ...nativeProps
-  } = { ...presetConfig?.props, ...rest }
+  } = mergePresetProps(presetConfig?.props, rest)
 
   const presetClassNames = presetConfig ? (presetConfig.classNames ?? {}) : undefined
   const slotClassName = useSlotClassNames('form', classNames, presetClassNames, presetConfig?.className)

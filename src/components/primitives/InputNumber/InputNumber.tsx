@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import type { InputNumberProps } from './InputNumber.types'
 import { cn } from '../../../utils/cn'
+import { mergePresetProps } from '../../../utils/mergePresetProps'
 import {
   RADIUS_CLASSES,
   TEXT_FIELD_WRAPPER_SIZE_CLASSES,
@@ -86,7 +87,7 @@ export const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>((rawPr
     onValueChange,
     validations,
     ...nativeProps
-  } = { ...presetConfig?.props, ...rest }
+  } = mergePresetProps(presetConfig?.props, rest)
 
   const { fieldId: inputId, descriptionId, errorId } = useFieldIds(idProp)
 
