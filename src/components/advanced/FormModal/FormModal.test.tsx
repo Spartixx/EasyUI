@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { userEvent } from 'vitest/browser'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { Mock } from 'vitest'
 import { FormModal } from './index'
 import { useForm, type FormFields } from '../Form'
@@ -19,7 +19,7 @@ function FormModalHarness({
   onSubmit?: Mock | ((values: { title: string }) => void | Promise<void>)
   onOpenChange?: (isOpen: boolean) => void
   title?: string
-  description?: string
+  description?: ReactNode
   isClosedOnSubmit?: boolean
   isResetOnClose?: boolean
   isLoading?: boolean
@@ -60,6 +60,23 @@ describe('FormModal', () => {
     expect(dialog.getAttribute('aria-labelledby')).toBe(heading.id)
     const formElement = dialog.querySelector('form') as HTMLElement
     expect(formElement.contains(heading)).toBe(false)
+  })
+
+  test('accepts markup as the modal header description', () => {
+    render(
+      <FormModalHarness
+        title="New user"
+        description={
+          <span>
+            Read the <a href="https://example.com">guidelines</a> first.
+          </span>
+        }
+      />,
+    )
+    const dialog = screen.getByRole('dialog')
+    const link = screen.getByRole('link', { name: 'guidelines' })
+    const formElement = dialog.querySelector('form') as HTMLElement
+    expect(formElement.contains(link)).toBe(false)
   })
 
   test('the form renders no header of its own even while loading', () => {

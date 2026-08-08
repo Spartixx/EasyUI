@@ -480,7 +480,7 @@ These slots can also be set globally via [`EasyUIProvider`](../../Customize/glob
 | `form`                   | `FormInstance`                                 | —       | The instance returned by `useForm(fields)`               |
 | `onSubmit`               | `(values, allValues) => void \| Promise<void>` | —       | Applicable fields, then every field (see above)          |
 | `title`                  | `string`                                       | —       | Optional heading at the top of the form                  |
-| `description`            | `string`                                       | —       | Optional text under the title                            |
+| `description`            | `ReactNode`                                    | —       | Optional text or markup under the title                  |
 | `actions`                | `FormActionsConfig`                            | —       | Labels, `onCancel`, `isSubmitButtonHidden`, button props |
 | `error`                  | `string`                                       | —       | Submission error, rendered in an alert under the title   |
 | `submitErrorMessages`    | `Record<string \| number, string>`             | —       | Status code → message, merged with the global defaults   |

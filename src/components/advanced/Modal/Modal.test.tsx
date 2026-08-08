@@ -56,6 +56,23 @@ describe('Modal', () => {
     expect(screen.getByText('Body content')).toBeDefined()
   })
 
+  test('accepts markup as the description and keeps it wired to aria-describedby', () => {
+    render(
+      <ModalHarness
+        title="Confirm"
+        description={
+          <ul>
+            <li>Every task is removed</li>
+            <li>This cannot be undone</li>
+          </ul>
+        }
+      />,
+    )
+    const list = screen.getByRole('list')
+    expect(screen.getByRole('dialog').getAttribute('aria-describedby')).toBe(list.parentElement?.id)
+    expect(screen.getAllByRole('listitem')).toHaveLength(2)
+  })
+
   test('renders into a portal attached to the body, outside the React root', () => {
     const { container } = render(<ModalHarness title="Confirm" />)
     const dialog = screen.getByRole('dialog')
