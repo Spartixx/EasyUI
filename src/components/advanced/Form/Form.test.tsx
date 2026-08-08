@@ -690,6 +690,24 @@ describe('Form', () => {
     const readHttpStatus = (error: Error) =>
       error instanceof HttpError ? String(error.response.status) : null
 
+    async function collectUnhandledRejections(run: () => Promise<void>) {
+      const rejections: PromiseRejectionEvent[] = []
+      const collect = (event: PromiseRejectionEvent) => {
+        rejections.push(event)
+        event.preventDefault()
+      }
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      window.addEventListener('unhandledrejection', collect)
+      try {
+        await run()
+        await waitFor(() => expect(rejections).toHaveLength(1))
+      } finally {
+        window.removeEventListener('unhandledrejection', collect)
+        consoleError.mockRestore()
+      }
+      return rejections
+    }
+
     test('renders no alert when there is no error', () => {
       renderForm({ fields })
       expect(screen.queryByRole('alert')).toBeNull()
@@ -712,31 +730,33 @@ describe('Form', () => {
     })
 
     test('an unmapped status shows nothing, the error is left to the caller', async () => {
-      const swallow = (event: PromiseRejectionEvent) => event.preventDefault()
-      window.addEventListener('unhandledrejection', swallow)
-      renderForm({
-        fields,
-        onSubmit: () => Promise.reject(new HttpError(503)),
-        getSubmitErrorStatus: readHttpStatus,
-        submitErrorMessages: { 409: 'This resource already exists' },
+      const unmapped = new HttpError(503)
+      const rejections = await collectUnhandledRejections(async () => {
+        renderForm({
+          fields,
+          onSubmit: () => Promise.reject(unmapped),
+          getSubmitErrorStatus: readHttpStatus,
+          submitErrorMessages: { 409: 'This resource already exists' },
+        })
+        await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
       })
-      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
       expect(screen.queryByRole('alert')).toBeNull()
-      window.removeEventListener('unhandledrejection', swallow)
+      expect(rejections[0].reason).toBe(unmapped)
     })
 
     test('an extractor that blows up on an unexpected error shape is neutralised', async () => {
-      const swallow = (event: PromiseRejectionEvent) => event.preventDefault()
-      window.addEventListener('unhandledrejection', swallow)
-      renderForm({
-        fields,
-        onSubmit: () => Promise.reject(new Error('plain error')),
-        getSubmitErrorStatus: (error) => (error as HttpError).response.status.toString(),
-        submitErrorMessages: { 409: 'This resource already exists' },
+      const plainError = new Error('plain error')
+      const rejections = await collectUnhandledRejections(async () => {
+        renderForm({
+          fields,
+          onSubmit: () => Promise.reject(plainError),
+          getSubmitErrorStatus: (error) => (error as HttpError).response.status.toString(),
+          submitErrorMessages: { 409: 'This resource already exists' },
+        })
+        await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
       })
-      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
       expect(screen.queryByRole('alert')).toBeNull()
-      window.removeEventListener('unhandledrejection', swallow)
+      expect(rejections[0].reason).toBe(plainError)
     })
 
     test('onUnhandledSubmitError receives the errors the mapping did not cover', async () => {
