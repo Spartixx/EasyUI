@@ -1223,6 +1223,87 @@ describe('Form', () => {
     })
   })
 
+  describe('checkbox fields', () => {
+    test('renders a checkbox and submits its boolean value', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: { isSubscribed: { type: 'checkbox', label: 'Subscribe' } },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('checkbox'))
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+      expect(onSubmit.mock.calls[0][0]).toEqual({ isSubscribed: true })
+    })
+
+    test('starts unchecked and submits false', async () => {
+      const onSubmit = vi.fn()
+      renderForm({ fields: { isSubscribed: { type: 'checkbox', label: 'Subscribe' } }, onSubmit })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+      expect(onSubmit.mock.calls[0][0]).toEqual({ isSubscribed: false })
+    })
+
+    test('honours defaultValue', () => {
+      renderForm({
+        fields: { isSubscribed: { type: 'checkbox', label: 'Subscribe', defaultValue: true } },
+      })
+      expect((screen.getByRole('checkbox') as HTMLInputElement).checked).toBe(true)
+    })
+
+    test('a required checkbox blocks the submit while unchecked', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: { hasAccepted: { type: 'checkbox', label: 'Accept', isRequired: true } },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(onSubmit).not.toHaveBeenCalled()
+      expect(screen.getByRole('alert').textContent).toBe('This field is required')
+    })
+
+    test('a required checkbox lets the submit through once checked', async () => {
+      const onSubmit = vi.fn()
+      renderForm({
+        fields: { hasAccepted: { type: 'checkbox', label: 'Accept', isRequired: true } },
+        onSubmit,
+      })
+      await userEvent.click(screen.getByRole('checkbox'))
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    })
+
+    test('drives the visibility of another field', async () => {
+      renderForm({
+        fields: {
+          hasBilling: { type: 'checkbox', label: 'Different billing address' },
+          street: {
+            type: 'input',
+            label: 'Street',
+            isHidden: (values) => values.hasBilling !== true,
+          },
+        },
+      })
+      expect(screen.queryByLabelText('Street')).toBeNull()
+      await userEvent.click(screen.getByRole('checkbox'))
+      expect(screen.getByLabelText('Street')).toBeDefined()
+    })
+
+    test('fieldProps reaches every checkbox field', () => {
+      renderForm({
+        fields: {
+          first: { type: 'checkbox', label: 'First' },
+          second: { type: 'checkbox', label: 'Second' },
+        },
+        fieldProps: { checkbox: { radius: 'full' } },
+      })
+      const boxes = screen
+        .getAllByRole('checkbox')
+        .map((input) => input.nextElementSibling as HTMLElement)
+      expect(boxes.every((box) => box.classList.contains('rounded-full'))).toBe(true)
+    })
+  })
+
   describe('fieldProps', () => {
     test('applies to every field of the matching type', () => {
       renderForm({

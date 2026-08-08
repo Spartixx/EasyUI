@@ -1,0 +1,179 @@
+# Checkbox
+
+A single boolean control, with an optional label, description and error, and a third indeterminate state.
+
+## Usage
+
+```tsx
+import { Checkbox } from '@easy-ui-react/easy-ui-react'
+
+export function Example() {
+  return <Checkbox label="Accept the terms" />
+}
+```
+
+```jsx live
+<Checkbox label="Accept the terms" />
+```
+
+The label always sits to the right of the box, and the whole row is clickable — box, label and description alike.
+
+## Selection
+
+`Checkbox` works uncontrolled by default: give it `defaultSelected` and it manages its own state.
+
+```jsx live
+<Checkbox label="Subscribe to the newsletter" defaultSelected />
+```
+
+To control it, pass `isSelected` and update it from `onValueChange`, which receives the next boolean:
+
+```tsx
+const [isSelected, setIsSelected] = useState(false)
+
+<Checkbox label="Accept the terms" isSelected={isSelected} onValueChange={setIsSelected} />
+```
+
+The native `onChange` is still available for the raw event; `onValueChange` is only the ergonomic form.
+
+## Indeterminate
+
+`isIndeterminate` draws a dash instead of a check mark and announces `aria-checked="mixed"`. It is the state of a
+"select all" box when only some of the items below are selected — neither checked nor unchecked would be true.
+
+```jsx live
+<Checkbox label="Select all" isIndeterminate />
+```
+
+It is purely a display state: the value stays whatever `isSelected` says. Clicking an indeterminate checkbox
+reports the value the browser computes, so it is up to the parent to decide what "select all" means.
+
+```tsx
+const isAllSelected = selected.length === options.length
+
+<Checkbox
+  label="Select all"
+  isSelected={isAllSelected}
+  isIndeterminate={selected.length > 0 && !isAllSelected}
+  onValueChange={(next) => setSelected(next ? options : [])}
+/>
+```
+
+## Label, description and error
+
+`description` sits under the label by default. Set `descriptionPlacement="element"` to move it below the whole
+row, aligned with the box.
+
+```jsx live
+<Checkbox
+  label="Accept the terms"
+  description="You can change this later in your settings."
+/>
+```
+
+An `error` replaces the description when the description is placed under the element, colors the box border and
+sets `aria-invalid` on the input.
+
+```jsx live
+<Checkbox label="Accept the terms" isRequired error="You must accept the terms to continue" />
+```
+
+A checkbox without a visible label still needs an accessible name — pass `aria-label`:
+
+```tsx
+<Checkbox aria-label="Select this row" />
+```
+
+## Validation
+
+Like the other field primitives, `Checkbox` validates itself on blur unless a `Form` drives it.
+
+- `isRequired` fails while the box is unchecked. The message comes from `isRequiredMessage`, then
+  [`defaults.requiredMessage`](../../Customize/defaults.md), then the built-in text.
+- `validations` runs your own checks against the boolean value.
+
+```tsx
+<Checkbox
+  label="Confirm the deletion"
+  validations={[(isSelected) => (isSelected ? null : 'Confirmation is mandatory')]}
+/>
+```
+
+`isFormControlled` disables that local behaviour entirely; the `Form` sets it for you on the fields it renders.
+
+## Icons
+
+`icon` and `indeterminateIcon` replace the two glyphs drawn inside the box. Both can be set once for the whole
+application through [`defaults.checkbox`](../../Customize/defaults.md), which is the only way to reach the
+checkboxes a `Form` renders on your behalf.
+
+```tsx
+<Checkbox label="Confirm" defaultSelected icon={<X className="size-full" strokeWidth={3} />} />
+```
+
+The icon inherits the text color of the box and is sized by `size`, so give it `size-full` rather than a fixed
+dimension.
+
+## Inside a Form
+
+The `checkbox` field type renders one for you, with the form driving its value, its error and its disabled state:
+
+```tsx
+const fields = {
+  hasAcceptedTerms: { type: 'checkbox', label: 'Accept the terms', isRequired: true },
+} satisfies FormFields
+```
+
+A required checkbox is only satisfied when it is checked. See the [Form](../Advanced/form.mdx) page for the field
+definition and for `fieldProps.checkbox`, which styles every checkbox of a form at once.
+
+## Slots
+
+| Slot          | Element                                       |
+|---------------|-----------------------------------------------|
+| `base`        | root wrapper, holds the row and the error     |
+| `wrapper`     | the square box                                |
+| `icon`        | the check mark or the dash                    |
+| `content`     | column holding the label and its description  |
+| `label`       | the label text                                |
+| `description` | the description text                          |
+| `error`       | the error message                             |
+
+These slots can also be set globally through [`EasyUIProvider`](../../Customize/global-config.md) under
+`wrappers.checkbox`, or per role with [`presets.checkbox`](../../Customize/presets.md).
+
+## Props
+
+| Prop                   | Type                                                                         | Default     | Description                                          |
+|------------------------|------------------------------------------------------------------------------|-------------|------------------------------------------------------|
+| `isSelected`           | `boolean`                                                                    | -           | Controlled value                                     |
+| `defaultSelected`      | `boolean`                                                                    | `false`     | Initial value when uncontrolled                      |
+| `onValueChange`        | `(isSelected: boolean) => void`                                              | -           | Called with the next value                           |
+| `isIndeterminate`      | `boolean`                                                                    | `false`     | Draws a dash and announces `aria-checked="mixed"`    |
+| `label`                | `string`                                                                     | -           | Text to the right of the box                         |
+| `description`          | `string`                                                                     | -           | Helper text                                          |
+| `descriptionPlacement` | `'label' \| 'element'`                                                       | `'label'`   | Under the label, or under the whole row              |
+| `error`                | `string`                                                                     | -           | Error message, wins over the local validation        |
+| `isRequired`           | `boolean`                                                                    | `false`     | The box must be checked                              |
+| `isRequiredMessage`    | `string`                                                                     | -           | Message of the required check                        |
+| `validations`          | `Array<(isSelected: boolean) => string \| null>`                             | -           | Custom checks, run on blur                           |
+| `isFormControlled`     | `boolean`                                                                    | `false`     | Disables the local validation                        |
+| `isDisabled`           | `boolean`                                                                    | `false`     | Disables the input                                   |
+| `isReadOnly`           | `boolean`                                                                    | `false`     | Prevents toggling without dimming the control        |
+| `color`                | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'primary'` | Color of the checked box                             |
+| `size`                 | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`      | Box, icon and label size                             |
+| `radius`               | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'sm'`      | Corner radius of the box                             |
+| `isFullWidth`          | `boolean`                                                                    | `false`     | Stretches the root to the available width            |
+| `icon`                 | `ReactNode`                                                                  | -           | Replaces the check mark                              |
+| `indeterminateIcon`    | `ReactNode`                                                                  | -           | Replaces the dash                                    |
+| `value`                | `string`                                                                     | -           | Native value submitted by an HTML `<form>`           |
+| `className`            | `string`                                                                     | -           | Class applied to the root element                    |
+| `classNames`           | `Partial<Record<CheckboxSlots, string>>`                                     | -           | Per-slot class overrides                             |
+| `preset`               | `string`                                                                     | -           | Name of a configured preset                          |
+
+`Checkbox` also accepts every native `<input>` attribute (`name`, `aria-label`, `autoFocus`…) and forwards `ref`
+to the underlying `<input>` element.
+
+## Storybook
+
+[Open in Storybook →](pathname:///storybook/?path=/story/primitives-checkbox--default) and see more combinations.

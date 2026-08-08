@@ -33,6 +33,7 @@ export type {
   AutocompleteSingleFieldConfig,
   AutocompleteMultipleFieldConfig,
   NumberFieldConfig,
+  CheckboxFieldConfig,
   InputsGroupFieldConfig,
   InputsGroupTextFieldConfig,
   InputsGroupNumberFieldConfig,

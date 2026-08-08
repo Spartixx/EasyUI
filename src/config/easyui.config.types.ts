@@ -1,5 +1,7 @@
+import type { ReactNode } from 'react'
 import type { AlertProps, AlertSlots } from '../components'
 import type { ButtonProps, ButtonSlots } from '../components'
+import type { CheckboxProps, CheckboxSlots } from '../components'
 import type { InputProps, InputSlots } from '../components'
 import type { InputNumberProps, InputNumberSlots } from '../components'
 import type { SelectorCommonProps, SelectorSlots } from '../components'
@@ -14,6 +16,7 @@ export type SlotClassNames<TSlots extends string> = Partial<Record<TSlots, strin
 export interface EasyUIWrappersConfig {
   alert?: SlotClassNames<AlertSlots>
   button?: SlotClassNames<ButtonSlots>
+  checkbox?: SlotClassNames<CheckboxSlots>
   input?: SlotClassNames<InputSlots>
   inputNumber?: SlotClassNames<InputNumberSlots>
   selector?: SlotClassNames<SelectorSlots>
@@ -36,6 +39,24 @@ export type AlertPresetProps = Partial<
 
 export type ButtonPresetProps = Partial<
   Omit<ButtonProps, 'children' | 'className' | 'classNames' | 'preset'>
+>
+
+export type CheckboxPresetProps = Partial<
+  Omit<
+    CheckboxProps,
+    | 'className'
+    | 'classNames'
+    | 'preset'
+    | 'validations'
+    | 'isFormControlled'
+    | 'error'
+    | 'isSelected'
+    | 'defaultSelected'
+    | 'isIndeterminate'
+    | 'onValueChange'
+    | 'onChange'
+    | 'onBlur'
+  >
 >
 
 export type InputPresetProps = Partial<
@@ -104,6 +125,7 @@ export type FormModalPresetProps = Partial<
 export interface EasyUIPresetsConfig {
   alert?: Record<string, EasyUIPreset<AlertPresetProps, AlertSlots>>
   button?: Record<string, EasyUIPreset<ButtonPresetProps, ButtonSlots>>
+  checkbox?: Record<string, EasyUIPreset<CheckboxPresetProps, CheckboxSlots>>
   input?: Record<string, EasyUIPreset<InputPresetProps, InputSlots>>
   inputNumber?: Record<string, EasyUIPreset<InputNumberPresetProps, InputNumberSlots>>
   selector?: Record<string, EasyUIPreset<SelectorPresetProps, SelectorSlots>>
@@ -124,6 +146,10 @@ export interface EasyUIDefaultsConfig {
   }
   alert?: {
     closeButtonLabel?: string
+  }
+  checkbox?: {
+    icon?: ReactNode
+    indeterminateIcon?: ReactNode
   }
   modal?: {
     closeIconButtonLabel?: string

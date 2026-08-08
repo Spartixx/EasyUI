@@ -36,6 +36,8 @@ function initialValueFor(config: FieldConfig): FieldValueType {
       return config.selectionMode === 'multiple' ? [] : ''
     case 'number':
       return null
+    case 'checkbox':
+      return false
     default:
       return assertNever(config)
   }
@@ -53,6 +55,8 @@ function isEmpty(value: FieldValueType): boolean {
   if (value === null) return true
   if (Array.isArray(value)) return value.every((entry) => isEmpty(entry))
   if (typeof value === 'number') return false
+  // A required checkbox is only satisfied when it is checked, so an unchecked one counts as empty.
+  if (typeof value === 'boolean') return !value
   return value.trim() === ''
 }
 

@@ -4,6 +4,7 @@ import type { FormFieldVariant } from '../../../utils/class-maps'
 import type { ActionsConfig, ButtonVariant } from '../../internal/actions'
 import type { SubmitErrorMessages } from '../../internal/submit'
 import type {
+  CheckboxProps,
   InputProps,
   SelectorCommonProps,
   SelectorSingleProps,
@@ -38,11 +39,19 @@ export type FormSlots =
   | 'autocompleteField'
   | 'numberField'
   | 'inputsGroupField'
+  | 'checkboxField'
   | 'actions'
   | 'submitButton'
   | 'cancelButton'
 
-export type FieldType = 'input' | 'selector' | 'autocomplete' | 'number' | 'inputs-group' | 'custom'
+export type FieldType =
+  | 'input'
+  | 'selector'
+  | 'autocomplete'
+  | 'number'
+  | 'inputs-group'
+  | 'checkbox'
+  | 'custom'
 
 export type InputKind =
   | 'text'
@@ -53,7 +62,7 @@ export type InputKind =
   | 'search'
   | (string & {})
 
-export type FieldValueType = string | string[] | number | (number | null)[] | null
+export type FieldValueType = string | string[] | number | (number | null)[] | boolean | null
 export type FormValues = Record<string, FieldValueType>
 export type FieldValidator<TValue extends FieldValueType> = (value: TValue, values: FormValues) => string | null
 
@@ -110,12 +119,31 @@ type InputsGroupFieldOmittedProps =
 type InputsGroupTextFieldProps = Omit<InputsGroupTextProps, InputsGroupFieldOmittedProps>
 type InputsGroupNumberFieldProps = Omit<InputsGroupNumberProps, InputsGroupFieldOmittedProps>
 
+type CheckboxFieldProps = Omit<
+  CheckboxProps,
+  | 'isSelected'
+  | 'defaultSelected'
+  | 'onValueChange'
+  | 'onChange'
+  | 'error'
+  | 'label'
+  | 'description'
+  | 'isRequired'
+  | 'isRequiredMessage'
+  | 'isFormControlled'
+  | 'isDisabled'
+  | 'validations'
+  | 'name'
+  | 'className'
+>
+
 export interface FormFieldPropsByType {
   input?: InputFieldProps
   selector?: Omit<SelectorCommonProps, SelectionFieldOmittedProps>
   autocomplete?: Omit<AutocompleteCommonProps, SelectionFieldOmittedProps>
   number?: InputFieldProps
   inputsGroup?: Omit<InputsGroupCommonProps, InputsGroupFieldOmittedProps>
+  checkbox?: CheckboxFieldProps
 }
 
 export interface InputFieldConfig extends BaseFieldConfig<string> {
@@ -178,6 +206,11 @@ export interface NumberFieldConfig extends BaseFieldConfig<number | null> {
   props?: InputFieldProps
 }
 
+export interface CheckboxFieldConfig extends BaseFieldConfig<boolean> {
+  type: 'checkbox'
+  props?: CheckboxFieldProps
+}
+
 export interface FieldRenderContext<TValue extends FieldValueType = string> {
   name: string
   value: TValue
@@ -204,12 +237,15 @@ export type FieldConfig =
   | AutocompleteFieldConfig
   | NumberFieldConfig
   | InputsGroupFieldConfig
+  | CheckboxFieldConfig
   | CustomFieldConfig
 export type BuiltinFieldConfig = Exclude<FieldConfig, CustomFieldConfig>
 export type FormFields = Record<string, FieldConfig>
 
 export type FieldValue<TConfig extends FieldConfig> =
-  TConfig extends { type: 'number' }
+  TConfig extends { type: 'checkbox' }
+    ? boolean
+    : TConfig extends { type: 'number' }
     ? number | null
     : TConfig extends { type: 'selector' | 'autocomplete'; selectionMode: 'multiple' }
       ? string[]
@@ -231,9 +267,11 @@ type IsConditionalField<TConfig extends FieldConfig> =
 type SubmittedFieldValue<TConfig extends FieldConfig> =
   TConfig extends { type: 'number'; isRequired: true }
     ? number
-    : TConfig extends { type: 'inputs-group'; itemsType: 'number' }
-      ? number[]
-      : FieldValue<TConfig>
+    : TConfig extends { type: 'checkbox'; isRequired: true }
+      ? true
+      : TConfig extends { type: 'inputs-group'; itemsType: 'number' }
+        ? number[]
+        : FieldValue<TConfig>
 
 export type FormAllValues<TFields extends FormFields = FormFields> = {
   [FieldName in keyof TFields]: FieldValue<TFields[FieldName]>

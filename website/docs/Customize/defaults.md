@@ -32,6 +32,10 @@ export default defineConfig({
     alert: {
       closeButtonLabel: 'Dismiss',
     },
+    checkbox: {
+      icon: <CheckIcon />,
+      indeterminateIcon: <DashIcon />,
+    },
     modal: {
       closeIconButtonLabel: 'Fermer',
       getSubmitErrorStatus: (error) => (axios.isAxiosError(error) ? String(error.response?.status) : null),
@@ -73,6 +77,8 @@ Without a provider (or with the key left unset), each component falls back to it
 | `selector.noResultsMessage`          | `string`                           | `Selector`                                                               | `'No results found'`       |
 | `inputsGroup.addLabel`               | `string`                           | `InputsGroup`                                                            | `'Add'`                    |
 | `alert.closeButtonLabel`             | `string`                           | `Alert`                                                                  | `'Close'`                  |
+| `checkbox.icon`                      | `ReactNode`                        | `Checkbox`                                                               | built-in check mark        |
+| `checkbox.indeterminateIcon`         | `ReactNode`                        | `Checkbox`                                                               | built-in dash              |
 | `modal.closeIconButtonLabel`         | `string`                           | `Modal`, `FormModal`                                                     | `'Close'`                  |
 | `modal.getSubmitErrorStatus`         | `(error: Error) => string \| null` | `Modal`                                                                  | —                          |
 | `modal.submitErrorMessages`          | `Record<string \| number, string>` | `Modal`                                                                  | —                          |
@@ -158,6 +164,35 @@ is set. The button shows an icon only, so this label is what screen readers anno
 
   {/* overrides the default for this instance only */}
   <Alert isClosable closeButtonLabel="Hide this notice" title="Maintenance tonight" />
+</EasyUIProvider>
+```
+
+## `checkbox.icon` and `checkbox.indeterminateIcon`
+
+The two glyphs a [`Checkbox`](../Components/Primitives/checkbox.mdx) draws inside its box: the check mark once it
+is selected, and the dash while it is indeterminate. Setting them once keeps every checkbox of the application on
+the same icon set — including the ones a `Form` renders for you, which you never instantiate yourself.
+
+The icon inherits the text color of the box and is sized by the checkbox `size`, so give it `size-full` rather
+than a fixed dimension.
+
+```tsx
+<EasyUIProvider
+  config={{
+    defaults: {
+      checkbox: {
+        icon: <Check className="size-full" strokeWidth={3} />,
+        indeterminateIcon: <Minus className="size-full" strokeWidth={3} />,
+      },
+    },
+  }}
+>
+  {/* both use the icons above */}
+  <Checkbox label="Accept the terms" defaultSelected />
+  <Checkbox label="Select all" isIndeterminate />
+
+  {/* overrides the default for this instance only */}
+  <Checkbox label="Confirm" defaultSelected icon={<X className="size-full" />} />
 </EasyUIProvider>
 ```
 

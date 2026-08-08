@@ -20,6 +20,9 @@ export const FOCUS_OUTLINE_CLASSES =
 export const FOCUS_WITHIN_OUTLINE_CLASSES =
   'focus-within:outline-(length:--easyui-outline-width) focus-within:outline-offset-(--easyui-outline-offset) focus-within:outline-(--easyui-color-focus-ring)'
 
+export const PEER_FOCUS_OUTLINE_CLASSES =
+  'peer-focus-visible:outline-(length:--easyui-outline-width) peer-focus-visible:outline-offset-(--easyui-outline-offset) peer-focus-visible:outline-(--easyui-color-focus-ring)'
+
 export const ARROW_SIZE_CLASSES: Record<NonNullable<EasyUIBaseProps['size']>, string> = {
   sm: 'size-3',
   md: 'size-4',

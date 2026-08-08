@@ -175,6 +175,7 @@ Each field declares a `type` (its category). The `input` type additionally accep
 | `autocomplete` | `string` / `string[]`             | requires `options`; `selectionMode: 'multiple'` makes it a list |
 | `number`       | `number \| null`                  | `null` = empty (distinct from `0`)                              |
 | `inputs-group` | `string[]` / `(number \| null)[]` | a repeatable row; `itemsType: 'number'` switches the shape      |
+| `checkbox`     | `boolean`                         | `isRequired` is only satisfied when checked                     |
 | `custom`       | `string`                          | requires a `render` function                                    |
 
 The value type is derived from the field declaration, so `form.values` and the submitted payloads are typed per field.
@@ -370,9 +371,9 @@ placeholder behaviour, per-slot classes — `fieldProps` carries a full set of p
 />
 ```
 
-Keys: `input`, `selector`, `autocomplete`, `number`, `inputsGroup`. Each accepts every prop of the matching
-primitive except the ones the form drives itself (`value`, `onValueChange`, `error`, `label`, `isDisabled`,
-`isFormControlled`, `name`, `className`).
+Keys: `input`, `selector`, `autocomplete`, `number`, `inputsGroup`, `checkbox`. Each accepts every prop of the
+matching primitive except the ones the form drives itself (`value`, `onValueChange`, `error`, `label`,
+`isDisabled`, `isFormControlled`, `name`, `className`).
 
 The `props` of a single field win over `fieldProps`, and objects such as `classNames` are merged slot by slot. A
 field that declares its own `preset` ignores `fieldProps` entirely — see
@@ -488,6 +489,7 @@ Each field type has its own slot, alongside the container and action slots. Fiel
 | `autocompleteField` | rendered `autocomplete` fields         |
 | `numberField`       | rendered `number` fields               |
 | `inputsGroupField`  | rendered `inputs-group` fields         |
+| `checkboxField`     | rendered `checkbox` fields             |
 | `actions`           | footer wrapping the buttons            |
 | `submitButton`      | the submit button                      |
 | `cancelButton`      | the cancel button                      |

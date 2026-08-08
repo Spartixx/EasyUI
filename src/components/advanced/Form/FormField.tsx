@@ -123,6 +123,19 @@ export function FormField<TFields extends FormFields>({
           })}
         </>
       )
+    case 'checkbox':
+      return (
+        <>
+          {fieldRegistry.checkbox({
+            ...common,
+            config,
+            props: resolveFieldProps(fieldProps?.checkbox, config.props),
+            value: fieldState.value as boolean,
+            setValue: fieldState.setValue as (value: boolean) => void,
+            slotClassName: slotClassName('checkboxField'),
+          })}
+        </>
+      )
     case 'number':
       return (
         <>

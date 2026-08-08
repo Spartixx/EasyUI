@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Input, Selector, Autocomplete } from '../../../primitives'
+import { Input, Selector, Autocomplete, Checkbox } from '../../../primitives'
 import { InputsGroup } from '../../InputsGroup'
 import type { FormFieldVariant } from '../../../../utils/class-maps'
 import type {
@@ -14,6 +14,7 @@ import type {
   NumberFieldConfig,
   InputsGroupTextFieldConfig,
   InputsGroupNumberFieldConfig,
+  CheckboxFieldConfig,
 } from '../Form.types'
 
 export interface BuiltinFieldRenderContext<
@@ -75,6 +76,7 @@ export interface BuiltinFieldRegistry {
   inputsGroupNumber: (
     ctx: BuiltinFieldRenderContext<(number | null)[], InputsGroupNumberFieldConfig>,
   ) => ReactNode
+  checkbox: (ctx: BuiltinFieldRenderContext<boolean, CheckboxFieldConfig>) => ReactNode
 }
 
 export const fieldRegistry: BuiltinFieldRegistry = {
@@ -189,6 +191,24 @@ export const fieldRegistry: BuiltinFieldRegistry = {
       initialValues={ctx.config.initialValues}
       values={ctx.value}
       onValuesChange={ctx.setValue}
+      error={ctx.error ?? undefined}
+      className={ctx.slotClassName}
+      {...ctx.props}
+    />
+  ),
+  checkbox: (ctx) => (
+    <Checkbox
+      name={ctx.name}
+      label={ctx.config.label}
+      description={ctx.config.description}
+      isRequired={ctx.config.isRequired}
+      isFormControlled
+      isDisabled={ctx.isDisabled || ctx.isLoading}
+      isFullWidth
+      color={ctx.color}
+      isSelected={ctx.value}
+      onBlur={ctx.onBlur}
+      onValueChange={ctx.setValue}
       error={ctx.error ?? undefined}
       className={ctx.slotClassName}
       {...ctx.props}
