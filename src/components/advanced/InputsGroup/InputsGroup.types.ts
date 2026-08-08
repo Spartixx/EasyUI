@@ -19,7 +19,7 @@ export interface RenderRemoveButtonParams {
   isDisabled: boolean
 }
 
-interface InputsGroupCommonProps extends Omit<EasyUIBaseProps<InputsGroupSlots>, 'isLoading'> {
+export interface InputsGroupCommonProps extends Omit<EasyUIBaseProps<InputsGroupSlots>, 'isLoading'> {
   label?: string
   description?: string
   error?: string

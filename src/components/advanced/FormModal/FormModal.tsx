@@ -1,16 +1,21 @@
 import { forwardRef, useId } from 'react'
 import type { ReactElement, Ref } from 'react'
-import type { FormModalProps } from './FormModal.types'
+import type { FormModalProps, FormModalSlots } from './FormModal.types'
 import type { FormFields, FormSubmitHandler } from '../Form'
 import { cn } from '../../../utils/cn'
+import { mergePresetProps } from '../../../utils/mergePresetProps'
+import { useSlotClassNames, usePreset } from '../../../hooks'
 import { resolveButtonVariant } from '../../internal/actions'
 import { Form } from '../Form'
-import { Modal } from '../Modal'
+import { Modal, MODAL_SLOTS } from '../Modal'
 
 function FormModalInner<TFields extends FormFields, TSubmitError>(
   rawProps: FormModalProps<TFields, TSubmitError>,
   ref: Ref<HTMLDivElement>,
 ) {
+  const { preset, ...rest } = rawProps
+  const presetConfig = usePreset('formModal', preset)
+
   const {
     form,
     formProps,
@@ -18,12 +23,20 @@ function FormModalInner<TFields extends FormFields, TSubmitError>(
     actions,
     variant,
     color,
-    isLoading = false,
-    isDisabled = false,
+    isLoading,
+    isDisabled,
     isClosedOnSubmit = true,
     isResetOnClose = true,
+    className,
+    classNames,
     ...modalProps
-  } = rawProps
+  } = mergePresetProps(presetConfig?.props, rest)
+
+  const presetClassNames = presetConfig ? (presetConfig.classNames ?? {}) : undefined
+  const slotClassName = useSlotClassNames('formModal', classNames, presetClassNames, presetConfig?.className)
+  const modalClassNames = Object.fromEntries(
+    MODAL_SLOTS.map((slot) => [slot, slotClassName(slot)]),
+  ) as Partial<Record<FormModalSlots, string>>
 
   const formId = useId()
 
@@ -55,6 +68,8 @@ function FormModalInner<TFields extends FormFields, TSubmitError>(
           ...actions?.submitProps,
         },
       }}
+      className={className}
+      classNames={modalClassNames}
       {...modalProps}
     >
       <Form

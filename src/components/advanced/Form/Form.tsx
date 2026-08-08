@@ -30,6 +30,7 @@ function FormInner<TFields extends FormFields, TSubmitError>(
     loadingMessage,
     disabledMessage,
     actions,
+    fieldProps,
     variant,
     color,
     isDisabled = false,
@@ -130,6 +131,7 @@ function FormInner<TFields extends FormFields, TSubmitError>(
               isFormLoading={fieldsLoading}
               formVariant={variant}
               formColor={color}
+              fieldProps={fieldProps}
               slotClassName={slotClassName}
             />
           ) : null,

@@ -6,6 +6,7 @@ import { Form, useForm } from './index'
 import type {
   FormActionsConfig,
   FormColor,
+  FormFieldPropsByType,
   FormFields,
   FormInstance,
   FormSubmitHandler,
@@ -20,6 +21,7 @@ interface HarnessProps {
   onSubmit?: FormSubmitHandler
   validateOn?: ValidateMode
   actions?: FormActionsConfig
+  fieldProps?: FormFieldPropsByType
   color?: FormColor
   preset?: string
   title?: string
@@ -1218,6 +1220,90 @@ describe('Form', () => {
       const input = screen.getByLabelText('Name')
       expect(input.getAttribute('autocomplete')).toBe('off')
       expect(input.parentElement?.classList.contains('bg-(--easyui-color-success)/30')).toBe(true)
+    })
+  })
+
+  describe('fieldProps', () => {
+    test('applies to every field of the matching type', () => {
+      renderForm({
+        fields: {
+          first: { type: 'input', label: 'First' },
+          second: { type: 'input', label: 'Second' },
+        },
+        fieldProps: { input: { autoComplete: 'off' } },
+      })
+      expect(screen.getByLabelText('First').getAttribute('autocomplete')).toBe('off')
+      expect(screen.getByLabelText('Second').getAttribute('autocomplete')).toBe('off')
+    })
+
+    test('does not leak to fields of another type', () => {
+      renderForm({
+        fields: {
+          name: { type: 'input', label: 'Name' },
+          amount: { type: 'number', label: 'Amount' },
+        },
+        fieldProps: { input: { autoComplete: 'off' } },
+      })
+      expect(screen.getByLabelText('Name').getAttribute('autocomplete')).toBe('off')
+      expect(screen.getByLabelText('Amount').getAttribute('autocomplete')).toBeNull()
+    })
+
+    test('the props of a field win over fieldProps', () => {
+      renderForm({
+        fields: { name: { type: 'input', label: 'Name', props: { autoComplete: 'email' } } },
+        fieldProps: { input: { autoComplete: 'off' } },
+      })
+      expect(screen.getByLabelText('Name').getAttribute('autocomplete')).toBe('email')
+    })
+
+    test('merges classNames slot by slot instead of replacing them', () => {
+      renderForm({
+        fields: {
+          name: { type: 'input', label: 'Name', props: { classNames: { input: 'own-input' } } },
+        },
+        fieldProps: { input: { classNames: { label: 'inherited-label' } } },
+      })
+      expect(screen.getByLabelText('Name').classList.contains('own-input')).toBe(true)
+      expect(screen.getByText('Name').classList.contains('inherited-label')).toBe(true)
+    })
+
+    test('a preset on a field makes that field ignore fieldProps entirely', () => {
+      renderForm(
+        {
+          fields: {
+            plain: { type: 'input', label: 'Plain' },
+            special: { type: 'input', label: 'Special', props: { preset: 'hero' } },
+          },
+          fieldProps: { input: { autoComplete: 'off' } },
+        },
+        { presets: { input: { hero: { props: { autoComplete: 'email' } } } } },
+      )
+      expect(screen.getByLabelText('Plain').getAttribute('autocomplete')).toBe('off')
+      expect(screen.getByLabelText('Special').getAttribute('autocomplete')).toBe('email')
+    })
+
+    test('a form preset can carry fieldProps', () => {
+      renderForm(
+        {
+          fields: { name: { type: 'input', label: 'Name' } },
+          preset: 'compact',
+        },
+        { presets: { form: { compact: { props: { fieldProps: { input: { autoComplete: 'off' } } } } } } },
+      )
+      expect(screen.getByLabelText('Name').getAttribute('autocomplete')).toBe('off')
+    })
+
+    test('the fieldProps of the instance merge with the ones of the form preset', () => {
+      renderForm(
+        {
+          fields: { name: { type: 'input', label: 'Name' } },
+          preset: 'compact',
+          fieldProps: { input: { classNames: { label: 'instance-label' } } },
+        },
+        { presets: { form: { compact: { props: { fieldProps: { input: { autoComplete: 'off' } } } } } } },
+      )
+      expect(screen.getByLabelText('Name').getAttribute('autocomplete')).toBe('off')
+      expect(screen.getByText('Name').classList.contains('instance-label')).toBe(true)
     })
   })
 

@@ -8,18 +8,21 @@ export type ModalColor = NonNullable<WithVariantProps['color']>
 export type ModalVariant = ButtonVariant
 export type ModalActionsConfig = ActionsConfig
 
-export type ModalSlots =
-  | 'base'
-  | 'backdrop'
-  | 'header'
-  | 'title'
-  | 'description'
-  | 'closeIconButton'
-  | 'body'
-  | 'errorAlert'
-  | 'footer'
-  | 'submitButton'
-  | 'cancelButton'
+export const MODAL_SLOTS = [
+  'base',
+  'backdrop',
+  'header',
+  'title',
+  'description',
+  'closeIconButton',
+  'body',
+  'errorAlert',
+  'footer',
+  'submitButton',
+  'cancelButton',
+] as const
+
+export type ModalSlots = (typeof MODAL_SLOTS)[number]
 
 export interface ModalProps<TSubmitError = Error>
   extends Omit<ComponentPropsWithoutRef<'div'>, 'title' | 'color' | 'onSubmit' | 'children'> {

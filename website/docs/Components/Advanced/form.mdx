@@ -353,6 +353,31 @@ const fields = {
 <Form form={form} onSubmit={onSubmit} variant="flat" color="primary" />
 ```
 
+### Configuring every field of a type (`fieldProps`)
+
+`variant` and `color` are single values shared with the action buttons. When you need more than that — a size, a
+placeholder behaviour, per-slot classes — `fieldProps` carries a full set of props per field type:
+
+```tsx
+<Form
+  form={form}
+  onSubmit={onSubmit}
+  fieldProps={{
+    input: { size: 'sm', variant: 'bordered' },
+    selector: { size: 'sm', variant: 'bordered' },
+    inputsGroup: { addButtonPlacement: 'full-width' },
+  }}
+/>
+```
+
+Keys: `input`, `selector`, `autocomplete`, `number`, `inputsGroup`. Each accepts every prop of the matching
+primitive except the ones the form drives itself (`value`, `onValueChange`, `error`, `label`, `isDisabled`,
+`isFormControlled`, `name`, `className`).
+
+The `props` of a single field win over `fieldProps`, and objects such as `classNames` are merged slot by slot. A
+field that declares its own `preset` ignores `fieldProps` entirely — see
+[presets](../../Customize/presets.md#against-the-props-of-a-single-field).
+
 ## Loading and disabled state
 
 `isLoading` and `isSubmitting` are two independent states, even though fields and buttons render the same way in both:
@@ -482,6 +507,7 @@ These slots can also be set globally via [`EasyUIProvider`](../../Customize/glob
 | `title`                  | `string`                                       | —       | Optional heading at the top of the form                  |
 | `description`            | `ReactNode`                                    | —       | Optional text or markup under the title                  |
 | `actions`                | `FormActionsConfig`                            | —       | Labels, `onCancel`, `isSubmitButtonHidden`, button props |
+| `fieldProps`             | `FormFieldPropsByType`                         | —       | Props applied to every field of a given type (see below) |
 | `error`                  | `string`                                       | —       | Submission error, rendered in an alert under the title   |
 | `submitErrorMessages`    | `Record<string \| number, string>`             | —       | Status code → message, merged with the global defaults   |
 | `getSubmitErrorStatus`   | `(error) => string \| null`                    | —       | Reads the status out of a rejected `onSubmit`            |

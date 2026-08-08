@@ -102,6 +102,36 @@ close after a successful submit.
 />
 ```
 
+## Presets
+
+`FormModal` resolves its own `presets.formModal` entry, not `presets.modal`. A single name therefore describes the
+modal, its action buttons and the look of the fields, which is what makes recurring roles such as a delete
+confirmation modal.
+
+```tsx
+<EasyUIProvider config={{
+  presets: {
+    formModal: {
+      delete: {
+        props: {
+          size: 'sm',
+          actions: { submitLabel: 'Delete', submitProps: { color: 'error' } },
+          formProps: { fieldProps: { input: { size: 'sm' } } },
+        },
+        classNames: { title: 'text-(--easyui-color-error)' },
+      },
+    },
+  },
+}}>
+  <FormModal preset="delete" form={form} isOpen={isOpen} onOpenChange={setIsOpen} title="Delete this user"
+             formProps={{ onSubmit: deleteUser }} />
+</EasyUIProvider>
+```
+
+The `formProps` you pass on the instance is merged with the one of the preset key by key, so injecting `onSubmit`
+does not discard the `fieldProps` the preset declared. See [presets](../../Customize/presets.md#formmodal) for the
+full rules.
+
 ## Props
 
 | Prop             | Type                       | Description                                               |
@@ -115,6 +145,7 @@ close after a successful submit.
 | `color`          | `FormColor`                | Cascades to the fields and the footer buttons             |
 | `isLoading`      | `boolean`                  | Fields in loading state, footer buttons disabled          |
 | `isDisabled`     | `boolean`                  | Disables the fields and the footer buttons                |
+| `preset`         | `string`                   | Named `presets.formModal` entry (see above)               |
 
 Every other [Modal prop](./modal.mdx#props) is accepted, except those the form owns: `children`, `onSubmit`,
 `error`, `submitErrorMessages`, `getSubmitErrorStatus` and `onUnhandledSubmitError`.

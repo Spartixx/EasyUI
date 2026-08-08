@@ -5,14 +5,17 @@ import type { ActionsConfig, ButtonVariant } from '../../internal/actions'
 import type { SubmitErrorMessages } from '../../internal/submit'
 import type {
   InputProps,
+  SelectorCommonProps,
   SelectorSingleProps,
   SelectorMultipleProps,
   SelectorOption,
+  AutocompleteCommonProps,
   AutocompleteSingleProps,
   AutocompleteMultipleProps,
   AutocompleteOption,
 } from '../../primitives'
 import type {
+  InputsGroupCommonProps,
   InputsGroupTextProps,
   InputsGroupNumberProps,
   InputsGroupTextInitialValue,
@@ -107,6 +110,14 @@ type InputsGroupFieldOmittedProps =
 type InputsGroupTextFieldProps = Omit<InputsGroupTextProps, InputsGroupFieldOmittedProps>
 type InputsGroupNumberFieldProps = Omit<InputsGroupNumberProps, InputsGroupFieldOmittedProps>
 
+export interface FormFieldPropsByType {
+  input?: InputFieldProps
+  selector?: Omit<SelectorCommonProps, SelectionFieldOmittedProps>
+  autocomplete?: Omit<AutocompleteCommonProps, SelectionFieldOmittedProps>
+  number?: InputFieldProps
+  inputsGroup?: Omit<InputsGroupCommonProps, InputsGroupFieldOmittedProps>
+}
+
 export interface InputFieldConfig extends BaseFieldConfig<string> {
   type: 'input'
   kind?: InputKind
@@ -194,6 +205,7 @@ export type FieldConfig =
   | NumberFieldConfig
   | InputsGroupFieldConfig
   | CustomFieldConfig
+export type BuiltinFieldConfig = Exclude<FieldConfig, CustomFieldConfig>
 export type FormFields = Record<string, FieldConfig>
 
 export type FieldValue<TConfig extends FieldConfig> =
@@ -284,6 +296,7 @@ export interface FormProps<TFields extends FormFields = FormFields, TSubmitError
   loadingMessage?: string
   disabledMessage?: string
   actions?: FormActionsConfig
+  fieldProps?: FormFieldPropsByType
   variant?: FormVariant
   color?: FormColor
   isDisabled?: boolean
