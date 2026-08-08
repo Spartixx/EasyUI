@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { Input } from '../index.ts'
 import { inputMeta } from './meta.ts'
 
 const meta = { ...inputMeta, title: 'Primitives/Input/States' } satisfies Meta<typeof inputMeta.component>
@@ -13,6 +14,16 @@ export const ReadOnly: Story = { args: { isReadOnly: true, value: 'Read-only val
 export const Required: Story = { args: { isRequired: true, label: 'Email' } }
 export const RequiredWithCustomMessage: Story = {
   args: { isRequired: true, isRequiredMessage: 'An email address is mandatory', label: 'Email' },
+}
+export const ActivePerVariant: Story = {
+  args: { isActive: true, defaultValue: 'Filtered value' },
+  render: (args) => (
+    <div className="flex flex-col gap-4">
+      {(['bordered', 'faded', 'flat', 'underlined'] as const).map((variant) => (
+        <Input {...args} key={variant} variant={variant} label={variant} />
+      ))}
+    </div>
+  ),
 }
 export const WithError: Story = { args: { error: 'This field is required.' } }
 export const WithValidation: Story = {

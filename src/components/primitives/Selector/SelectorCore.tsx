@@ -3,7 +3,12 @@ import type { FocusEvent, KeyboardEvent, MouseEvent, RefObject } from 'react'
 import type { SelectorOption as SelectorOptionData, SelectorCommonProps, SelectorProps } from './Selector.types'
 import { cn } from '../../../utils/cn'
 import { mergePresetProps } from '../../../utils/mergePresetProps'
-import { RADIUS_CLASSES, LABEL_COLOR_CLASSES, FOCUS_OUTLINE_CLASSES } from '../../../utils/class-maps'
+import {
+  RADIUS_CLASSES,
+  LABEL_COLOR_CLASSES,
+  FOCUS_OUTLINE_CLASSES,
+  ACTIVE_FIELD_CLASSES,
+} from '../../../utils/class-maps'
 import { useSlotClassNames, usePreset } from '../../../hooks'
 import { useEasyUIConfig } from '../../../providers/EasyUIContext'
 import { Spinner } from '../spinners/Spinner'
@@ -17,6 +22,7 @@ import {
   useFieldDescribedBy,
   useFieldColors,
   useFieldValidation,
+  getSelectionSummary,
   FieldLayout,
 } from '../../internal/field'
 import type { SelectionBehavior } from '../../internal/field'
@@ -112,6 +118,8 @@ export function SelectorCore<TValue>(rawProps: SelectorCoreProps<TValue>) {
     defaultValue,
     onValueChange,
     placeholder,
+    triggerText,
+    isActive = false,
     size = 'md',
     variant = 'bordered',
     color = 'default',
@@ -305,7 +313,11 @@ export function SelectorCore<TValue>(rawProps: SelectorCoreProps<TValue>) {
     </ArrowIcon>
   )
 
-  const hasChips = isMultiple && selectedValues.length > 0
+  const hasTriggerText = triggerText !== undefined
+  const hasChips = isMultiple && selectedValues.length > 0 && !hasTriggerText
+  const selectionSummary = hasTriggerText
+    ? getSelectionSummary(isMultiple, selectedValues, selectedOption?.label)
+    : null
 
   const triggerContent = (
     <>
@@ -329,10 +341,17 @@ export function SelectorCore<TValue>(rawProps: SelectorCoreProps<TValue>) {
           chipRemoveButtonClassName={slotClassName('chipRemoveButton')}
         />
       ) : (
-        <span className={cn('flex-1 truncate', !selectedOption && 'opacity-60', slotClassName('value'))}>
-          {selectedOption?.label ?? placeholder}
+        <span
+          className={cn(
+            'flex-1 truncate',
+            !hasTriggerText && !selectedOption && 'opacity-60',
+            slotClassName('value'),
+          )}
+        >
+          {triggerText ?? selectedOption?.label ?? placeholder}
         </span>
       )}
+      {selectionSummary && <span className="sr-only">, {selectionSummary}</span>}
       {isLoading && <Spinner size={size} className={cn('shrink-0', slotClassName('spinner'))} />}
       <ContentSlot
         content={endContent}
@@ -368,10 +387,12 @@ export function SelectorCore<TValue>(rawProps: SelectorCoreProps<TValue>) {
         isMultiple ? MULTIPLE_TRIGGER_SIZE_CLASSES[size] : TRIGGER_SIZE_CLASSES[size],
         variant !== 'underlined' && RADIUS_CLASSES[radius],
         TRIGGER_VARIANT_COLOR_CLASSES[variant][color],
+        !hasError && isActive && ACTIVE_FIELD_CLASSES[variant],
         hasError && ERROR_TRIGGER_CLASSES[variant],
         effectiveTextColor,
         isSelectorDisabled && 'opacity-50 cursor-not-allowed',
         slotClassName('trigger'),
+        !hasError && isActive && slotClassName('activeTrigger'),
       )}
       {...nativeProps}
     >
@@ -397,7 +418,7 @@ export function SelectorCore<TValue>(rawProps: SelectorCoreProps<TValue>) {
               id={optionId(index)}
               option={option}
               isSelected={selectedValues.includes(option.value)}
-              isActive={index === activeIndex}
+              isHighlighted={index === activeIndex}
               selectionIndicator={selectionIndicator}
               className={slotClassName('option')}
               onSelect={() => selectOption(option)}

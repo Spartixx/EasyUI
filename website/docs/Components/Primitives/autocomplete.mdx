@@ -362,24 +362,25 @@ The only value-level check is `isRequired`, which verifies that an option is sel
 
 Customize individual parts via `classNames`:
 
-| Slot           | Description                                |
-|----------------|--------------------------------------------|
-| `base`         | Root `<div>` wrapping the whole field      |
-| `label`        | The `<label>` element                      |
-| `inputWrapper` | The bordered/tinted box wrapping the input |
-| `input`        | The `<input>` element                      |
-| `chips`        | Wrapper around the chips (multiple mode)   |
-| `chip`         | Each selected value chip                   |
-| `chipLabel`    | The label inside a chip                    |
-| `chipRemoveButton` | The remove control inside a chip       |
-| `startContent` | Wrapper around `startContent`              |
-| `endContent`   | Wrapper around `endContent`                |
-| `arrow`        | Wrapper around the arrow icon              |
-| `spinner`      | The loading spinner                        |
-| `listbox`      | The options `<ul>` container               |
-| `option`       | Each `<li>` option                         |
-| `description`  | The helper text element                    |
-| `error`        | The error message element                  |
+| Slot                 | Description                                |
+|----------------------|--------------------------------------------|
+| `base`               | Root `<div>` wrapping the whole field      |
+| `label`              | The `<label>` element                      |
+| `inputWrapper`       | The bordered/tinted box wrapping the input |
+| `activeInputWrapper` | Extra classes on the box while `isActive`  |
+| `input`              | The `<input>` element                      |
+| `chips`              | Wrapper around the chips (multiple mode)   |
+| `chip`               | Each selected value chip                   |
+| `chipLabel`          | The label inside a chip                    |
+| `chipRemoveButton`   | The remove control inside a chip           |
+| `startContent`       | Wrapper around `startContent`              |
+| `endContent`         | Wrapper around `endContent`                |
+| `arrow`              | Wrapper around the arrow icon              |
+| `spinner`            | The loading spinner                        |
+| `listbox`            | The options `<ul>` container               |
+| `option`             | Each `<li>` option                         |
+| `description`        | The helper text element                    |
+| `error`              | The error message element                  |
 
 ```jsx live
 <Autocomplete
@@ -393,40 +394,42 @@ These slots can also be styled globally for every `Autocomplete` in your app, se
 
 ## Props
 
-| Prop                    | Type                                                                         | Default              | Description                                           |
-|-------------------------|------------------------------------------------------------------------------|----------------------|-------------------------------------------------------|
-| `options`               | `AutocompleteOption[]`                                                       | -                    | The list of selectable options                        |
-| `selectionMode`         | `'single' \| 'multiple'`                                                     | `'single'`           | Whether one or several options can be selected        |
-| `selectionIndicator`    | `'check' \| 'none'`                                                          | `'check'`            | Check icon at the end of selected options             |
-| `value`                 | `string` (single) \| `string[]` (multiple)                                   | -                    | Controlled selected value                             |
-| `defaultValue`          | `string` (single) \| `string[]` (multiple)                                   | -                    | Initial value for uncontrolled usage                  |
-| `onValueChange`         | `(value: string) => void` \| `(values: string[]) => void`                    | -                    | Called when the selection changes                     |
-| `placeholder`           | `string`                                                                     | -                    | Text shown when the field is empty                    |
-| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'`         | Visual style                                          |
-| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`          | Focus color                                           |
-| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`               | Field size                                            |
-| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`               | Corner radius                                         |
-| `isDisabled`            | `boolean`                                                                    | `false`              | Disables the field                                    |
-| `isLoading`             | `boolean`                                                                    | `false`              | Shows a spinner and disables the field                |
-| `isRequired`            | `boolean`                                                                    | `false`              | Marks the field as required                           |
-| `isRequiredMessage`     | `string`                                                                     | -                    | Message shown when a required field has no selection  |
-| `isFullWidth`           | `boolean`                                                                    | `false`              | Makes the field take the full available width         |
-| `label`                 | `string`                                                                     | -                    | Label rendered above the field                        |
-| `description`           | `string`                                                                     | -                    | Helper text                                           |
-| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`          | Render description below the label or below the field |
-| `error`                 | `string`                                                                     | -                    | Externally controlled error, takes precedence over local validation |
-| `validations`           | `Array<(option: AutocompleteOption) => string \| null>`                      | -                    | Per-option validators; invalid options are disabled   |
-| `startContent`          | `ReactNode`                                                                  | -                    | Content rendered before the input                     |
-| `endContent`            | `ReactNode`                                                                  | -                    | Content rendered after the input                      |
-| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `startContent` is rendered                      |
-| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `endContent` is rendered                        |
-| `noResultsMessage`      | `string`                                                                     | `'No results found'` | Message shown when no option matches the typed text   |
-| `isInputClearedOnFocus` | `boolean`                                                                    | `false`              | Empties the input on focus so a new search can be typed; the committed value is kept |
-| `arrow`                 | `ReactNode`                                                                  | -                    | Custom node replacing the default chevron icon        |
-| `arrowPlacement`        | `'start' \| 'end'`                                                           | `'end'`              | Where the arrow is rendered                           |
-| `isArrowHidden`         | `boolean`                                                                    | `false`              | Hides the arrow                                       |
-| `className`             | `string`                                                                     | -                    | Class applied to the root element                     |
-| `classNames`            | `Partial<Record<AutocompleteSlots, string>>`                                 | -                    | Per-slot class overrides                              |
+| Prop                    | Type                                                                         | Default              | Description                                                                                         |
+|-------------------------|------------------------------------------------------------------------------|----------------------|-----------------------------------------------------------------------------------------------------|
+| `options`               | `AutocompleteOption[]`                                                       | -                    | The list of selectable options                                                                      |
+| `selectionMode`         | `'single' \| 'multiple'`                                                     | `'single'`           | Whether one or several options can be selected                                                      |
+| `selectionIndicator`    | `'check' \| 'none'`                                                          | `'check'`            | Check icon at the end of selected options                                                           |
+| `value`                 | `string` (single) \| `string[]` (multiple)                                   | -                    | Controlled selected value                                                                           |
+| `defaultValue`          | `string` (single) \| `string[]` (multiple)                                   | -                    | Initial value for uncontrolled usage                                                                |
+| `onValueChange`         | `(value: string) => void` \| `(values: string[]) => void`                    | -                    | Called when the selection changes                                                                   |
+| `placeholder`           | `string`                                                                     | -                    | Text shown when the field is empty                                                                  |
+| `triggerText`           | `string`                                                                     | -                    | Fixed text shown while the field is not focused; focusing clears the input, chips are not displayed |
+| `isActive`              | `boolean`                                                                    | `false`              | Active state, drawn with a primary border                                                           |
+| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'`         | Visual style                                                                                        |
+| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`          | Focus color                                                                                         |
+| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`               | Field size                                                                                          |
+| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`               | Corner radius                                                                                       |
+| `isDisabled`            | `boolean`                                                                    | `false`              | Disables the field                                                                                  |
+| `isLoading`             | `boolean`                                                                    | `false`              | Shows a spinner and disables the field                                                              |
+| `isRequired`            | `boolean`                                                                    | `false`              | Marks the field as required                                                                         |
+| `isRequiredMessage`     | `string`                                                                     | -                    | Message shown when a required field has no selection                                                |
+| `isFullWidth`           | `boolean`                                                                    | `false`              | Makes the field take the full available width                                                       |
+| `label`                 | `string`                                                                     | -                    | Label rendered above the field                                                                      |
+| `description`           | `string`                                                                     | -                    | Helper text                                                                                         |
+| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`          | Render description below the label or below the field                                               |
+| `error`                 | `string`                                                                     | -                    | Externally controlled error, takes precedence over local validation                                 |
+| `validations`           | `Array<(option: AutocompleteOption) => string \| null>`                      | -                    | Per-option validators; invalid options are disabled                                                 |
+| `startContent`          | `ReactNode`                                                                  | -                    | Content rendered before the input                                                                   |
+| `endContent`            | `ReactNode`                                                                  | -                    | Content rendered after the input                                                                    |
+| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `startContent` is rendered                                                                    |
+| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`           | Where `endContent` is rendered                                                                      |
+| `noResultsMessage`      | `string`                                                                     | `'No results found'` | Message shown when no option matches the typed text                                                 |
+| `isInputClearedOnFocus` | `boolean`                                                                    | `false`              | Empties the input on focus so a new search can be typed; the committed value is kept                |
+| `arrow`                 | `ReactNode`                                                                  | -                    | Custom node replacing the default chevron icon                                                      |
+| `arrowPlacement`        | `'start' \| 'end'`                                                           | `'end'`              | Where the arrow is rendered                                                                         |
+| `isArrowHidden`         | `boolean`                                                                    | `false`              | Hides the arrow                                                                                     |
+| `className`             | `string`                                                                     | -                    | Class applied to the root element                                                                   |
+| `classNames`            | `Partial<Record<AutocompleteSlots, string>>`                                 | -                    | Per-slot class overrides                                                                            |
 
 `Autocomplete` forwards `ref` to the underlying `<input>` element.
 

@@ -177,6 +177,13 @@ export const TEXT_FIELD_WRAPPER_VARIANT_COLOR_CLASSES: Record<
   },
 }
 
+export const ACTIVE_FIELD_CLASSES: Record<FormFieldVariant, string> = {
+  bordered: 'border-(--easyui-color-primary)',
+  faded: 'border-(--easyui-color-primary)',
+  flat: 'inset-ring-[length:var(--easyui-border-width-md)] inset-ring-(--easyui-color-primary)',
+  underlined: 'border-(--easyui-color-primary)',
+}
+
 export const TEXT_FIELD_ERROR_WRAPPER_CLASSES: Record<FormFieldVariant, string> = {
   bordered: 'border-(--easyui-color-error) focus-within:border-(--easyui-color-error)',
   faded: 'border-(--easyui-color-error) bg-(--easyui-color-error)/10 focus-within:border-(--easyui-color-error)',

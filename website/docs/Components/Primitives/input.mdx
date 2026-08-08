@@ -194,20 +194,21 @@ The `error` prop (external) always takes precedence over a `validations` error.
 
 Customize individual parts via `classNames`:
 
-| Slot              | Description                                       |
-|-------------------|---------------------------------------------------|
-| `base`            | Root `<div>` wrapping the whole field             |
-| `label`           | The `<label>` element                             |
-| `inputWrapper`    | The visual bordered/background box                |
-| `input`           | The native `<input>` element                      |
-| `startContent`    | Wrapper around `startContent`                     |
-| `endContent`      | Wrapper around `endContent`                       |
-| `spinner`         | The loading spinner                               |
-| `stepper`         | Wrapper around the number stepper buttons         |
-| `incrementButton` | The increment (up) button of the number stepper   |
-| `decrementButton` | The decrement (down) button of the number stepper |
-| `description`     | The helper text element                           |
-| `error`           | The error message element                         |
+| Slot                 | Description                                       |
+|----------------------|---------------------------------------------------|
+| `base`               | Root `<div>` wrapping the whole field             |
+| `label`              | The `<label>` element                             |
+| `inputWrapper`       | The visual bordered/background box                |
+| `activeInputWrapper` | Extra classes on the box while `isActive`         |
+| `input`              | The native `<input>` element                      |
+| `startContent`       | Wrapper around `startContent`                     |
+| `endContent`         | Wrapper around `endContent`                       |
+| `spinner`            | The loading spinner                               |
+| `stepper`            | Wrapper around the number stepper buttons         |
+| `incrementButton`    | The increment (up) button of the number stepper   |
+| `decrementButton`    | The decrement (down) button of the number stepper |
+| `description`        | The helper text element                           |
+| `error`              | The error message element                         |
 
 ```jsx live
 <Input
@@ -220,31 +221,32 @@ These slots can also be styled globally for every `Input` in your app, see the [
 
 ## Props
 
-| Prop                    | Type                                                                         | Default      | Description                                           |
-|-------------------------|------------------------------------------------------------------------------|--------------|-------------------------------------------------------|
-| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'` | Visual style                                          |
-| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`  | Focus color                                           |
-| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`       | Input size                                            |
-| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`       | Corner radius                                         |
-| `isDisabled`            | `boolean`                                                                    | `false`      | Disables the input                                    |
-| `isLoading`             | `boolean`                                                                    | `false`      | Shows a spinner and disables the input                |
-| `isRequired`            | `boolean`                                                                    | `false`      | Marks the field as required                           |
-| `isRequiredMessage`     | `string`                                                                     | -            | Message shown when a required field is left empty     |
-| `isReadOnly`            | `boolean`                                                                    | `false`      | Makes the input read-only                             |
-| `isFullWidth`           | `boolean`                                                                    | `false`      | Makes the input take the full available width         |
-| `showStepper`           | `boolean`                                                                    | `true`       | Shows the stepper buttons when `type="number"`        |
-| `label`                 | `string`                                                                     | -            | Label rendered above the input                        |
-| `description`           | `string`                                                                     | -            | Helper text                                           |
-| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`  | Render description below the label or below the input |
+| Prop                    | Type                                                                         | Default      | Description                                                         |
+|-------------------------|------------------------------------------------------------------------------|--------------|---------------------------------------------------------------------|
+| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'bordered'` | Visual style                                                        |
+| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'`  | Focus color                                                         |
+| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`       | Input size                                                          |
+| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`       | Corner radius                                                       |
+| `isDisabled`            | `boolean`                                                                    | `false`      | Disables the input                                                  |
+| `isLoading`             | `boolean`                                                                    | `false`      | Shows a spinner and disables the input                              |
+| `isRequired`            | `boolean`                                                                    | `false`      | Marks the field as required                                         |
+| `isRequiredMessage`     | `string`                                                                     | -            | Message shown when a required field is left empty                   |
+| `isReadOnly`            | `boolean`                                                                    | `false`      | Makes the input read-only                                           |
+| `isActive`              | `boolean`                                                                    | `false`      | Active state, drawn with a primary border                           |
+| `isFullWidth`           | `boolean`                                                                    | `false`      | Makes the input take the full available width                       |
+| `showStepper`           | `boolean`                                                                    | `true`       | Shows the stepper buttons when `type="number"`                      |
+| `label`                 | `string`                                                                     | -            | Label rendered above the input                                      |
+| `description`           | `string`                                                                     | -            | Helper text                                                         |
+| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'`  | Render description below the label or below the input               |
 | `error`                 | `string`                                                                     | -            | Externally controlled error, takes precedence over local validation |
-| `validations`           | `Array<(value: string) => string \| null>`                                   | -            | Validators run on blur                                |
-| `onValueChange`         | `(value: string) => void`                                                    | -            | Shorthand for `onChange` returning just the value     |
-| `startContent`          | `ReactNode`                                                                  | -            | Content rendered before the input text                |
-| `endContent`            | `ReactNode`                                                                  | -            | Content rendered after the input text                 |
-| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `startContent` is rendered                      |
-| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `endContent` is rendered                        |
-| `className`             | `string`                                                                     | -            | Class applied to the root element                     |
-| `classNames`            | `Partial<Record<InputSlots, string>>`                                        | -            | Per-slot class overrides                              |
+| `validations`           | `Array<(value: string) => string \| null>`                                   | -            | Validators run on blur                                              |
+| `onValueChange`         | `(value: string) => void`                                                    | -            | Shorthand for `onChange` returning just the value                   |
+| `startContent`          | `ReactNode`                                                                  | -            | Content rendered before the input text                              |
+| `endContent`            | `ReactNode`                                                                  | -            | Content rendered after the input text                               |
+| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `startContent` is rendered                                    |
+| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`   | Where `endContent` is rendered                                      |
+| `className`             | `string`                                                                     | -            | Class applied to the root element                                   |
+| `classNames`            | `Partial<Record<InputSlots, string>>`                                        | -            | Per-slot class overrides                                            |
 
 `Input` also accepts every native `<input>` attribute (`value`, `defaultValue`, `placeholder`, `type`, `name`, `autoComplete`, etc.) and forwards `ref` to the underlying `<input>` element.
 

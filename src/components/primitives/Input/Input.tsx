@@ -10,6 +10,7 @@ import {
   TEXT_FIELD_ERROR_TEXT_COLOR,
   TEXT_FIELD_WRAPPER_VARIANT_COLOR_CLASSES,
   TEXT_FIELD_ERROR_WRAPPER_CLASSES,
+  ACTIVE_FIELD_CLASSES,
   FOCUS_WITHIN_OUTLINE_CLASSES,
 } from '../../../utils/class-maps'
 import { useSlotClassNames } from '../../../hooks'
@@ -56,6 +57,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
     isFormControlled = false,
     isLoading = false,
     isReadOnly = false,
+    isActive = false,
     isFullWidth = false,
     showStepper = true,
     startContent,
@@ -211,11 +213,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((rawProps, ref) =>
         variant !== 'underlined' && RADIUS_CLASSES[radius],
         TEXT_FIELD_WRAPPER_VARIANT_COLOR_CLASSES[variant][color],
         variant === 'flat' && FOCUS_WITHIN_OUTLINE_CLASSES,
+        !hasError && isActive && ACTIVE_FIELD_CLASSES[variant],
         hasError && TEXT_FIELD_ERROR_WRAPPER_CLASSES[variant],
         isInputDisabled && 'opacity-50 cursor-not-allowed',
         !hasOutsideContent && isFullWidth && 'w-full',
         hasOutsideContent && 'flex-1',
         slotClassName('inputWrapper'),
+        !hasError && isActive && slotClassName('activeInputWrapper'),
       )}
     >
       {usesInsideLabel && (

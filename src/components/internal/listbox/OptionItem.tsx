@@ -6,7 +6,7 @@ interface OptionItemProps {
   id: string
   option: ListboxOption
   isSelected: boolean
-  isActive: boolean
+  isHighlighted: boolean
   selectionIndicator?: SelectionIndicator
   className?: string
   onSelect: () => void
@@ -17,7 +17,7 @@ export function OptionItem({
   id,
   option,
   isSelected,
-  isActive,
+  isHighlighted,
   selectionIndicator = 'check',
   className,
   onSelect,
@@ -34,7 +34,7 @@ export function OptionItem({
       onClick={() => !option.isDisabled && onSelect()}
       className={cn(
         'flex items-center gap-2 px-3 py-2 text-sm cursor-pointer select-none',
-        isActive && !option.isDisabled && 'bg-(--easyui-color-primary)/10',
+        isHighlighted && !option.isDisabled && 'bg-(--easyui-color-primary)/10',
         isSelected && 'font-medium',
         option.isDisabled && 'opacity-50 cursor-not-allowed',
         className,

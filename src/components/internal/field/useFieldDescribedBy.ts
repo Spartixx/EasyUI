@@ -4,6 +4,7 @@ interface UseFieldDescribedByParams {
   descriptionPlacement?: 'label' | 'element'
   descriptionId: string
   errorId: string
+  additionalDescribedById?: string
 }
 
 export function useFieldDescribedBy({
@@ -12,9 +13,12 @@ export function useFieldDescribedBy({
   descriptionPlacement,
   descriptionId,
   errorId,
+  additionalDescribedById,
 }: UseFieldDescribedByParams) {
   const showsDescription = !!description && (descriptionPlacement === 'label' || !hasError)
-  const ariaDescribedBy = [showsDescription && descriptionId, hasError && errorId].filter(Boolean).join(' ') || undefined
+  const ariaDescribedBy =
+    [showsDescription && descriptionId, hasError && errorId, additionalDescribedById].filter(Boolean).join(' ') ||
+    undefined
 
   return { ariaDescribedBy }
 }

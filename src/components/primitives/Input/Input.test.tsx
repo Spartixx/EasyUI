@@ -510,6 +510,58 @@ describe('Input', () => {
     })
   })
 
+  describe('isActive', () => {
+    const probe = { inputWrapper: 'wrapper-probe' }
+
+    function getInputWrapper() {
+      return document.querySelector('.wrapper-probe') as HTMLElement
+    }
+
+    test('does nothing by default', () => {
+      render(<Input classNames={probe} />)
+      expect(getInputWrapper().className).not.toContain('--easyui-color-primary')
+    })
+
+    test('turns the border primary on a bordered input', () => {
+      render(<Input variant="bordered" isActive classNames={probe} />)
+      expect(getInputWrapper().className).toContain('border-(--easyui-color-primary)')
+    })
+
+    test('draws an inset ring on flat, which has no border', () => {
+      render(<Input variant="flat" isActive classNames={probe} />)
+      expect(getInputWrapper().className).toContain('inset-ring-(--easyui-color-primary)')
+    })
+
+    test('the flat inset ring leaves the height untouched', () => {
+      const { rerender } = render(<Input variant="flat" classNames={probe} />)
+      const inactiveHeight = getInputWrapper().getBoundingClientRect().height
+      rerender(<Input variant="flat" isActive classNames={probe} />)
+      expect(getInputWrapper().getBoundingClientRect().height).toBe(inactiveHeight)
+    })
+
+    test('the error state wins over the active state', () => {
+      render(<Input variant="bordered" isActive error="Required" classNames={probe} />)
+      expect(getInputWrapper().className).toContain('border-(--easyui-color-error)')
+      expect(getInputWrapper().className).not.toContain('border-(--easyui-color-primary)')
+    })
+
+    test('the activeInputWrapper slot applies only while active', () => {
+      const { rerender } = render(<Input classNames={{ ...probe, activeInputWrapper: 'instance-active' }} />)
+      expect(getInputWrapper().classList.contains('instance-active')).toBe(false)
+      rerender(<Input isActive classNames={{ ...probe, activeInputWrapper: 'instance-active' }} />)
+      expect(getInputWrapper().classList.contains('instance-active')).toBe(true)
+    })
+
+    test('the activeInputWrapper slot is configurable globally', () => {
+      render(
+        <EasyUIProvider config={{ wrappers: { input: { activeInputWrapper: 'global-active' } } }}>
+          <Input isActive classNames={probe} />
+        </EasyUIProvider>,
+      )
+      expect(getInputWrapper().classList.contains('global-active')).toBe(true)
+    })
+  })
+
   describe('global wrappers config', () => {
     test('renders unchanged when no provider is present', () => {
       render(<Input />)

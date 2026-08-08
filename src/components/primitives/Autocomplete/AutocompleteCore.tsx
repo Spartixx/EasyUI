@@ -15,6 +15,7 @@ import {
   TEXT_FIELD_ERROR_TEXT_COLOR,
   TEXT_FIELD_WRAPPER_VARIANT_COLOR_CLASSES,
   TEXT_FIELD_ERROR_WRAPPER_CLASSES,
+  ACTIVE_FIELD_CLASSES,
   FOCUS_WITHIN_OUTLINE_CLASSES,
 } from '../../../utils/class-maps'
 import { useSlotClassNames, usePreset } from '../../../hooks'
@@ -30,6 +31,7 @@ import {
   useFieldDescribedBy,
   useFieldColors,
   useFieldValidation,
+  getSelectionSummary,
   FieldLayout,
 } from '../../internal/field'
 import type { SelectionBehavior } from '../../internal/field'
@@ -72,6 +74,8 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
     defaultValue,
     onValueChange,
     placeholder,
+    triggerText,
+    isActive = false,
     size = 'md',
     variant = 'bordered',
     color = 'default',
@@ -138,7 +142,16 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
 
   const [typedText, setTypedText] = useState('')
   const [isUserTyping, setIsUserTyping] = useState(false)
-  const displayedValue = isUserTyping ? typedText : isMultiple ? '' : (committedOption?.label ?? '')
+  const [isFocused, setIsFocused] = useState(false)
+  const hasTriggerText = triggerText !== undefined
+  const displayedValue =
+    hasTriggerText && !isFocused
+      ? triggerText
+      : isUserTyping
+        ? typedText
+        : isMultiple
+          ? ''
+          : (committedOption?.label ?? '')
   const [announcement, setAnnouncement] = useState('')
 
   const listboxRef = useRef<HTMLUListElement>(null)
@@ -150,13 +163,24 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
 
   const resolvedNoResultsMessage = noResultsMessage ?? defaults?.autocomplete?.noResultsMessage
   const resolvedIsInputClearedOnFocus =
-    isInputClearedOnFocus ?? defaults?.autocomplete?.isInputClearedOnFocus ?? false
+    hasTriggerText || (isInputClearedOnFocus ?? defaults?.autocomplete?.isInputClearedOnFocus ?? false)
 
   const isAutocompleteDisabled = isDisabled || isLoading
 
   const displayedError = error ?? fieldValidation.error
   const hasError = !!displayedError
-  const { ariaDescribedBy } = useFieldDescribedBy({ hasError, description, descriptionPlacement, descriptionId, errorId })
+  const selectionSummaryId = `${inputId}-selection`
+  const selectionSummary = hasTriggerText
+    ? getSelectionSummary(isMultiple, selectedValues, committedOption?.label)
+    : null
+  const { ariaDescribedBy } = useFieldDescribedBy({
+    hasError,
+    description,
+    descriptionPlacement,
+    descriptionId,
+    errorId,
+    additionalDescribedById: selectionSummary ? selectionSummaryId : undefined,
+  })
 
   const filteredOptions = isUserTyping
     ? resolvedOptions.filter((option) => option.label.toLowerCase().includes(typedText.toLowerCase().trim()))
@@ -252,6 +276,7 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
     onFocus?.(e)
     if (isAutocompleteDisabled) return
+    setIsFocused(true)
     if (resolvedIsInputClearedOnFocus) clearInputText()
     openListbox()
   }
@@ -267,6 +292,7 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
     onBlur?.(e)
     if (isAutocompleteDisabled) return
+    setIsFocused(false)
     revertInputText()
     closeListbox()
     fieldValidation.validate(currentValue ?? behavior.emptyValue)
@@ -301,7 +327,7 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
     </ArrowIcon>
   )
 
-  const hasChips = isMultiple && selectedValues.length > 0
+  const hasChips = isMultiple && selectedValues.length > 0 && !hasTriggerText
 
   const inputContent = (
     <>
@@ -358,6 +384,11 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
         )}
         {...nativeProps}
       />
+      {selectionSummary && (
+        <span id={selectionSummaryId} className="sr-only">
+          {selectionSummary}
+        </span>
+      )}
       {isLoading && <Spinner size={size} className={cn('shrink-0', slotClassName('spinner'))} />}
       <ContentSlot
         content={endContent}
@@ -377,11 +408,13 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
         variant !== 'underlined' && RADIUS_CLASSES[radius],
         TEXT_FIELD_WRAPPER_VARIANT_COLOR_CLASSES[variant][color],
         variant === 'flat' && FOCUS_WITHIN_OUTLINE_CLASSES,
+        !hasError && isActive && ACTIVE_FIELD_CLASSES[variant],
         hasError && TEXT_FIELD_ERROR_WRAPPER_CLASSES[variant],
         isAutocompleteDisabled && 'opacity-50 cursor-not-allowed',
         !hasOutsideContent && isFullWidth && 'w-full',
         hasOutsideContent && 'flex-1',
         slotClassName('inputWrapper'),
+        !hasError && isActive && slotClassName('activeInputWrapper'),
       )}
     >
       {inputContent}
@@ -406,7 +439,7 @@ export function AutocompleteCore<TValue>(rawProps: AutocompleteCoreProps<TValue>
               id={optionId(index)}
               option={option}
               isSelected={selectedValues.includes(option.value)}
-              isActive={index === activeIndex}
+              isHighlighted={index === activeIndex}
               selectionIndicator={selectionIndicator}
               className={slotClassName('option')}
               onSelect={() => selectOption(option)}
