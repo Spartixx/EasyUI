@@ -279,7 +279,7 @@ export interface FormProps<TFields extends FormFields = FormFields, TSubmitError
   getSubmitErrorStatus?: (error: TSubmitError) => string | null
   onUnhandledSubmitError?: (error: TSubmitError) => void
   title?: string
-  description?: string
+  description?: ReactNode
   isHeaderHidden?: boolean
   loadingMessage?: string
   disabledMessage?: string

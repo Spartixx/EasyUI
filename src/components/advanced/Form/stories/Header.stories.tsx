@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import type { ReactNode } from 'react'
 import { useForm, type FormFields } from '../index.ts'
 import { formMeta } from './meta.ts'
 import { FormWithSubmittedValues } from './submittedValues.tsx'
@@ -16,7 +17,7 @@ const fields = {
   email: { type: 'input', kind: 'email', label: 'Email' },
 } satisfies FormFields
 
-function HeaderForm(props: { title?: string; description?: string }) {
+function HeaderForm(props: { title?: string; description?: ReactNode }) {
   const form = useForm(fields)
   return (
     <div style={{ width: 360 }}>
@@ -40,5 +41,19 @@ export const DescriptionOnly: Story = {
 export const TitleAndDescription: Story = {
   render: () => (
     <HeaderForm title="Create your profile" description="Fill in the fields below to get started." />
+  ),
+}
+
+export const RichDescription: Story = {
+  render: () => (
+    <HeaderForm
+      title="Create your profile"
+      description={
+        <ul className="flex flex-col gap-1 list-disc pl-4">
+          <li>Your first name is shown to your teammates</li>
+          <li>Your email stays private</li>
+        </ul>
+      }
+    />
   ),
 }

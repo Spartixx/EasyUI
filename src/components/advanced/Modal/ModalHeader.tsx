@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { cn } from '../../../utils/cn'
 import { FOCUS_OUTLINE_CLASSES } from '../../../utils/class-maps'
 import { CloseIcon } from '../../internal/icons'
@@ -5,7 +6,7 @@ import { CloseIcon } from '../../internal/icons'
 interface ModalHeaderProps {
   title?: string
   titleId: string
-  description?: string
+  description?: ReactNode
   descriptionId: string
   isCloseIconHidden: boolean
   closeIconButtonLabel: string
@@ -41,12 +42,12 @@ export function ModalHeader({
           </h2>
         )}
         {description && (
-          <p
+          <div
             id={descriptionId}
             className={cn('text-sm text-(--easyui-color-foreground)/60', descriptionClassName)}
           >
             {description}
-          </p>
+          </div>
         )}
       </div>
       {!isCloseIconHidden && (

@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, type Mock } from 'vitest'
 import { render, screen, renderHook, act, waitFor } from '@testing-library/react'
 import { userEvent } from 'vitest/browser'
-import { createRef, useState, type Ref } from 'react'
+import { createRef, useState, type ReactNode, type Ref } from 'react'
 import { Form, useForm } from './index'
 import type {
   FormActionsConfig,
@@ -23,7 +23,7 @@ interface HarnessProps {
   color?: FormColor
   preset?: string
   title?: string
-  description?: string
+  description?: ReactNode
   loadingMessage?: string
   disabledMessage?: string
   isDisabled?: boolean
@@ -109,6 +109,19 @@ describe('Form', () => {
     })
     expect(screen.getByRole('heading', { name: 'My form' })).toBeDefined()
     expect(screen.getByText('A short description.')).toBeDefined()
+  })
+
+  test('accepts markup as the description', () => {
+    renderForm({
+      fields: { name: { type: 'input', label: 'Name' } },
+      title: 'My form',
+      description: (
+        <span>
+          Read the <a href="https://example.com">guidelines</a> first.
+        </span>
+      ),
+    })
+    expect(screen.getByRole('link', { name: 'guidelines' })).toBeDefined()
   })
 
   test('omits the header when neither title nor description is set', () => {

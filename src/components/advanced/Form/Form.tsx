@@ -105,9 +105,9 @@ function FormInner<TFields extends FormFields, TSubmitError>(
             </h2>
           )}
           {effectiveDescription && (
-            <p className={cn('text-sm text-(--easyui-color-foreground)/60', slotClassName('description'))}>
+            <div className={cn('text-sm text-(--easyui-color-foreground)/60', slotClassName('description'))}>
               {effectiveDescription}
-            </p>
+            </div>
           )}
         </div>
       )}

@@ -166,7 +166,7 @@ The close icon is announced as "Close" — change it with `closeIconButtonLabel`
 | `base`            | The dialog panel                            |
 | `header`          | The header row (texts + close icon)         |
 | `title`           | The `<h2>` title                            |
-| `description`     | The description paragraph                   |
+| `description`     | The description block                       |
 | `closeIconButton` | The close icon in the top-right corner      |
 | `errorAlert`      | The `Alert` shown for a submit error        |
 | `body`            | The wrapper around `children`               |
@@ -185,7 +185,7 @@ The close icon is announced as "Close" — change it with `closeIconButtonLabel`
 | `isOpen`                  | `boolean`                                                                    | -         | Whether the modal is displayed                          |
 | `onOpenChange`            | `(isOpen: boolean) => void`                                                  | -         | Called with `false` every time the modal wants to close |
 | `title`                   | `string`                                                                     | -         | Header title, also the accessible name                  |
-| `description`             | `string`                                                                     | -         | Header description                                      |
+| `description`             | `ReactNode`                                                                  | -         | Header description, plain text or markup                |
 | `children`                | `ReactNode`                                                                  | -         | The body                                                |
 | `footer`                  | `ReactNode`                                                                  | -         | Replaces the whole footer                               |
 | `size`                    | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`    | Maximum width of the panel                              |
