@@ -1,6 +1,7 @@
 export { InputsGroup } from './InputsGroup'
 export type {
   InputsGroupProps,
+  InputsGroupCommonProps,
   InputsGroupTextProps,
   InputsGroupNumberProps,
   InputsGroupSlots,

@@ -1,6 +1,16 @@
 import { assertNever } from '../../../utils/assertNever'
+import { mergePresetProps } from '../../../utils/mergePresetProps'
+import type { PresetPropsOf } from '../../../utils/mergePresetProps'
 import type { FormFieldVariant } from '../../../utils/class-maps'
-import type { FieldConfig, FormColor, FormFields, FormInstance, FormSlots, FormVariant } from './Form.types'
+import type {
+  FieldConfig,
+  FormColor,
+  FormFieldPropsByType,
+  FormFields,
+  FormInstance,
+  FormSlots,
+  FormVariant,
+} from './Form.types'
 import { fieldRegistry } from './fields/registry'
 
 interface FormFieldProps<TFields extends FormFields> {
@@ -10,7 +20,16 @@ interface FormFieldProps<TFields extends FormFields> {
   isFormLoading: boolean
   formVariant?: FormVariant
   formColor?: FormColor
+  fieldProps?: FormFieldPropsByType
   slotClassName: (slot: FormSlots) => string
+}
+
+function resolveFieldProps<TProps extends object>(
+  inherited: PresetPropsOf<NoInfer<TProps>> | undefined,
+  ownProps: TProps | undefined,
+): TProps {
+  const hasOwnPreset = Boolean((ownProps as { preset?: string } | undefined)?.preset)
+  return mergePresetProps(hasOwnPreset ? undefined : inherited, ownProps ?? ({} as TProps))
 }
 
 const FIELD_VARIANTS: FormFieldVariant[] = ['bordered', 'faded', 'flat', 'underlined']
@@ -28,6 +47,7 @@ export function FormField<TFields extends FormFields>({
   isFormLoading,
   formVariant,
   formColor,
+  fieldProps,
   slotClassName,
 }: FormFieldProps<TFields>) {
   const config: FieldConfig = form.config[fieldName]
@@ -48,20 +68,21 @@ export function FormField<TFields extends FormFields>({
 
   switch (config.type) {
     case 'input':
-      return <>{fieldRegistry.input({ ...common, config, value: stringValue, setValue: setStringValue, slotClassName: slotClassName('inputField') })}</>
+      return <>{fieldRegistry.input({ ...common, config, props: resolveFieldProps(fieldProps?.input, config.props), value: stringValue, setValue: setStringValue, slotClassName: slotClassName('inputField') })}</>
     case 'selector':
       return config.selectionMode === 'multiple' ? (
         <>
           {fieldRegistry.selectorMultiple({
             ...common,
             config,
+            props: resolveFieldProps(fieldProps?.selector, config.props),
             value: fieldState.value as string[],
             setValue: fieldState.setValue as (value: string[]) => void,
             slotClassName: slotClassName('selectorField'),
           })}
         </>
       ) : (
-        <>{fieldRegistry.selectorSingle({ ...common, config, value: stringValue, setValue: setStringValue, slotClassName: slotClassName('selectorField') })}</>
+        <>{fieldRegistry.selectorSingle({ ...common, config, props: resolveFieldProps(fieldProps?.selector, config.props), value: stringValue, setValue: setStringValue, slotClassName: slotClassName('selectorField') })}</>
       )
     case 'autocomplete':
       return config.selectionMode === 'multiple' ? (
@@ -69,13 +90,14 @@ export function FormField<TFields extends FormFields>({
           {fieldRegistry.autocompleteMultiple({
             ...common,
             config,
+            props: resolveFieldProps(fieldProps?.autocomplete, config.props),
             value: fieldState.value as string[],
             setValue: fieldState.setValue as (value: string[]) => void,
             slotClassName: slotClassName('autocompleteField'),
           })}
         </>
       ) : (
-        <>{fieldRegistry.autocompleteSingle({ ...common, config, value: stringValue, setValue: setStringValue, slotClassName: slotClassName('autocompleteField') })}</>
+        <>{fieldRegistry.autocompleteSingle({ ...common, config, props: resolveFieldProps(fieldProps?.autocomplete, config.props), value: stringValue, setValue: setStringValue, slotClassName: slotClassName('autocompleteField') })}</>
       )
     case 'inputs-group':
       return config.itemsType === 'number' ? (
@@ -83,6 +105,7 @@ export function FormField<TFields extends FormFields>({
           {fieldRegistry.inputsGroupNumber({
             ...common,
             config,
+            props: resolveFieldProps(fieldProps?.inputsGroup, config.props),
             value: fieldState.value as (number | null)[],
             setValue: fieldState.setValue as (value: (number | null)[]) => void,
             slotClassName: slotClassName('inputsGroupField'),
@@ -93,6 +116,7 @@ export function FormField<TFields extends FormFields>({
           {fieldRegistry.inputsGroupText({
             ...common,
             config,
+            props: resolveFieldProps(fieldProps?.inputsGroup, config.props),
             value: fieldState.value as string[],
             setValue: fieldState.setValue as (value: string[]) => void,
             slotClassName: slotClassName('inputsGroupField'),
@@ -105,6 +129,7 @@ export function FormField<TFields extends FormFields>({
           {fieldRegistry.number({
             ...common,
             config,
+            props: resolveFieldProps(fieldProps?.number, config.props),
             value: fieldState.value as number | null,
             setValue: fieldState.setValue as (value: number | null) => void,
             slotClassName: slotClassName('numberField'),

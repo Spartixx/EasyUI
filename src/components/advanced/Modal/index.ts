@@ -1,4 +1,5 @@
 export { Modal } from './Modal'
+export { MODAL_SLOTS } from './Modal.types'
 export type {
   ModalProps,
   ModalSlots,

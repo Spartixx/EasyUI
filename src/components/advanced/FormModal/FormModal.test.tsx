@@ -4,8 +4,11 @@ import { userEvent } from 'vitest/browser'
 import { useState, type ReactNode } from 'react'
 import type { Mock } from 'vitest'
 import { FormModal } from './index'
+import type { FormModalSlots } from './index'
 import { useForm, type FormFields } from '../Form'
+import type { ModalActionsConfig } from '../Modal'
 import { EasyUIProvider } from '../../../providers'
+import type { EasyUIConfig } from '../../../config/easyui.config.types'
 
 const fields = {
   title: { type: 'input', label: 'Title', isRequired: true },
@@ -24,6 +27,9 @@ function FormModalHarness({
   isResetOnClose?: boolean
   isLoading?: boolean
   isDisabled?: boolean
+  preset?: string
+  actions?: ModalActionsConfig
+  classNames?: Partial<Record<FormModalSlots, string>>
 }) {
   const [isOpen, setIsOpen] = useState(true)
   const form = useForm(fields)
@@ -175,6 +181,131 @@ describe('FormModal', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
       await userEvent.click(screen.getByRole('button', { name: 'reopen the modal' }))
       expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('Hello')
+    })
+  })
+
+  describe('presets config', () => {
+    function renderWithConfig(
+      props: Parameters<typeof FormModalHarness>[0],
+      config: EasyUIConfig,
+    ) {
+      return render(
+        <EasyUIProvider config={config}>
+          <FormModalHarness {...props} />
+        </EasyUIProvider>,
+      )
+    }
+
+    test('a single preset drives both the action buttons and the fields', () => {
+      renderWithConfig(
+        { preset: 'delete' },
+        {
+          presets: {
+            formModal: {
+              delete: {
+                props: {
+                  actions: { submitLabel: 'Delete' },
+                  formProps: { fieldProps: { input: { autoComplete: 'off' } } },
+                },
+              },
+            },
+          },
+        },
+      )
+      expect(screen.getByRole('button', { name: 'Delete' })).toBeDefined()
+      expect(screen.getByRole('textbox').getAttribute('autocomplete')).toBe('off')
+    })
+
+    test('the formProps of the instance no longer wipe the ones of the preset', () => {
+      renderWithConfig(
+        { preset: 'delete' },
+        {
+          presets: {
+            formModal: {
+              delete: { props: { formProps: { fieldProps: { input: { autoComplete: 'off' } } } } },
+            },
+          },
+        },
+      )
+      expect(screen.getByRole('textbox').getAttribute('autocomplete')).toBe('off')
+    })
+
+    test('the actions of the instance merge with the ones of the preset', () => {
+      renderWithConfig(
+        { preset: 'delete', actions: { cancelLabel: 'Back' } },
+        {
+          presets: {
+            formModal: { delete: { props: { actions: { submitLabel: 'Delete' } } } },
+          },
+        },
+      )
+      expect(screen.getByRole('button', { name: 'Delete' })).toBeDefined()
+      expect(screen.getByRole('button', { name: 'Back' })).toBeDefined()
+    })
+
+    test('isDisabled of a preset survives the relay to the form', () => {
+      renderWithConfig(
+        { preset: 'locked' },
+        { presets: { formModal: { locked: { props: { isDisabled: true } } } } },
+      )
+      expect(screen.getByRole('textbox').hasAttribute('disabled')).toBe(true)
+    })
+
+    test('the classNames of a preset reach the slots of the modal', () => {
+      renderWithConfig(
+        { preset: 'delete', title: 'Delete this user' },
+        {
+          presets: {
+            formModal: { delete: { classNames: { title: 'preset-title' } } },
+          },
+        },
+      )
+      expect(
+        screen.getByRole('heading', { name: 'Delete this user' }).classList.contains('preset-title'),
+      ).toBe(true)
+    })
+
+    test('the classNames of the instance apply over the ones of the preset', () => {
+      renderWithConfig(
+        { preset: 'delete', title: 'Delete this user', classNames: { title: 'instance-title' } },
+        {
+          presets: {
+            formModal: { delete: { classNames: { title: 'preset-title' } } },
+          },
+        },
+      )
+      const heading = screen.getByRole('heading', { name: 'Delete this user' })
+      expect(heading.classList.contains('preset-title')).toBe(true)
+      expect(heading.classList.contains('instance-title')).toBe(true)
+    })
+
+    test('a formModal preset can name a button preset and a field preset instead of raw props', () => {
+      renderWithConfig(
+        { preset: 'delete' },
+        {
+          presets: {
+            button: { danger: { props: { color: 'error' } } },
+            input: { compact: { props: { autoComplete: 'off' } } },
+            formModal: {
+              delete: {
+                props: {
+                  actions: { submitLabel: 'Delete', submitProps: { preset: 'danger' } },
+                  formProps: { fieldProps: { input: { preset: 'compact' } } },
+                },
+              },
+            },
+          },
+        },
+      )
+      const submitButton = screen.getByRole('button', { name: 'Delete' })
+      expect(submitButton.classList.contains('bg-(--easyui-color-error)')).toBe(true)
+      expect(submitButton.classList.contains('bg-(--easyui-color-primary)')).toBe(false)
+      expect(screen.getByRole('textbox').getAttribute('autocomplete')).toBe('off')
+    })
+
+    test('an unknown preset name leaves the modal unchanged', () => {
+      renderWithConfig({ preset: 'missing' }, { presets: { formModal: {} } })
+      expect(screen.getByRole('button', { name: 'Submit' })).toBeDefined()
     })
   })
 

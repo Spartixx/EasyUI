@@ -3,7 +3,7 @@ import { Input, Selector, Autocomplete } from '../../../primitives'
 import { InputsGroup } from '../../InputsGroup'
 import type { FormFieldVariant } from '../../../../utils/class-maps'
 import type {
-  FieldConfig,
+  BuiltinFieldConfig,
   FieldValueType,
   FormColor,
   InputFieldConfig,
@@ -18,7 +18,7 @@ import type {
 
 export interface BuiltinFieldRenderContext<
   TValue extends FieldValueType = FieldValueType,
-  TConfig extends FieldConfig = FieldConfig,
+  TConfig extends BuiltinFieldConfig = BuiltinFieldConfig,
 > {
   name: string
   value: TValue
@@ -31,6 +31,7 @@ export interface BuiltinFieldRenderContext<
   color?: FormColor
   slotClassName: string
   config: TConfig
+  props: NonNullable<TConfig['props']>
 }
 
 function renderInputField<TConfig extends InputFieldConfig | NumberFieldConfig>(
@@ -56,7 +57,7 @@ function renderInputField<TConfig extends InputFieldConfig | NumberFieldConfig>(
       onValueChange={ctx.setValue}
       error={ctx.error ?? undefined}
       className={ctx.slotClassName}
-      {...config.props}
+      {...ctx.props}
     />
   )
 }
@@ -96,7 +97,7 @@ export const fieldRegistry: BuiltinFieldRegistry = {
       onValueChange={ctx.setValue}
       error={ctx.error ?? undefined}
       className={ctx.slotClassName}
-      {...ctx.config.props}
+      {...ctx.props}
     />
   ),
   selectorMultiple: (ctx) => (
@@ -118,7 +119,7 @@ export const fieldRegistry: BuiltinFieldRegistry = {
       onValueChange={ctx.setValue}
       error={ctx.error ?? undefined}
       className={ctx.slotClassName}
-      {...ctx.config.props}
+      {...ctx.props}
     />
   ),
   autocompleteSingle: (ctx) => (
@@ -139,7 +140,7 @@ export const fieldRegistry: BuiltinFieldRegistry = {
       onValueChange={ctx.setValue}
       error={ctx.error ?? undefined}
       className={ctx.slotClassName}
-      {...ctx.config.props}
+      {...ctx.props}
     />
   ),
   autocompleteMultiple: (ctx) => (
@@ -161,7 +162,7 @@ export const fieldRegistry: BuiltinFieldRegistry = {
       onValueChange={ctx.setValue}
       error={ctx.error ?? undefined}
       className={ctx.slotClassName}
-      {...ctx.config.props}
+      {...ctx.props}
     />
   ),
   inputsGroupText: (ctx) => (
@@ -175,7 +176,7 @@ export const fieldRegistry: BuiltinFieldRegistry = {
       onValuesChange={ctx.setValue}
       error={ctx.error ?? undefined}
       className={ctx.slotClassName}
-      {...ctx.config.props}
+      {...ctx.props}
     />
   ),
   inputsGroupNumber: (ctx) => (
@@ -190,7 +191,7 @@ export const fieldRegistry: BuiltinFieldRegistry = {
       onValuesChange={ctx.setValue}
       error={ctx.error ?? undefined}
       className={ctx.slotClassName}
-      {...ctx.config.props}
+      {...ctx.props}
     />
   ),
   number: (ctx) =>

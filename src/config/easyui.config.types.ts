@@ -4,9 +4,10 @@ import type { InputProps, InputSlots } from '../components'
 import type { InputNumberProps, InputNumberSlots } from '../components'
 import type { SelectorCommonProps, SelectorSlots } from '../components'
 import type { AutocompleteCommonProps, AutocompleteSlots } from '../components'
-import type { FormProps, FormSlots, SubmitErrorMessages } from '../components'
+import type { FormProps, FormSlots, FormFields, SubmitErrorMessages } from '../components'
 import type { InputsGroupProps, InputsGroupSlots } from '../components'
 import type { ModalProps, ModalSlots } from '../components'
+import type { FormModalProps, FormModalSlots, FormModalFormProps } from '../components'
 
 export type SlotClassNames<TSlots extends string> = Partial<Record<TSlots, string>>
 
@@ -20,6 +21,7 @@ export interface EasyUIWrappersConfig {
   form?: SlotClassNames<FormSlots>
   inputsGroup?: SlotClassNames<InputsGroupSlots>
   modal?: SlotClassNames<ModalSlots>
+  formModal?: SlotClassNames<FormModalSlots>
 }
 
 export interface EasyUIPreset<TProps, TSlots extends string> {
@@ -58,7 +60,9 @@ export type AutocompletePresetProps = Partial<
   >
 >
 
-export type FormPresetProps = Partial<Pick<FormProps, 'actions' | 'isDisabled' | 'variant' | 'color'>>
+export type FormPresetProps = Partial<
+  Pick<FormProps, 'actions' | 'fieldProps' | 'isDisabled' | 'variant' | 'color'>
+>
 
 export type InputsGroupPresetProps = Partial<
   Pick<
@@ -79,6 +83,24 @@ export type ModalPresetProps = Partial<
   Pick<ModalProps, 'actions' | 'size' | 'variant' | 'color' | 'isDisabled' | 'isClosedOnSubmit' | 'isCloseIconHidden' | 'isClosedOnBackdropClick' | 'isClosedOnEscape'>
 >
 
+export type FormModalPresetProps = Partial<
+  Pick<
+    FormModalProps,
+    | 'actions'
+    | 'size'
+    | 'variant'
+    | 'color'
+    | 'isDisabled'
+    | 'isClosedOnSubmit'
+    | 'isCloseIconHidden'
+    | 'isClosedOnBackdropClick'
+    | 'isClosedOnEscape'
+    | 'isResetOnClose'
+  >
+> & {
+  formProps?: Partial<Omit<FormModalFormProps<FormFields, Error>, 'onSubmit'>>
+}
+
 export interface EasyUIPresetsConfig {
   alert?: Record<string, EasyUIPreset<AlertPresetProps, AlertSlots>>
   button?: Record<string, EasyUIPreset<ButtonPresetProps, ButtonSlots>>
@@ -89,6 +111,7 @@ export interface EasyUIPresetsConfig {
   form?: Record<string, EasyUIPreset<FormPresetProps, FormSlots>>
   inputsGroup?: Record<string, EasyUIPreset<InputsGroupPresetProps, InputsGroupSlots>>
   modal?: Record<string, EasyUIPreset<ModalPresetProps, ModalSlots>>
+  formModal?: Record<string, EasyUIPreset<FormModalPresetProps, FormModalSlots>>
 }
 
 export interface EasyUIDefaultsConfig {

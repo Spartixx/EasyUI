@@ -11,6 +11,7 @@ export type {
   FormSubmitHandler,
   SubmitErrorMessages,
   FormActionsConfig,
+  FormFieldPropsByType,
   FormVariant,
   FormColor,
   ButtonVariant,
