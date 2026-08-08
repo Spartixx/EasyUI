@@ -864,6 +864,131 @@ describe('Selector', () => {
     })
   })
 
+  describe('isActive', () => {
+    test('does nothing by default', () => {
+      render(<Selector options={fruitOptions} />)
+      expect(screen.getByRole('combobox').className).not.toContain('--easyui-color-primary')
+    })
+
+    test('turns the border primary on a bordered selector', () => {
+      render(<Selector options={fruitOptions} isActive />)
+      expect(screen.getByRole('combobox').className).toContain('border-(--easyui-color-primary)')
+    })
+
+    test('draws an inset ring on flat, which has no border', () => {
+      render(<Selector options={fruitOptions} variant="flat" isActive />)
+      expect(screen.getByRole('combobox').className).toContain('inset-ring-(--easyui-color-primary)')
+    })
+
+    test('the flat inset ring leaves the height untouched', () => {
+      const { rerender } = render(<Selector options={fruitOptions} variant="flat" />)
+      const inactiveHeight = screen.getByRole('combobox').getBoundingClientRect().height
+      rerender(<Selector options={fruitOptions} variant="flat" isActive />)
+      expect(screen.getByRole('combobox').getBoundingClientRect().height).toBe(inactiveHeight)
+    })
+
+    test('the error state wins over the active state', () => {
+      render(<Selector options={fruitOptions} isActive error="Required" />)
+      const trigger = screen.getByRole('combobox')
+      expect(trigger.className).toContain('border-(--easyui-color-error)')
+      expect(trigger.className).not.toContain('border-(--easyui-color-primary)')
+    })
+
+    test('the activeTrigger slot applies only while active', () => {
+      const { rerender } = render(
+        <Selector options={fruitOptions} classNames={{ activeTrigger: 'instance-active' }} />,
+      )
+      expect(screen.getByRole('combobox').classList.contains('instance-active')).toBe(false)
+      rerender(<Selector options={fruitOptions} isActive classNames={{ activeTrigger: 'instance-active' }} />)
+      expect(screen.getByRole('combobox').classList.contains('instance-active')).toBe(true)
+    })
+
+    test('the activeTrigger slot is configurable globally and by preset', () => {
+      const { rerender } = render(
+        <EasyUIProvider config={{ wrappers: { selector: { activeTrigger: 'global-active' } } }}>
+          <Selector options={fruitOptions} isActive />
+        </EasyUIProvider>,
+      )
+      expect(screen.getByRole('combobox').classList.contains('global-active')).toBe(true)
+
+      rerender(
+        <EasyUIProvider
+          config={{ presets: { selector: { filter: { classNames: { activeTrigger: 'preset-active' } } } } }}
+        >
+          <Selector options={fruitOptions} isActive preset="filter" />
+        </EasyUIProvider>,
+      )
+      expect(screen.getByRole('combobox').classList.contains('preset-active')).toBe(true)
+    })
+
+    test('the error state also suppresses the activeTrigger slot', () => {
+      render(<Selector options={fruitOptions} isActive error="Required" classNames={{ activeTrigger: 'x-active' }} />)
+      expect(screen.getByRole('combobox').classList.contains('x-active')).toBe(false)
+    })
+  })
+
+  describe('triggerText', () => {
+    test('replaces the selected value on the trigger', () => {
+      render(<Selector options={fruitOptions} defaultValue="apple" triggerText="Fruit" />)
+      expect(screen.getByRole('combobox').textContent).toContain('Fruit')
+      expect(screen.queryByText('Apple')).toBeNull()
+    })
+
+    test('replaces the placeholder too', () => {
+      render(<Selector options={fruitOptions} placeholder="Pick a fruit" triggerText="Fruit" />)
+      expect(screen.queryByText('Pick a fruit')).toBeNull()
+    })
+
+    test('the selected option is still visible in the listbox', async () => {
+      render(<Selector options={fruitOptions} defaultValue="apple" triggerText="Fruit" />)
+      await userEvent.click(screen.getByRole('combobox'))
+      expect(screen.getByRole('option', { name: /Apple/ }).getAttribute('aria-selected')).toBe('true')
+    })
+
+    test('replaces the chips in multiple mode', () => {
+      render(
+        <Selector
+          options={fruitOptions}
+          selectionMode="multiple"
+          defaultValue={['apple', 'banana']}
+          triggerText="Fruit"
+        />,
+      )
+      expect(screen.queryByRole('button', { name: 'Remove Apple' })).toBeNull()
+      expect(screen.getByRole('combobox').textContent).toContain('Fruit')
+    })
+
+    test('exposes the single selection to screen readers', () => {
+      render(<Selector options={fruitOptions} defaultValue="apple" triggerText="Fruit" />)
+      expect(screen.getByRole('combobox').textContent).toContain('Selected: Apple')
+    })
+
+    test('exposes the selection count to screen readers in multiple mode', () => {
+      render(
+        <Selector
+          options={fruitOptions}
+          selectionMode="multiple"
+          defaultValue={['apple', 'banana']}
+          triggerText="Fruit"
+        />,
+      )
+      expect(screen.getByRole('combobox').textContent).toContain('2 selected')
+    })
+
+    test('adds no summary when nothing is selected', () => {
+      render(<Selector options={fruitOptions} triggerText="Fruit" />)
+      expect(screen.getByRole('combobox').textContent).toBe('Fruit')
+    })
+
+    test('selecting an option keeps the visible text and only updates the summary', async () => {
+      render(<Selector options={fruitOptions} triggerText="Fruit" />)
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(screen.getByRole('option', { name: /Banana/ }))
+      expect(screen.getByText('Fruit')).toBeDefined()
+      expect(screen.getByRole('combobox').textContent).toContain('Selected: Banana')
+    })
+  })
+
   describe('global wrappers config', () => {
     test('renders unchanged when no provider is present', () => {
       render(<Selector options={fruitOptions} />)

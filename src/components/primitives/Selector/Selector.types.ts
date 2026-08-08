@@ -17,6 +17,7 @@ export type SelectorSlots =
   | 'base'
   | 'label'
   | 'trigger'
+  | 'activeTrigger'
   | 'value'
   | 'chips'
   | 'chip'
@@ -44,6 +45,8 @@ export interface SelectorCommonProps
   options: SelectorOption[]
   selectionIndicator?: SelectorSelectionIndicator
   placeholder?: string
+  triggerText?: string
+  isActive?: boolean
   error?: string
   isRequired?: boolean
   validations?: Array<(option: SelectorOption) => string | null>

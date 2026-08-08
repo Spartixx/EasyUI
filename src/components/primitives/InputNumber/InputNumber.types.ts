@@ -14,6 +14,7 @@ export type InputNumberSlots =
   | 'base'
   | 'label'
   | 'inputWrapper'
+  | 'activeInputWrapper'
   | 'input'
   | 'prefix'
   | 'suffix'
@@ -62,6 +63,7 @@ export interface InputNumberProps
   isWheelStepEnabled?: boolean
   isRequired?: boolean
   isReadOnly?: boolean
+  isActive?: boolean
   error?: string
   validations?: Array<(value: number | null) => string | null>
 }

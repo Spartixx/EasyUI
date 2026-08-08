@@ -498,6 +498,51 @@ describe('InputNumber', () => {
     })
   })
 
+  describe('isActive', () => {
+    const probe = { inputWrapper: 'wrapper-probe' }
+
+    function getInputWrapper() {
+      return document.querySelector('.wrapper-probe') as HTMLElement
+    }
+
+    test('does nothing by default', () => {
+      render(<InputNumber classNames={probe} />)
+      expect(getInputWrapper().className).not.toContain('--easyui-color-primary')
+    })
+
+    test('turns the border primary on a bordered input', () => {
+      render(<InputNumber variant="bordered" isActive classNames={probe} />)
+      expect(getInputWrapper().className).toContain('border-(--easyui-color-primary)')
+    })
+
+    test('draws an inset ring on flat, which has no border', () => {
+      render(<InputNumber variant="flat" isActive classNames={probe} />)
+      expect(getInputWrapper().className).toContain('inset-ring-(--easyui-color-primary)')
+    })
+
+    test('the error state wins over the active state', () => {
+      render(<InputNumber variant="bordered" isActive error="Required" classNames={probe} />)
+      expect(getInputWrapper().className).toContain('border-(--easyui-color-error)')
+      expect(getInputWrapper().className).not.toContain('border-(--easyui-color-primary)')
+    })
+
+    test('the activeInputWrapper slot applies only while active', () => {
+      const { rerender } = render(<InputNumber classNames={{ ...probe, activeInputWrapper: 'instance-active' }} />)
+      expect(getInputWrapper().classList.contains('instance-active')).toBe(false)
+      rerender(<InputNumber isActive classNames={{ ...probe, activeInputWrapper: 'instance-active' }} />)
+      expect(getInputWrapper().classList.contains('instance-active')).toBe(true)
+    })
+
+    test('the activeInputWrapper slot is configurable globally', () => {
+      render(
+        <EasyUIProvider config={{ wrappers: { inputNumber: { activeInputWrapper: 'global-active' } } }}>
+          <InputNumber isActive classNames={probe} />
+        </EasyUIProvider>,
+      )
+      expect(getInputWrapper().classList.contains('global-active')).toBe(true)
+    })
+  })
+
   describe('global wrappers config', () => {
     test('applies global inputNumber wrapper classes to slots', () => {
       render(

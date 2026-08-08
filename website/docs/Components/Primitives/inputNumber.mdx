@@ -183,22 +183,23 @@ The `error` prop is the externally controlled error channel: use it for errors t
 
 ## Slots
 
-| Slot              | Description                                            |
-|-------------------|--------------------------------------------------------|
-| `base`            | Root `<div>` wrapping the whole field                  |
-| `label`           | The `<label>` element                                  |
-| `inputWrapper`    | The visual bordered/background box                     |
-| `input`           | The native `<input>` element                           |
-| `prefix`          | The static prefix text                                 |
-| `suffix`          | The static suffix text                                 |
-| `startContent`    | Wrapper around `startContent`                          |
-| `endContent`      | Wrapper around `endContent`                            |
-| `spinner`         | The loading spinner                                    |
-| `stepper`         | Wrapper around the chevrons (`stepperPlacement="end"`) |
-| `incrementButton` | The increment control (up chevron or `+` button)       |
-| `decrementButton` | The decrement control (down chevron or `−` button)     |
-| `description`     | The helper text element                                |
-| `error`           | The error message element                              |
+| Slot                 | Description                                            |
+|----------------------|--------------------------------------------------------|
+| `base`               | Root `<div>` wrapping the whole field                  |
+| `label`              | The `<label>` element                                  |
+| `inputWrapper`       | The visual bordered/background box                     |
+| `activeInputWrapper` | Extra classes on the box while `isActive`              |
+| `input`              | The native `<input>` element                           |
+| `prefix`             | The static prefix text                                 |
+| `suffix`             | The static suffix text                                 |
+| `startContent`       | Wrapper around `startContent`                          |
+| `endContent`         | Wrapper around `endContent`                            |
+| `spinner`            | The loading spinner                                    |
+| `stepper`            | Wrapper around the chevrons (`stepperPlacement="end"`) |
+| `incrementButton`    | The increment control (up chevron or `+` button)       |
+| `decrementButton`    | The decrement control (down chevron or `−` button)     |
+| `description`        | The helper text element                                |
+| `error`              | The error message element                              |
 
 ```jsx live
 <InputNumber classNames={{ inputWrapper: 'shadow-md', input: 'font-mono' }} defaultValue={1} />
@@ -208,40 +209,41 @@ These slots can also be styled globally for every `InputNumber` in your app, see
 
 ## Props
 
-| Prop                    | Type                                                                         | Default     | Description                                       |
-|-------------------------|------------------------------------------------------------------------------|-------------|---------------------------------------------------|
-| `value`                 | `number \| null`                                                             | -           | Controlled value (`null` is empty)                |
-| `defaultValue`          | `number \| null`                                                             | `null`      | Uncontrolled initial value                        |
-| `onValueChange`         | `(value: number \| null) => void`                                            | -           | Called with the parsed value on every change      |
-| `stepperPlacement`      | `'end' \| 'sides'`                                                           | `'end'`     | Layout of the increment/decrement controls        |
-| `prefix`                | `string`                                                                     | -           | Static text before the number                     |
-| `suffix`                | `string`                                                                     | -           | Static text after the number                      |
-| `min`                   | `number`                                                                     | -           | Minimum value (clamps and disables decrement)     |
-| `max`                   | `number`                                                                     | -           | Maximum value (clamps and disables increment)     |
-| `step`                  | `number`                                                                     | `1`         | Increment/decrement amount                        |
-| `isWheelStepEnabled`    | `boolean`                                                                    | `true`      | Step with the mouse wheel while focused           |
-| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'flat'`    | Visual style                                      |
-| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'` | Focus color                                       |
-| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`      | Field size                                        |
-| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`      | Corner radius                                     |
-| `isDisabled`            | `boolean`                                                                    | `false`     | Disables the field                                |
-| `isLoading`             | `boolean`                                                                    | `false`     | Shows a spinner and disables the field            |
-| `isRequired`            | `boolean`                                                                    | `false`     | Marks the field as required                       |
-| `isRequiredMessage`     | `string`                                                                     | -           | Message shown when a required field is left empty |
-| `isReadOnly`            | `boolean`                                                                    | `false`     | Read-only (hides the controls and wheel stepping) |
-| `isFullWidth`           | `boolean`                                                                    | `false`     | Takes the full available width                    |
-| `label`                 | `string`                                                                     | -           | Field label                                       |
-| `labelPlacement`        | `'outside' \| 'inside'`                                                      | `'outside'` | Render the label above or inside the box          |
-| `description`           | `string`                                                                     | -           | Helper text                                       |
-| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'` | Render description below the label or the field   |
+| Prop                    | Type                                                                         | Default     | Description                                                         |
+|-------------------------|------------------------------------------------------------------------------|-------------|---------------------------------------------------------------------|
+| `value`                 | `number \| null`                                                             | -           | Controlled value (`null` is empty)                                  |
+| `defaultValue`          | `number \| null`                                                             | `null`      | Uncontrolled initial value                                          |
+| `onValueChange`         | `(value: number \| null) => void`                                            | -           | Called with the parsed value on every change                        |
+| `stepperPlacement`      | `'end' \| 'sides'`                                                           | `'end'`     | Layout of the increment/decrement controls                          |
+| `prefix`                | `string`                                                                     | -           | Static text before the number                                       |
+| `suffix`                | `string`                                                                     | -           | Static text after the number                                        |
+| `min`                   | `number`                                                                     | -           | Minimum value (clamps and disables decrement)                       |
+| `max`                   | `number`                                                                     | -           | Maximum value (clamps and disables increment)                       |
+| `step`                  | `number`                                                                     | `1`         | Increment/decrement amount                                          |
+| `isWheelStepEnabled`    | `boolean`                                                                    | `true`      | Step with the mouse wheel while focused                             |
+| `variant`               | `'bordered' \| 'faded' \| 'flat' \| 'underlined'`                            | `'flat'`    | Visual style                                                        |
+| `color`                 | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'warning' \| 'error'` | `'default'` | Focus color                                                         |
+| `size`                  | `'sm' \| 'md' \| 'lg'`                                                       | `'md'`      | Field size                                                          |
+| `radius`                | `'none' \| 'sm' \| 'md' \| 'lg' \| 'full'`                                   | `'md'`      | Corner radius                                                       |
+| `isDisabled`            | `boolean`                                                                    | `false`     | Disables the field                                                  |
+| `isLoading`             | `boolean`                                                                    | `false`     | Shows a spinner and disables the field                              |
+| `isRequired`            | `boolean`                                                                    | `false`     | Marks the field as required                                         |
+| `isRequiredMessage`     | `string`                                                                     | -           | Message shown when a required field is left empty                   |
+| `isReadOnly`            | `boolean`                                                                    | `false`     | Read-only (hides the controls and wheel stepping)                   |
+| `isActive`              | `boolean`                                                                    | `false`     | Active state, drawn with a primary border                           |
+| `isFullWidth`           | `boolean`                                                                    | `false`     | Takes the full available width                                      |
+| `label`                 | `string`                                                                     | -           | Field label                                                         |
+| `labelPlacement`        | `'outside' \| 'inside'`                                                      | `'outside'` | Render the label above or inside the box                            |
+| `description`           | `string`                                                                     | -           | Helper text                                                         |
+| `descriptionPlacement`  | `'label' \| 'element'`                                                       | `'element'` | Render description below the label or the field                     |
 | `error`                 | `string`                                                                     | -           | Externally controlled error, takes precedence over local validation |
-| `validations`           | `Array<(value: number \| null) => string \| null>`                           | -           | Validators run on blur                            |
-| `startContent`          | `ReactNode`                                                                  | -           | Content rendered before the number                |
-| `endContent`            | `ReactNode`                                                                  | -           | Content rendered after the number                 |
-| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`  | Where `startContent` is rendered                  |
-| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`  | Where `endContent` is rendered                    |
-| `className`             | `string`                                                                     | -           | Class applied to the root element                 |
-| `classNames`            | `Partial<Record<InputNumberSlots, string>>`                                  | -           | Per-slot class overrides                          |
+| `validations`           | `Array<(value: number \| null) => string \| null>`                           | -           | Validators run on blur                                              |
+| `startContent`          | `ReactNode`                                                                  | -           | Content rendered before the number                                  |
+| `endContent`            | `ReactNode`                                                                  | -           | Content rendered after the number                                   |
+| `startContentPlacement` | `'inside' \| 'outside'`                                                      | `'inside'`  | Where `startContent` is rendered                                    |
+| `endContentPlacement`   | `'inside' \| 'outside'`                                                      | `'inside'`  | Where `endContent` is rendered                                      |
+| `className`             | `string`                                                                     | -           | Class applied to the root element                                   |
+| `classNames`            | `Partial<Record<InputNumberSlots, string>>`                                  | -           | Per-slot class overrides                                            |
 
 `InputNumber` also accepts native `<input>` attributes (`placeholder`, `name`, `autoFocus`, etc.) and forwards `ref` to the underlying `<input>` element.
 

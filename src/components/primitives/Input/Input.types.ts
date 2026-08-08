@@ -14,6 +14,7 @@ export type InputSlots =
   | 'base'
   | 'label'
   | 'inputWrapper'
+  | 'activeInputWrapper'
   | 'input'
   | 'startContent'
   | 'endContent'
@@ -37,6 +38,7 @@ export interface InputProps
   onValueChange?: (value: string) => void
   isRequired?: boolean
   isReadOnly?: boolean
+  isActive?: boolean
   showStepper?: boolean
   validations?: Array<(value: string) => string | null>
 }

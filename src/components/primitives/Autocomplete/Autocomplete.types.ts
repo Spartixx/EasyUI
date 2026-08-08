@@ -17,6 +17,7 @@ export type AutocompleteSlots =
   | 'base'
   | 'label'
   | 'inputWrapper'
+  | 'activeInputWrapper'
   | 'input'
   | 'chips'
   | 'chip'
@@ -47,6 +48,8 @@ export interface AutocompleteCommonProps
   options: AutocompleteOption[]
   selectionIndicator?: AutocompleteSelectionIndicator
   placeholder?: string
+  triggerText?: string
+  isActive?: boolean
   error?: string
   isRequired?: boolean
   validations?: Array<(option: AutocompleteOption) => string | null>

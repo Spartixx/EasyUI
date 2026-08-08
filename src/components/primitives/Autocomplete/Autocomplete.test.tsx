@@ -1063,6 +1063,102 @@ describe('Autocomplete', () => {
     })
   })
 
+  describe('isActive', () => {
+    function getInputWrapper() {
+      return screen.getByRole('combobox').parentElement as HTMLElement
+    }
+
+    test('does nothing by default', () => {
+      render(<Autocomplete options={fruitOptions} />)
+      expect(getInputWrapper().className).not.toContain('--easyui-color-primary')
+    })
+
+    test('turns the border primary on a bordered autocomplete', () => {
+      render(<Autocomplete options={fruitOptions} isActive />)
+      expect(getInputWrapper().className).toContain('border-(--easyui-color-primary)')
+    })
+
+    test('draws an inset ring on flat, which has no border', () => {
+      render(<Autocomplete options={fruitOptions} variant="flat" isActive />)
+      expect(getInputWrapper().className).toContain('inset-ring-(--easyui-color-primary)')
+    })
+
+    test('the error state wins over the active state', () => {
+      render(<Autocomplete options={fruitOptions} isActive error="Required" />)
+      expect(getInputWrapper().className).toContain('border-(--easyui-color-error)')
+      expect(getInputWrapper().className).not.toContain('border-(--easyui-color-primary)')
+    })
+
+    test('the activeInputWrapper slot applies only while active', () => {
+      const { rerender } = render(
+        <Autocomplete options={fruitOptions} classNames={{ activeInputWrapper: 'instance-active' }} />,
+      )
+      expect(getInputWrapper().classList.contains('instance-active')).toBe(false)
+      rerender(<Autocomplete options={fruitOptions} isActive classNames={{ activeInputWrapper: 'instance-active' }} />)
+      expect(getInputWrapper().classList.contains('instance-active')).toBe(true)
+    })
+
+    test('the activeInputWrapper slot is configurable globally', () => {
+      render(
+        <EasyUIProvider config={{ wrappers: { autocomplete: { activeInputWrapper: 'global-active' } } }}>
+          <Autocomplete options={fruitOptions} isActive />
+        </EasyUIProvider>,
+      )
+      expect(getInputWrapper().classList.contains('global-active')).toBe(true)
+    })
+  })
+
+  describe('triggerText', () => {
+    test('is displayed instead of the committed value while blurred', () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="apple" triggerText="Fruit" />)
+      expect((screen.getByRole('combobox') as HTMLInputElement).value).toBe('Fruit')
+    })
+
+    test('gives way to an empty input on focus, and comes back on blur', async () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="apple" triggerText="Fruit" />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      expect(input.value).toBe('')
+      expect(screen.getByRole('listbox')).toBeDefined()
+
+      fireEvent.blur(input)
+      expect(input.value).toBe('Fruit')
+    })
+
+    test('lets the user filter while focused', async () => {
+      render(<Autocomplete options={fruitOptions} triggerText="Fruit" />)
+      const input = screen.getByRole('combobox') as HTMLInputElement
+      await userEvent.click(input)
+      await userEvent.type(input, 'ban')
+      expect(input.value).toBe('ban')
+      expect(screen.getAllByRole('option')).toHaveLength(1)
+    })
+
+    test('replaces the chips in multiple mode', () => {
+      render(
+        <Autocomplete
+          options={fruitOptions}
+          selectionMode="multiple"
+          defaultValue={['apple', 'banana']}
+          triggerText="Fruit"
+        />,
+      )
+      expect(screen.queryByRole('button', { name: 'Remove Apple' })).toBeNull()
+      expect((screen.getByRole('combobox') as HTMLInputElement).value).toBe('Fruit')
+    })
+
+    test('describes the selection for screen readers', () => {
+      render(<Autocomplete options={fruitOptions} defaultValue="apple" triggerText="Fruit" />)
+      const describedBy = screen.getByRole('combobox').getAttribute('aria-describedby') as string
+      expect(document.getElementById(describedBy)?.textContent).toBe('Selected: Apple')
+    })
+
+    test('adds no description when nothing is selected', () => {
+      render(<Autocomplete options={fruitOptions} triggerText="Fruit" />)
+      expect(screen.getByRole('combobox').getAttribute('aria-describedby')).toBeNull()
+    })
+  })
+
   describe('global wrappers config', () => {
     test('renders unchanged when no provider is present', () => {
       render(<Autocomplete options={fruitOptions} />)
